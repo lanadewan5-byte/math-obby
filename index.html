@@ -12,7 +12,7 @@
 <div id="hud" class="hidden">
  <div class="top">
   <div class="pill">⭐ <span id="score">0</span> نقطة<br><small id="world">جزيرة الأقواس</small><br><small>💎 الجواهر: <span id="gemCount">0</span></small></div>
-  <div class="pill">🏁 <span id="progress">0</span>/15<div class="meter"><i id="bar"></i></div></div>
+  <div class="pill">🏁 <span id="progress">0</span>/25<div class="meter"><i id="bar"></i></div></div>
   <div class="pill">⏱️ <span id="clock">30:00</span><br><small id="playerLabel"></small></div>
  </div>
  <div class="bottom"><div class="hint">تحرّك: WASD أو الأسهم · اقفز: Space<br>اقترب من بوابة التحدي لتفتح المسألة</div><button class="dark" style="pointer-events:auto" onclick="togglePause()">Ⅱ إيقاف</button></div>
@@ -36,23 +36,33 @@
 <script type="module">
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
 const defaultQuestions=[
-{w:0,q:"(8 + 3) × 4",a:["32","44","20"],c:1,e:"الأقواس أولًا: 8 + 3 = 11، ثم 11 × 4 = 44."},
-{w:0,q:"30 − (3 × 6)",a:["18","12","48"],c:1,e:"نحسب داخل القوس: 3 × 6 = 18، ثم 30 − 18 = 12."},
-{w:0,q:"5 × (9 − 5)",a:["40","20","25"],c:1,e:"الأقواس أولًا: 9 − 5 = 4، ثم 5 × 4 = 20."},
-{w:1,q:"36 ÷ 4 × 2",a:["18","9","4.5"],c:0,e:"القسمة والضرب لهما الأولوية نفسها؛ نبدأ من اليسار: 36 ÷ 4 = 9، ثم 9 × 2 = 18."},
-{w:1,q:"9 × 4 ÷ 6",a:["18","6","3"],c:1,e:"نبدأ من اليسار: 9 × 4 = 36، ثم 36 ÷ 6 = 6."},
-{w:1,q:"48 ÷ 6 + 3 × 2",a:["19","14","22"],c:1,e:"نحسب القسمة والضرب أولًا: 48 ÷ 6 = 8، و3 × 2 = 6، ثم 8 + 6 = 14."},
-{w:2,q:"20 − 6 + 3",a:["11","17","23"],c:1,e:"الجمع والطرح لهما الأولوية نفسها؛ نبدأ من اليسار: 20 − 6 = 14، ثم 14 + 3 = 17."},
-{w:2,q:"40 ÷ 5 × 3",a:["8","24","2"],c:1,e:"نبدأ من اليسار: 40 ÷ 5 = 8، ثم 8 × 3 = 24."},
-{w:2,q:"72 ÷ 8 × 2",a:["9","18","4"],c:1,e:"نبدأ من اليسار: 72 ÷ 8 = 9، ثم 9 × 2 = 18."},
-{w:3,q:"5 + 3 × 6 − 4",a:["44","19","14"],c:1,e:"الضرب أولًا: 3 × 6 = 18، ثم الجمع والطرح من اليسار: 5 + 18 − 4 = 19."},
-{w:3,q:"(12 + 8) ÷ 4 + 6",a:["14","11","8"],c:1,e:"الأقواس أولًا: 12 + 8 = 20، ثم 20 ÷ 4 = 5، ثم 5 + 6 = 11."},
-{w:3,q:"45 − 5 × 7 + 2",a:["22","12","28"],c:1,e:"الضرب أولًا: 5 × 7 = 35، ثم من اليسار: 45 − 35 = 10، ثم 10 + 2 = 12."},
-{w:4,q:"(25 − 5) ÷ 4 × 3",a:["5","15","20"],c:1,e:"الأقواس أولًا: 25 − 5 = 20، ثم من اليسار: 20 ÷ 4 = 5، ثم 5 × 3 = 15."},
-{w:4,q:"90 − (6 × 8) + 7",a:["31","49","103"],c:1,e:"الأقواس أولًا: 6 × 8 = 48، ثم من اليسار: 90 − 48 = 42، ثم 42 + 7 = 49."},
-{w:4,q:"(30 + 6) ÷ 6 × 5",a:["11","30","35"],c:1,e:"الأقواس أولًا: 30 + 6 = 36، ثم من اليسار: 36 ÷ 6 = 6، ثم 6 × 5 = 30."}
+{w:0,q:"(12 + 8) × 3",a:["36","60","20"],c:1,e:"الأقواس أولًا: 12 + 8 = 20، ثم 20 × 3 = 60."},
+{w:0,q:"6 × (9 − 4)",a:["30","24","54"],c:0,e:"الأقواس أولًا: 9 − 4 = 5، ثم 6 × 5 = 30."},
+{w:0,q:"(24 ÷ 6) + 15",a:["19","11","4"],c:0,e:"القوس أولًا: 24 ÷ 6 = 4، ثم 4 + 15 = 19."},
+{w:0,q:"40 − (5 × 6)",a:["15","10","70"],c:1,e:"داخل القوس: 5 × 6 = 30، ثم 40 − 30 = 10."},
+{w:0,q:"(18 + 12) ÷ 5",a:["5","6","30"],c:1,e:"الأقواس أولًا: 18 + 12 = 30، ثم 30 ÷ 5 = 6."},
+{w:1,q:"7 × 8",a:["54","56","64"],c:1,e:"7 × 8 = 56."},
+{w:1,q:"72 ÷ 8",a:["8","9","10"],c:1,e:"72 ÷ 8 = 9."},
+{w:1,q:"6 + 36 ÷ 6",a:["7","12","42"],c:1,e:"القسمة أولًا: 36 ÷ 6 = 6، ثم 6 + 6 = 12."},
+{w:1,q:"9 × 4 ÷ 6",a:["6","18","3"],c:0,e:"نبدأ من اليسار: 9 × 4 = 36، ثم 36 ÷ 6 = 6."},
+{w:1,q:"48 ÷ 6 × 2",a:["4","16","18"],c:1,e:"نبدأ من اليسار: 48 ÷ 6 = 8، ثم 8 × 2 = 16."},
+{w:2,q:"25 − 10 + 6",a:["9","21","31"],c:1,e:"الجمع والطرح من اليسار: 25 − 10 = 15، ثم 15 + 6 = 21."},
+{w:2,q:"36 ÷ 6 × 3",a:["2","18","12"],c:1,e:"من اليسار: 36 ÷ 6 = 6، ثم 6 × 3 = 18."},
+{w:2,q:"14 + 9 − 5",a:["18","10","28"],c:0,e:"من اليسار: 14 + 9 = 23، ثم 23 − 5 = 18."},
+{w:2,q:"8 × 5 ÷ 4",a:["10","40","13"],c:0,e:"من اليسار: 8 × 5 = 40، ثم 40 ÷ 4 = 10."},
+{w:2,q:"60 − 20 + 15",a:["25","55","45"],c:1,e:"من اليسار: 60 − 20 = 40، ثم 40 + 15 = 55."},
+{w:3,q:"4 + 6 × 5",a:["50","34","40"],c:1,e:"الضرب أولًا: 6 × 5 = 30، ثم 4 + 30 = 34."},
+{w:3,q:"(16 + 8) ÷ 4 + 7",a:["13","10","17"],c:0,e:"القوس 24، ثم 24 ÷ 4 = 6، ثم 6 + 7 = 13."},
+{w:3,q:"50 − 4 × 8 + 6",a:["24","18","38"],c:0,e:"الضرب أولًا: 4 × 8 = 32، ثم من اليسار: 50 − 32 = 18، ثم 18 + 6 = 24."},
+{w:3,q:"7 × (12 − 8) + 5",a:["33","28","23"],c:0,e:"القوس 4، ثم 7 × 4 = 28، ثم 28 + 5 = 33."},
+{w:3,q:"64 ÷ 8 + 3 × 4",a:["20","44","11"],c:0,e:"القسمة والضرب أولًا: 64 ÷ 8 = 8، و3 × 4 = 12، ثم 8 + 12 = 20."},
+{w:4,q:"(30 − 6) ÷ 4 × 3",a:["18","6","24"],c:0,e:"القوس 24، ثم من اليسار: 24 ÷ 4 = 6، ثم 6 × 3 = 18."},
+{w:4,q:"90 − (7 × 8) + 12",a:["46","34","58"],c:0,e:"القوس 56، ثم 90 − 56 = 34، ثم 34 + 12 = 46."},
+{w:4,q:"5 × (18 ÷ 3) + 9",a:["39","30","45"],c:0,e:"داخل القوس 6، ثم 5 × 6 = 30، ثم 30 + 9 = 39."},
+{w:4,q:"100 ÷ (5 × 4) + 25",a:["30","20","45"],c:0,e:"القوس 20، ثم 100 ÷ 20 = 5، ثم 5 + 25 = 30."},
+{w:4,q:"(40 + 20) ÷ 5 × 2",a:["24","12","30"],c:0,e:"القوس 60، ثم من اليسار: 60 ÷ 5 = 12، ثم 12 × 2 = 24."}
 ];
-let questions=JSON.parse(localStorage.getItem('obbyBankV2')||'null')||defaultQuestions;
+let questions=JSON.parse(localStorage.getItem('obbyBankV3')||'null')||defaultQuestions;
 const names=['جزيرة الأقواس','مدينة الضرب والقسمة','جسر اليسار واليمين','وادي العمليات المختلطة','قلعة التحدي النهائي'];
 const colors=[0x44c77a,0xf2a63b,0x3d9be8,0x9b70d6,0xf06d91];
 let scene,camera,renderer,player,velocityY=0,onGround=false,keys={},started=false,paused=false,asking=false,finished=false;
@@ -82,11 +92,11 @@ function makeWorld(){
    const gem=new THREE.Mesh(new THREE.OctahedronGeometry(.62),new THREE.MeshStandardMaterial({color:0x62f5ff,emissive:0x168ba8,emissiveIntensity:1.1}));
    gem.position.set(k%2===0?-2.1:2.1,3.7,z-2.2);scene.add(gem);gemMeshes.push(gem);
    // سؤال عند كل منصتين فقط، حتى يبقى المسار مليئًا بالحركة
-   if(k%2===1){
+   if(k<5){
     const gate=new THREE.Group();gate.position.set(0,1.5,z-1.5);
     const frame= new THREE.Mesh(new THREE.BoxGeometry(4.8,3.5,.55),mat(0xffe066));gate.add(frame);
     const inner=new THREE.Mesh(new THREE.BoxGeometry(3.8,2.7,.65),new THREE.MeshStandardMaterial({color:0x162a55,emissive:0x254b9b,emissiveIntensity:.8}));gate.add(inner);
-    scene.add(gate);gateMeshes.push({group:gate,index:w*3+Math.floor(k/2),world:w,z:z-1.5,done:false});
+    scene.add(gate);gateMeshes.push({group:gate,index:w*5+k,world:w,z:z-1.5,done:false});
    }
   }
   // world sign
@@ -122,9 +132,9 @@ window.addEventListener('keydown',e=>{keys[e.key.toLowerCase()]=true;if(e.code==
 window.addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);
 document.querySelectorAll('[data-key]').forEach(b=>{const k=b.dataset.key;b.addEventListener('pointerdown',e=>{e.preventDefault();keys[k]=true});['pointerup','pointerleave','pointercancel'].forEach(ev=>b.addEventListener(ev,()=>keys[k]=false))});
 function openQuestion(g){asking=true;paused=true;currentGate=g.index;const q=questions[g.index];document.getElementById('qWorld').textContent=names[q.w]||names[g.world];document.getElementById('qTitle').textContent='بوابة التحدي '+(g.index+1);document.getElementById('qText').textContent=q.q;document.getElementById('feedback').textContent='';document.getElementById('continue').classList.add('hidden');const holder=document.getElementById('choices');holder.innerHTML='';q.a.forEach((a,i)=>{const b=document.createElement('button');b.textContent=a;b.onclick=()=>chooseAnswer(i,g,b);holder.appendChild(b)});document.getElementById('question').classList.remove('hidden')}
-function chooseAnswer(i,g,button){const q=questions[g.index],fb=document.getElementById('feedback');[...document.querySelectorAll('#choices button')].forEach(b=>b.disabled=true);if(i===q.c){score+=10;answered++;g.done=true;g.group?.scale?.set(1,1,1);fb.textContent='ممتاز! فتحتِ البوابة ⭐ '+q.e;fb.style.color='#9dffbd';document.getElementById('score').textContent=score;document.getElementById('progress').textContent=answered;document.getElementById('bar').style.width=(answered/15*100)+'%';document.getElementById('continue').classList.remove('hidden');}else{fb.textContent='حاولي مرة أخرى! تذكري ترتيب العمليات. '+q.e;fb.style.color='#ffd1a8';[...document.querySelectorAll('#choices button')].forEach((b,j)=>{if(j!==i)b.disabled=false});button.disabled=false}}
-function closeQuestion(){document.getElementById('question').classList.add('hidden');asking=false;paused=false;if(answered===15)finishGame()}
-function finishGame(){finished=true;document.getElementById('hud').classList.add('hidden');document.getElementById('finish').classList.remove('hidden');document.getElementById('finalScore').textContent=score+' من 150 نقطة';document.getElementById('finalInfo').textContent='الاسم: '+playerName+' | التحديات المنجزة: '+answered+'/15 | الجواهر: '+gemsCollected;localStorage.setItem('obbyLastResult',JSON.stringify({name:playerName,score,answered,date:new Date().toLocaleString('ar-JO')}))}
+function chooseAnswer(i,g,button){const q=questions[g.index],fb=document.getElementById('feedback');[...document.querySelectorAll('#choices button')].forEach(b=>b.disabled=true);if(i===q.c){score+=10;answered++;g.done=true;g.group?.scale?.set(1,1,1);fb.textContent='ممتاز! فتحتِ البوابة ⭐ '+q.e;fb.style.color='#9dffbd';document.getElementById('score').textContent=score;document.getElementById('progress').textContent=answered;document.getElementById('bar').style.width=(answered/25*100)+'%';document.getElementById('continue').classList.remove('hidden');}else{fb.textContent='حاولي مرة أخرى! تذكري ترتيب العمليات. '+q.e;fb.style.color='#ffd1a8';[...document.querySelectorAll('#choices button')].forEach((b,j)=>{if(j!==i)b.disabled=false});button.disabled=false}}
+function closeQuestion(){document.getElementById('question').classList.add('hidden');asking=false;paused=false;if(answered===25)finishGame()}
+function finishGame(){finished=true;document.getElementById('hud').classList.add('hidden');document.getElementById('finish').classList.remove('hidden');document.getElementById('finalScore').textContent=score+' من 250 نقطة';document.getElementById('finalInfo').textContent='الاسم: '+playerName+' | التحديات المنجزة: '+answered+'/15 | الجواهر: '+gemsCollected;localStorage.setItem('obbyLastResult',JSON.stringify({name:playerName,score,answered,date:new Date().toLocaleString('ar-JO')}))}
 function downloadResult(){const data=localStorage.getItem('obbyLastResult')||'{}';const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data],{type:'application/json'}));a.download='math-obby-result.json';a.click()}
 function updateTimer(dt){remaining-=dt;if(remaining<=0){remaining=0;finishGame()}const m=Math.floor(remaining/60),s=Math.floor(remaining%60);clockEl.textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0')}
 function animate(now=performance.now()){if(!started||finished)return;requestAnimationFrame(animate);const dt=Math.min((now-last)/1000,.04);last=now;if(!paused&&!asking){updateTimer(dt);let dx=0,dz=0;if(keys.a||keys.arrowleft)dx-=1;if(keys.d||keys.arrowright)dx+=1;if(keys.w||keys.arrowup)dz-=1;if(keys.s||keys.arrowdown)dz+=1;const len=Math.hypot(dx,dz)||1;player.position.x+=dx/len*8*dt;player.position.z+=dz/len*8*dt;player.position.x=THREE.MathUtils.clamp(player.position.x,-5.2,5.2);
@@ -143,7 +153,7 @@ function animate(now=performance.now()){if(!started||finished)return;requestAnim
 window.addEventListener('resize',()=>{if(!renderer)return;camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
 window.openAdmin=()=>{document.getElementById('bankEditor').value=JSON.stringify(questions,null,2);document.getElementById('admin').style.display='flex'};
 window.closeAdmin=()=>document.getElementById('admin').style.display='none';
-window.saveBank=()=>{try{const x=JSON.parse(document.getElementById('bankEditor').value);if(!Array.isArray(x)||x.length!==15||x.some(q=>!q.q||!Array.isArray(q.a)||q.a.length!==3||q.c<0||q.c>2))throw Error('يجب إدخال 15 سؤالًا، ولكل سؤال 3 خيارات وإجابة صحيحة من 0 إلى 2.');questions=x;localStorage.setItem('obbyBankV2',JSON.stringify(x));document.getElementById('adminMsg').textContent='تم حفظ بنك الأسئلة على هذا الجهاز.'}catch(e){document.getElementById('adminMsg').textContent='خطأ: '+e.message}};
+window.saveBank=()=>{try{const x=JSON.parse(document.getElementById('bankEditor').value);if(!Array.isArray(x)||x.length!==25||x.some(q=>!q.q||!Array.isArray(q.a)||q.a.length!==3||q.c<0||q.c>2))throw Error('يجب إدخال 25 سؤالًا، ولكل سؤال 3 خيارات وإجابة صحيحة من 0 إلى 2.');questions=x;localStorage.setItem('obbyBankV3',JSON.stringify(x));document.getElementById('adminMsg').textContent='تم حفظ بنك الأسئلة على هذا الجهاز.'}catch(e){document.getElementById('adminMsg').textContent='خطأ: '+e.message}};
 window.startGame=startGame;window.jump=jump;window.togglePause=togglePause;window.closeQuestion=closeQuestion;window.downloadResult=downloadResult;
 </script>
 </body></html>
