@@ -70,8 +70,10 @@ const defaultQuestions=[
 ];
 let questions=defaultQuestions;try{const saved=JSON.parse(localStorage.getItem('obbyBankV5')||'null');if(Array.isArray(saved)&&saved.length===25&&saved.every(q=>q&&typeof q.q==='string'&&Array.isArray(q.a)&&q.a.length===3&&Number.isInteger(q.c)&&q.c>=0&&q.c<3))questions=saved;}catch(e){localStorage.removeItem('obbyBankV5');}localStorage.removeItem('obbyBankV4');
 const names=['جزيرة الأقواس','مدينة الضرب والقسمة','جسر اليسار واليمين','وادي العمليات المختلطة','قلعة التحدي النهائي'];
-const colors=[0x00d978,0xff8a00,0x00a8ff,0xa855f7,0xff3f81];
-const accents=[0xffe600,0x00f5d4,0xffd166,0x7cf7ff,0xffd700];
+const colors=[0x22e66b,0xff7626,0x42c8ff,0xff4fa3,0x8b5cff];
+const accents=[0xeaff55,0xffd34e,0xd9f7ff,0xffd6fb,0x45f5ff];
+const skyColors=[0x70d9ff,0x32152b,0x9beaff,0x281052,0x090b35];
+const fogColors=[0x9beaff,0x6b2632,0xc9f3ff,0x4b176e,0x17104b];
 let scene,camera,renderer,player,velocityY=0,onGround=false,keys={},started=false,paused=false,asking=false,finished=false;
 let score=0,answered=0,playerName='',remaining=1800,last=performance.now(),gateMeshes=[],platforms=[],coinMeshes=[],coinsCollected=0,currentGate=0,checkpoint={x:0,y:.1,z:8};
 const clockEl=document.getElementById('clock');
@@ -81,38 +83,41 @@ function toggleSound(){soundEnabled=!soundEnabled;document.getElementById('sound
 function mat(color,roughness=.8){return new THREE.MeshStandardMaterial({color,roughness})}
 function block(x,y,z,sx,sy,sz,color){const m=new THREE.Mesh(new THREE.BoxGeometry(sx,sy,sz),mat(color));m.position.set(x,y,z);scene.add(m);return m}
 function makeWorld(){
- platforms=[];gateMeshes=[];coinMeshes=[];scene=new THREE.Scene();scene.background=new THREE.Color(0x87ceeb);scene.fog=new THREE.Fog(0x87ceeb,48,155);
+ platforms=[];gateMeshes=[];coinMeshes=[];scene=new THREE.Scene();scene.background=new THREE.Color(skyColors[0]);scene.fog=new THREE.Fog(fogColors[0],48,155);
  camera=new THREE.PerspectiveCamera(65,innerWidth/innerHeight,.1,300);
  renderer=new THREE.WebGLRenderer({antialias:true});renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;document.body.appendChild(renderer.domElement);
  scene.add(new THREE.HemisphereLight(0xeaf7ff,0x486044,2.1));
  const sun=new THREE.DirectionalLight(0xffffff,2.4);sun.position.set(-12,28,15);sun.castShadow=true;scene.add(sun);
- // لكل عالم تصميم مسار مستقل: متعرج، التفافي، قوسي، متعرج مزدوج، وتحدي متعرج حاد
- const lanePatterns=[[-2.4,1.8,3.0,-1.6,2.4],[-2.4,-3.5,-.2,3.4,1.0],[-2.4,1.1,3.7,2.8,-.8],[-2.4,-.4,-3.8,-1.3,2.8],[-2.4,3.5,-1.1,3.8,-2.1]];
- const heightPatterns=[[.15,1.15,.25,1.35,.35],[.15,.55,1.35,.35,1.05],[.15,1.3,.45,1.05,.15],[.15,.35,1.25,.2,1.35],[.15,1.35,.15,1.4,.3]];
- const stepSides=[[1,-1,1,-1,1],[-1,1,-1,1,-1],[1,1,-1,-1,1],[-1,-1,1,1,-1],[1,-1,-1,1,1]];
- const hurdleSets=[[1,3],[0,2,4],[1,4],[0,3],[1,2,4]];
- // خمس مناطق Obby متصلة، ولكل منطقة مسار وحركات مختلفة
+ // خمسة مسارات Obby عائمة مستوحاة من الصور: أخضر، حمم، جليد، عالم سحري، وفضاء
+ const lanePatterns=[[-2.4,2.5,-3.4,3.5,-1.7],[-2.4,-3.6,2.8,-2.8,3.6],[-2.4,3.4,-3.5,2.7,-2.8],[-2.4,-3.2,3.6,-3.5,2.8],[-2.4,3.7,-3.7,3.5,-2.6]];
+ const heightPatterns=[[.15,.75,1.35,.45,1.05],[.15,1.15,.35,1.4,.55],[.15,1.3,.55,1.45,.35],[.15,.85,1.5,.45,1.25],[.15,1.4,.35,1.55,.55]];
+ const hurdleSets=[[1,3],[0,2,4],[1,3],[0,2,4],[1,2,4]];
+ // كل عالم له سماء وإضاءة مختلفة، والمسار عبارة عن منصات قفز معلقة بلا أرضية كبيرة
  for(let w=0;w<5;w++){
   const baseZ=-w*48,col=colors[w];
-  const island=new THREE.Mesh(new THREE.CylinderGeometry(13,16,4,10),mat(col));island.position.set(0,-2,baseZ-22);island.receiveShadow=true;scene.add(island);
-  block(0,.1,baseZ-22,23,.8,23,0x9be5a0);
-  for(let j=0;j<7;j++){
-   const crystal=new THREE.Mesh(new THREE.ConeGeometry(.8,2.6,5),mat(j%2?0xffffff:0xffe58a));
-   crystal.position.set((j-3)*3.2,1.7,baseZ-27+(j%2)*9);scene.add(crystal);
+  scene.background=new THREE.Color(skyColors[w]);scene.fog.color.setHex(fogColors[w]);
+  const worldGlow=new THREE.PointLight(accents[w],1.25,42);worldGlow.position.set(0,7,baseZ-22);scene.add(worldGlow);
+  // صخور صغيرة عائمة أسفل الطريق لتعطي إحساس الجزر المعلقة
+  for(let j=0;j<5;j++){
+   const rock=new THREE.Mesh(new THREE.ConeGeometry(1.25,3.4,5),mat(w===1?0x642c36:w===2?0x75c9e8:w===3?0x572b86:w===4?0x29245e:0x168b58));
+   rock.position.set(lanePatterns[w][j],-2.25,baseZ-j*8-3);rock.rotation.z=Math.PI;scene.add(rock);
   }
   for(let k=0;k<5;k++){
    const z=baseZ-k*8-3;
    const laneX=lanePatterns[w][k];
-   // منصات متعاقبة الارتفاع لتكوين طلعات ونزلات واضحة
+   // منصات رئيسية ضيقة وطويلة، مع ارتفاعات وقفزات مثل ألعاب Roblox Obby
    const top=heightPatterns[w][k];
-   const p=block(laneX,top-.35,z,6.2,.7,6.2,col);p.userData={halfX:3.1,halfZ:3.1,top};platforms.push(p);
-   // منصات قفز صغيرة على جوانب الطريق
-   const stepX=laneX+stepSides[w][k]*3.8;
-   const stepTop=Math.max(-.05,top-.48);
-   const step=block(stepX,stepTop-.275,z-3.6,2.3,.55,2.3,accents[w]);step.userData={halfX:1.15,halfZ:1.15,top:stepTop};platforms.push(step);
+   const p=block(laneX,top-.3,z,4.2,.6,4.8,col);p.userData={halfX:2.1,halfZ:2.4,top};platforms.push(p);
+   // حجر قفز وسيط يربط كل منصتين متتاليتين ويجعل الطريق متعرجًا ومتصلًا
+   if(k>0){
+    const prevX=lanePatterns[w][k-1],prevTop=heightPatterns[w][k-1];
+    const midX=(prevX+laneX)/2,midZ=z+4,midTop=(prevTop+top)/2+.12;
+    const stepping=block(midX,midTop-.22,midZ,2.8,.44,2.8,accents[w]);
+    stepping.userData={halfX:1.4,halfZ:1.4,top:midTop};platforms.push(stepping);
+   }
    // عوارض قفز منخفضة مرئية على منصات مختارة
    if(hurdleSets[w].includes(k)){
-    const hurdle=block(laneX,top+.13,z-1.8,3.1,.5,.45,0xff5d73);
+    const hurdle=block(laneX,top+.13,z-1.8,2.7,.5,.42,accents[w]);
     hurdle.rotation.z=.08;
    }
    // كوين ذهبي كبير يدور ويلمع في مسار اللاعب
@@ -132,9 +137,9 @@ function makeWorld(){
    gateMeshes.push({group:gate,index:w*5+k,world:w,z:z-1.5,x:laneX,done:false});
   }
   // جسر انتقال واضح بين العوالم
-  const connector=block(0,-.25,baseZ-43,5.5,.7,5.5,0xffe066);connector.userData={halfX:2.75,halfZ:2.75,top:.1};platforms.push(connector);
+  const connector=block(lanePatterns[w][4],-.25,baseZ-43,4.8,.7,5.5,accents[w]);connector.userData={halfX:2.4,halfZ:2.75,top:.1};platforms.push(connector);
   // بوابة خروج مضيئة في نهاية كل عالم، تقود إلى العالم التالي
-  const exitGate=new THREE.Group();exitGate.position.set(0,.12,baseZ-43);
+  const exitGate=new THREE.Group();exitGate.position.set(lanePatterns[w][4],.12,baseZ-43);
   const exitMat=new THREE.MeshStandardMaterial({color:accents[w],emissive:col,emissiveIntensity:2.2,metalness:.25,roughness:.25});
   const exitSide=new THREE.Mesh(new THREE.BoxGeometry(.55,3.8,.7),exitMat);exitSide.position.x=-2.05;exitGate.add(exitSide);
   const exitSide2=exitSide.clone();exitSide2.position.x=2.05;exitGate.add(exitSide2);
@@ -142,14 +147,14 @@ function makeWorld(){
   const exitSurface=new THREE.Mesh(new THREE.PlaneGeometry(3.55,3.15),new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:.72,side:THREE.DoubleSide}));exitSurface.position.set(0,1.55,.08);exitGate.add(exitSurface);
   scene.add(exitGate);
   if(w===4){
-   const treasureBase=block(0,-.45,baseZ-49,13,.9,13,0xf6d66b);treasureBase.userData={halfX:6.5,halfZ:6.5,top:0};platforms.push(treasureBase);
+   const treasureBase=block(lanePatterns[w][4],-.45,baseZ-49,10,.9,10,0xf6d66b);treasureBase.userData={halfX:6.5,halfZ:6.5,top:0};platforms.push(treasureBase);
    const chest=new THREE.Group();
    const chestBody=new THREE.Mesh(new THREE.BoxGeometry(3.4,2.1,2.2),new THREE.MeshStandardMaterial({color:0x8b4513,metalness:.25,roughness:.55}));chestBody.position.y=1.15;chest.add(chestBody);
    const chestLid=new THREE.Mesh(new THREE.BoxGeometry(3.55,.65,2.35),new THREE.MeshStandardMaterial({color:0xc17a22,metalness:.35,roughness:.35}));chestLid.position.y=2.5;chest.add(chestLid);
    const band=new THREE.Mesh(new THREE.BoxGeometry(.42,2.25,2.42),new THREE.MeshStandardMaterial({color:0xffd43b,metalness:.8,roughness:.2}));band.position.set(0,1.35,0);chest.add(band);
    const lock=new THREE.Mesh(new THREE.BoxGeometry(.55,.7,.2),new THREE.MeshStandardMaterial({color:0xffe98a,metalness:.8}));lock.position.set(0,1.45,1.22);chest.add(lock);
-   chest.position.set(0,0,baseZ-49);scene.add(chest);
-   const treasureGlow=new THREE.PointLight(0xffc928,2.5,18);treasureGlow.position.set(0,4,baseZ-49);scene.add(treasureGlow);
+   chest.position.set(lanePatterns[w][4],0,baseZ-49);scene.add(chest);
+   const treasureGlow=new THREE.PointLight(0xffc928,2.5,18);treasureGlow.position.set(lanePatterns[w][4],4,baseZ-49);scene.add(treasureGlow);
   }
   for(let cloudIndex=0;cloudIndex<4;cloudIndex++){
    const cloud=new THREE.Mesh(new THREE.SphereGeometry(2.2,10,8),mat(0xffffff));
