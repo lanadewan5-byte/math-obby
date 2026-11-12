@@ -70,7 +70,8 @@ const defaultQuestions=[
 ];
 let questions=defaultQuestions;try{const saved=JSON.parse(localStorage.getItem('obbyBankV5')||'null');if(Array.isArray(saved)&&saved.length===25&&saved.every(q=>q&&typeof q.q==='string'&&Array.isArray(q.a)&&q.a.length===3&&Number.isInteger(q.c)&&q.c>=0&&q.c<3))questions=saved;}catch(e){localStorage.removeItem('obbyBankV5');}localStorage.removeItem('obbyBankV4');
 const names=['جزيرة الأقواس','مدينة الضرب والقسمة','جسر اليسار واليمين','وادي العمليات المختلطة','قلعة التحدي النهائي'];
-const colors=[0x44c77a,0xf2a63b,0x3d9be8,0x9b70d6,0xf06d91];
+const colors=[0x00d978,0xff8a00,0x00a8ff,0xa855f7,0xff3f81];
+const accents=[0xffe600,0x00f5d4,0xffd166,0x7cf7ff,0xffd700];
 let scene,camera,renderer,player,velocityY=0,onGround=false,keys={},started=false,paused=false,asking=false,finished=false;
 let score=0,answered=0,playerName='',remaining=1800,last=performance.now(),gateMeshes=[],platforms=[],coinMeshes=[],coinsCollected=0,currentGate=0,checkpoint={x:0,y:.1,z:8};
 const clockEl=document.getElementById('clock');
@@ -103,7 +104,7 @@ function makeWorld(){
    // منصات قفز صغيرة على جوانب الطريق
    const stepX=laneX+(k%2===0?3.8:-3.8);
    const stepTop=Math.max(-.05,top-.48);
-   const step=block(stepX,stepTop-.275,z-3.6,2.3,.55,2.3,0xf6d66b);step.userData={halfX:1.15,halfZ:1.15,top:stepTop};platforms.push(step);
+   const step=block(stepX,stepTop-.275,z-3.6,2.3,.55,2.3,accents[w]);step.userData={halfX:1.15,halfZ:1.15,top:stepTop};platforms.push(step);
    // عوارض قفز منخفضة مرئية على منصات مختارة
    if(k===1||k===3){
     const hurdle=block(laneX,top+.13,z-1.8,3.1,.5,.45,0xff5d73);
@@ -117,16 +118,24 @@ function makeWorld(){
    coin.add(coinRing);
    coin.position.set(laneX,top+1.7,z-3.0);coin.userData.baseY=top+1.7;scene.add(coin);coinMeshes.push(coin);
    const gate=new THREE.Group();gate.position.set(laneX,top+1.25,z-1.5);
-   const glow=new THREE.MeshStandardMaterial({color:0x62f5ff,emissive:0x168ba8,emissiveIntensity:1.5});
+   const glow=new THREE.MeshStandardMaterial({color:accents[w],emissive:col,emissiveIntensity:1.8});
    const left=new THREE.Mesh(new THREE.BoxGeometry(.42,3.1,.5),glow);left.position.x=-1.55;gate.add(left);
    const right=left.clone();right.position.x=1.55;gate.add(right);
-   const beam=new THREE.Mesh(new THREE.BoxGeometry(3.55,.42,.5),mat(0xffe066));beam.position.y=1.55;gate.add(beam);
+   const beam=new THREE.Mesh(new THREE.BoxGeometry(3.55,.42,.5),mat(accents[w]));beam.position.y=1.55;gate.add(beam);
    const portal=new THREE.Mesh(new THREE.PlaneGeometry(2.65,2.55),new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:.42,side:THREE.DoubleSide}));
    portal.position.z=.08;gate.add(portal);scene.add(gate);
    gateMeshes.push({group:gate,index:w*5+k,world:w,z:z-1.5,x:laneX,done:false});
   }
   // جسر انتقال واضح بين العوالم
   const connector=block(0,-.25,baseZ-43,5.5,.7,5.5,0xffe066);connector.userData={halfX:2.75,halfZ:2.75,top:.1};platforms.push(connector);
+  // بوابة خروج مضيئة في نهاية كل عالم، تقود إلى العالم التالي
+  const exitGate=new THREE.Group();exitGate.position.set(0,.12,baseZ-43);
+  const exitMat=new THREE.MeshStandardMaterial({color:accents[w],emissive:col,emissiveIntensity:2.2,metalness:.25,roughness:.25});
+  const exitSide=new THREE.Mesh(new THREE.BoxGeometry(.55,3.8,.7),exitMat);exitSide.position.x=-2.05;exitGate.add(exitSide);
+  const exitSide2=exitSide.clone();exitSide2.position.x=2.05;exitGate.add(exitSide2);
+  const exitTop=new THREE.Mesh(new THREE.BoxGeometry(4.6,.55,.7),exitMat);exitTop.position.y=1.9;exitGate.add(exitTop);
+  const exitSurface=new THREE.Mesh(new THREE.PlaneGeometry(3.55,3.15),new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:.72,side:THREE.DoubleSide}));exitSurface.position.set(0,1.55,.08);exitGate.add(exitSurface);
+  scene.add(exitGate);
   if(w===4){
    const treasureBase=block(0,-.45,baseZ-49,13,.9,13,0xf6d66b);treasureBase.userData={halfX:6.5,halfZ:6.5,top:0};platforms.push(treasureBase);
    const chest=new THREE.Group();
@@ -170,7 +179,7 @@ document.querySelectorAll('[data-key]').forEach(b=>{const k=b.dataset.key;b.addE
 function openQuestion(g){asking=true;paused=true;currentGate=g.index;const q=questions[g.index];document.getElementById('qWorld').textContent=names[q.w]||names[g.world];document.getElementById('qTitle').textContent='بوابة التحدي '+(g.index+1);document.getElementById('qText').textContent='\u2066'+q.q+'\u2069';document.getElementById('feedback').textContent='';document.getElementById('continue').classList.add('hidden');const holder=document.getElementById('choices');holder.innerHTML='';const correct=q.a[q.c],others=q.a.filter((_,i)=>i!==q.c);for(let n=others.length-1;n>0;n--){const j=Math.floor(Math.random()*(n+1));[others[n],others[j]]=[others[j],others[n]];}const display=[...others];const target=Math.floor(Math.random()*3);display.splice(target,0,correct);g.correctDisplayIndex=target;display.forEach((a,i)=>{const b=document.createElement('button');b.textContent=a;b.onclick=()=>chooseAnswer(i,g,b);holder.appendChild(b)});document.getElementById('question').classList.remove('hidden')}
 function chooseAnswer(i,g,button){const q=questions[g.index],fb=document.getElementById('feedback');[...document.querySelectorAll('#choices button')].forEach(b=>b.disabled=true);if(i===g.correctDisplayIndex){sound('correct');score+=10;answered++;g.done=true;fb.textContent='ممتاز! تم فتح البوابة ⭐ '+q.e;fb.style.color='#9dffbd';document.getElementById('score').textContent=score;document.getElementById('progress').textContent=answered;document.getElementById('bar').style.width=(answered/25*100)+'%';document.getElementById('continue').classList.remove('hidden');}else{sound('wrong');fb.textContent='محاولة أخرى! راجع ترتيب العمليات.';fb.style.color='#ffd1a8';[...document.querySelectorAll('#choices button')].forEach((b,j)=>{if(j!==i)b.disabled=false});button.disabled=false;}}
 function closeQuestion(){document.getElementById('question').classList.add('hidden');const completedWorld=Math.floor(currentGate/5),completedInWorld=(currentGate%5)+1;asking=false;paused=true;if(completedInWorld===5){document.getElementById('levelTitle').textContent='🏆 اكتمل عالم '+names[completedWorld]+'!';document.getElementById('levelMessage').textContent='تم إنجاز الأسئلة الخمسة لهذا العالم. '+(answered===25?'اكتملت المغامرة كلها!':'المستوى التالي بانتظارك.');document.querySelector('#levelComplete button').textContent=answered===25?'عرض النتيجة النهائية 🏆':'دخول '+names[completedWorld+1]+' 🚪';document.getElementById('levelComplete').classList.remove('hidden');sound('level');}else{paused=false;}}
-function nextLevel(){document.getElementById('levelComplete').classList.add('hidden');paused=false;asking=false;if(answered===25){document.getElementById('world').textContent='كنز النهاية 🏆';sound('level');return;}document.getElementById('world').textContent=names[Math.min(4,Math.floor(answered/5))];sound('gate');}
+function nextLevel(){document.getElementById('levelComplete').classList.add('hidden');paused=false;asking=false;if(answered===25){document.getElementById('world').textContent='كنز النهاية 🏆';player.position.set(0,.15,-241);checkpoint={x:0,y:.15,z:-241};velocityY=0;camera.position.set(0,6,-224);camera.lookAt(0,1,-241);sound('level');return;}const nextWorld=Math.floor(answered/5),nextBase=-nextWorld*48;player.position.set(-2.4,.2,nextBase-3);checkpoint={x:-2.4,y:.2,z:nextBase-3};velocityY=0;onGround=true;document.getElementById('world').textContent=names[nextWorld];camera.position.set(-2.4,6,nextBase+14);camera.lookAt(-2.4,1,nextBase-3);sound('gate');}
 function finishGame(){finished=true;document.getElementById('hud').classList.add('hidden');document.getElementById('finish').classList.remove('hidden');document.getElementById('finalScore').textContent=score+' من 250 نقطة';document.getElementById('finalInfo').textContent='الاسم: '+playerName+' | التحديات المنجزة: '+answered+'/25 | 🪙 الكوينز: '+coinsCollected+' من 25 | 🏆 وصلت إلى كنز النهاية!';localStorage.setItem('obbyLastResult',JSON.stringify({name:playerName,score,answered,date:new Date().toLocaleString('ar-JO')}))}
 function downloadResult(){const data=localStorage.getItem('obbyLastResult')||'{}';const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data],{type:'application/json'}));a.download='math-obby-result.json';a.click()}
 function updateTimer(dt){remaining-=dt;if(remaining<=0){remaining=0;finishGame()}const m=Math.floor(remaining/60),s=Math.floor(remaining%60);clockEl.textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0')}
