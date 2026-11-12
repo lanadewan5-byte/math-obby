@@ -119,7 +119,14 @@ function makeWorld(){
  camera.position.set(0,6,17);camera.lookAt(0,1,4);
 }
 function startGame(){playerName=document.getElementById('playerName').value.trim()||'لاعب';document.getElementById('playerLabel').textContent=playerName;document.getElementById('welcome').classList.add('hidden');document.getElementById('hud').classList.remove('hidden');makeWorld();started=true;last=performance.now();animate()}
-function jump(){if(started&&!paused&&!asking&&onGround){velocityY=10.5;onGround=false}}
+function jump(){
+ if(!started||paused||asking||finished||!player)return;
+ if(onGround||player.position.y<=0.25){
+  velocityY=12.5;
+  player.position.y=Math.max(player.position.y,0.05);
+  onGround=false;
+ }
+}
 function togglePause(){if(!started||finished)return;paused=!paused;document.getElementById('pause').classList.toggle('hidden',!paused)}
 window.addEventListener('keydown',e=>{keys[e.key.toLowerCase()]=true;if(e.code==='Space'){e.preventDefault();jump()}});
 window.addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);
