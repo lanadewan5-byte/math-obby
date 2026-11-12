@@ -15,8 +15,9 @@
   <div class="pill">🏁 <span id="progress">0</span>/25<div class="meter"><i id="bar"></i></div></div>
   <div class="pill">⏱️ <span id="clock">30:00</span><br><small id="playerLabel"></small></div>
  </div>
- <div class="bottom"><div class="hint">تحرّك: WASD أو الأسهم · اقفز: Space<br>اقترب من بوابة التحدي لتفتح المسألة</div><div style="display:flex;gap:6px;pointer-events:auto"><button class="dark" id="soundToggle" onclick="toggleSound()">🔊 الصوت: يعمل</button><button class="dark" onclick="togglePause()">Ⅱ إيقاف</button></div></div>
+ <div class="bottom"><div class="hint">تحرّك: WASD أو الأسهم · اقفز: Space · دخول البوابة: E<br>استكشف المركز الرئيسي وافتح العوالم بالتتابع</div><div style="display:flex;gap:6px;pointer-events:auto"><button class="dark" id="soundToggle" onclick="toggleSound()">🔊 الصوت: يعمل</button><button class="dark" onclick="togglePause()">Ⅱ إيقاف</button></div></div>
 </div>
+<div id="portalHint" style="position:fixed;top:88px;left:50%;transform:translateX(-50%);z-index:5;background:#101a36dd;border:1px solid #ffffff55;border-radius:14px;padding:9px 16px;font-weight:bold;pointer-events:none;display:none;white-space:nowrap">اقتربي من بوابة واضغطي E</div>
 <div id="touch"><div style="display:grid;grid-template-columns:repeat(3,55px);gap:5px"><span></span><button data-key="w">▲</button><span></span><button data-key="a">◀</button><button data-key="s">▼</button><button data-key="d">▶</button></div></div>
 <button id="jump" onclick="jump()">قفز</button>
 <div id="welcome" class="overlay"><div class="card">
@@ -75,7 +76,7 @@ const accents=[0xeaff55,0xffd34e,0xd9f7ff,0xffd6fb,0x45f5ff];
 const skyColors=[0x70d9ff,0x32152b,0x9beaff,0x281052,0x090b35];
 const fogColors=[0x9beaff,0x6b2632,0xc9f3ff,0x4b176e,0x17104b];
 let scene,camera,renderer,player,velocityY=0,onGround=false,keys={},started=false,paused=false,asking=false,finished=false;
-let score=0,answered=0,playerName='',remaining=1800,last=performance.now(),gateMeshes=[],platforms=[],coinMeshes=[],coinsCollected=0,currentGate=0,checkpoint={x:0,y:.1,z:8};
+let score=0,answered=0,playerName='',remaining=1800,last=performance.now(),gateMeshes=[],platforms=[],coinMeshes=[],hubPortals=[],coinsCollected=0,currentGate=0,checkpoint={x:0,y:.1,z:8};
 const clockEl=document.getElementById('clock');
 let audioCtx=null,soundEnabled=true;
 function sound(type){if(!soundEnabled)return;try{audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume();const now=audioCtx.currentTime,osc=audioCtx.createOscillator(),gain=audioCtx.createGain(),p={jump:[420,620,.11],gem:[760,1120,.16],coin:[900,1320,.18],correct:[620,880,.22],wrong:[210,150,.2],level:[520,780,.42],gate:[440,660,.3]}[type]||[500,700,.18];osc.type=type==='wrong'?'triangle':'sine';osc.frequency.setValueAtTime(p[0],now);osc.frequency.exponentialRampToValueAtTime(p[1],now+p[2]);gain.gain.setValueAtTime(.0001,now);gain.gain.exponentialRampToValueAtTime(.12,now+.015);gain.gain.exponentialRampToValueAtTime(.0001,now+p[2]);osc.connect(gain);gain.connect(audioCtx.destination);osc.start(now);osc.stop(now+p[2]+.02);}catch(e){}}
@@ -83,7 +84,7 @@ function toggleSound(){soundEnabled=!soundEnabled;document.getElementById('sound
 function mat(color,roughness=.8){return new THREE.MeshStandardMaterial({color,roughness})}
 function block(x,y,z,sx,sy,sz,color){const m=new THREE.Mesh(new THREE.BoxGeometry(sx,sy,sz),mat(color));m.position.set(x,y,z);scene.add(m);return m}
 function makeWorld(){
- platforms=[];gateMeshes=[];coinMeshes=[];scene=new THREE.Scene();scene.background=new THREE.Color(skyColors[0]);scene.fog=new THREE.Fog(fogColors[0],48,155);
+ platforms=[];gateMeshes=[];coinMeshes=[];hubPortals=[];scene=new THREE.Scene();scene.background=new THREE.Color(skyColors[0]);scene.fog=new THREE.Fog(fogColors[0],48,155);
  camera=new THREE.PerspectiveCamera(65,innerWidth/innerHeight,.1,300);
  renderer=new THREE.WebGLRenderer({antialias:true});renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;document.body.appendChild(renderer.domElement);
  scene.add(new THREE.HemisphereLight(0xeaf7ff,0x486044,2.1));
@@ -185,6 +186,25 @@ function makeWorld(){
  }
  // starting pad
  const startPad=block(0,-.4,7,12,1,12,0x4aaf79);startPad.userData={halfX:6,halfZ:6,top:.1};platforms.push(startPad);
+
+ // ساحة المركز الرئيسي وبوابات العوالم الخمسة
+ const hubFloor=block(0,-.75,8,34,.7,30,0x263d68);hubFloor.userData={halfX:17,halfZ:15,top:-.4};platforms.push(hubFloor);
+ const hubInner=block(0,-.32,8,25,.18,22,0x42618c);hubInner.userData={halfX:12.5,halfZ:11,top:-.23};platforms.push(hubInner);
+ const portalXs=[-12,-6,0,6,12],portalColors=[0x35e88b,0x45d9ff,0xffa43b,0xff4fd8,0x9b78ff];
+ const portalTitles=['عالم الطبيعة','عالم الفضاء','عالم المغامرات','عالم المستقبل','عالم الجزر'];
+ for(let i=0;i<5;i++){
+  const pg=new THREE.Group();pg.position.set(portalXs[i],0,13);
+  const fm=new THREE.MeshStandardMaterial({color:portalColors[i],emissive:portalColors[i],emissiveIntensity:1.5,metalness:.45,roughness:.25});
+  const ring=new THREE.Mesh(new THREE.TorusGeometry(1.65,.22,12,40),fm);ring.position.y=2.25;pg.add(ring);
+  const inner=new THREE.Mesh(new THREE.CircleGeometry(1.48,40),new THREE.MeshBasicMaterial({color:portalColors[i],transparent:true,opacity:.3,side:THREE.DoubleSide}));inner.position.set(0,2.25,.03);pg.add(inner);
+  const pl=new THREE.Mesh(new THREE.BoxGeometry(.35,3.8,.45),fm);pl.position.set(-1.75,1.9,0);pg.add(pl);
+  const pr=pl.clone();pr.position.x=1.75;pg.add(pr);
+  const base=new THREE.Mesh(new THREE.CylinderGeometry(2.2,2.45,.42,8),new THREE.MeshStandardMaterial({color:portalColors[i],metalness:.5,roughness:.35}));base.position.y=-.08;pg.add(base);
+  const light=new THREE.PointLight(portalColors[i],1.6,10);light.position.set(0,2.5,0);pg.add(light);
+  scene.add(pg);hubPortals.push({group:pg,index:i,x:portalXs[i],z:13,title:portalTitles[i],color:portalColors[i]});
+ }
+ const pillarMat=new THREE.MeshStandardMaterial({color:0x7cecff,emissive:0x145b9b,emissiveIntensity:.6,metalness:.6});
+ for(let i=0;i<8;i++){const pillar=new THREE.Mesh(new THREE.CylinderGeometry(.25,.5,3+(i%3),6),pillarMat);const a=i*Math.PI/4;pillar.position.set(Math.cos(a)*15,1.1,8+Math.sin(a)*12);scene.add(pillar);}
  // وصل منصة البداية بأول منصة حتى لا تسقط الشخصية قبل أول قفزة
  const bridge1=block(0,-.5,2,7,.7,5,0x4aaf79);bridge1.userData={halfX:3.5,halfZ:2.5,top:-.15};platforms.push(bridge1);
  const bridge2=block(0,-.5,-2,7,.7,5,0x4aaf79);bridge2.userData={halfX:3.5,halfZ:2.5,top:-.15};platforms.push(bridge2);
@@ -195,27 +215,40 @@ function makeWorld(){
  const hair=new THREE.Mesh(new THREE.BoxGeometry(1,.25,.9),mat(0x49301f));hair.position.y=3.25;player.add(hair);
  const legs=[];for(let s of [-1,1]){const leg=new THREE.Mesh(new THREE.BoxGeometry(.42,.95,.48),mat(0x24334e));leg.position.set(s*.3,.48,0);player.add(leg);legs.push(leg)}
  player.position.set(0,.1,8);checkpoint={x:0,y:.1,z:8};player.userData.legs=legs;scene.add(player);velocityY=0;onGround=true;
- camera.position.set(0,6,17);camera.lookAt(0,1,4);
+ camera.position.set(0,7,22);camera.lookAt(0,1,8);
 }
 function startGame(){try{started=false;paused=false;asking=false;finished=false;score=0;answered=0;remaining=1800;coinsCollected=0;document.getElementById('coinCount').textContent='0';playerName=document.getElementById('playerName').value.trim()||'مغامر';document.getElementById('playerLabel').textContent=playerName;if(renderer){renderer.dispose();renderer.domElement.remove();renderer=null;}makeWorld();document.getElementById('welcome').classList.add('hidden');document.getElementById('hud').classList.remove('hidden');started=true;last=performance.now();document.activeElement?.blur();document.body.focus();animate();sound('level');}catch(err){started=false;document.getElementById('welcome').classList.remove('hidden');document.getElementById('startHelp').textContent='تعذّر تشغيل اللعبة: '+(err&&err.message?err.message:'تحقق من تفعيل WebGL والاتصال بالإنترنت')+' — حدّثي الصفحة وحاول مرة أخرى.';console.error('Math Obby start error:',err);}}
+
+function enterNearbyPortal(){
+ if(!started||paused||asking||finished||!player)return;
+ const portal=hubPortals.find(p=>Math.abs(player.position.x-p.x)<2.8&&Math.abs(player.position.z-p.z)<3.2);
+ if(!portal)return;
+ const unlocked=Math.min(4,Math.floor(answered/5));
+ if(portal.index>unlocked){const hint=document.getElementById('portalHint');if(hint)hint.textContent='🔒 أكملي العالم السابق أولًا لفتح هذه البوابة';return;}
+ const baseZ=-portal.index*48;
+ player.position.set(-2.4,.2,baseZ-3);checkpoint={x:-2.4,y:.2,z:baseZ-3};velocityY=0;onGround=true;
+ document.getElementById('world').textContent=portal.title;
+ camera.position.set(-2.4,6,baseZ+14);camera.lookAt(-2.4,1,baseZ-3);sound('gate');
+ const firstGate=gateMeshes.find(g=>g.index===portal.index*5&&!g.done);if(firstGate)openQuestion(firstGate);
+}
 function jump(){
  if(!started||paused||asking||finished||!player)return;
  const onStartPad=Math.abs(player.position.x)<5.8&&player.position.z>1&&player.position.z<13&&player.position.y<=.35;
  if(onGround||onStartPad){velocityY=12.5;sound('jump');player.position.y=Math.max(player.position.y,.12);onGround=false;}
 }
 function togglePause(){if(!started||finished)return;paused=!paused;document.getElementById('pause').classList.toggle('hidden',!paused)}
-window.addEventListener('keydown',e=>{const m={ArrowUp:'w',ArrowDown:'s',ArrowLeft:'a',ArrowRight:'d',KeyW:'w',KeyS:'s',KeyA:'a',KeyD:'d'};keys[m[e.code]||e.key.toLowerCase()]=true;if(e.code==='Space'){e.preventDefault();if(!e.repeat)jump()}if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault()},true);
+window.addEventListener('keydown',e=>{if(e.code==='KeyE'){e.preventDefault();enterNearbyPortal();return;}const m={ArrowUp:'w',ArrowDown:'s',ArrowLeft:'a',ArrowRight:'d',KeyW:'w',KeyS:'s',KeyA:'a',KeyD:'d'};keys[m[e.code]||e.key.toLowerCase()]=true;if(e.code==='Space'){e.preventDefault();if(!e.repeat)jump()}if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault()},true);
 window.addEventListener('keyup',e=>{const m={ArrowUp:'w',ArrowDown:'s',ArrowLeft:'a',ArrowRight:'d',KeyW:'w',KeyS:'s',KeyA:'a',KeyD:'d'};keys[m[e.code]||e.key.toLowerCase()]=false});
 window.addEventListener('blur',()=>{keys={}});
 document.querySelectorAll('[data-key]').forEach(b=>{const k=b.dataset.key;b.addEventListener('pointerdown',e=>{e.preventDefault();keys[k]=true});['pointerup','pointerleave','pointercancel'].forEach(ev=>b.addEventListener(ev,()=>keys[k]=false))});
 function openQuestion(g){asking=true;paused=true;currentGate=g.index;const q=questions[g.index];document.getElementById('qWorld').textContent=names[q.w]||names[g.world];document.getElementById('qTitle').textContent='بوابة التحدي '+(g.index+1);document.getElementById('qText').textContent='\u2066'+q.q+'\u2069';document.getElementById('feedback').textContent='';document.getElementById('continue').classList.add('hidden');const holder=document.getElementById('choices');holder.innerHTML='';const correct=q.a[q.c],others=q.a.filter((_,i)=>i!==q.c);for(let n=others.length-1;n>0;n--){const j=Math.floor(Math.random()*(n+1));[others[n],others[j]]=[others[j],others[n]];}const display=[...others];const target=Math.floor(Math.random()*3);display.splice(target,0,correct);g.correctDisplayIndex=target;display.forEach((a,i)=>{const b=document.createElement('button');b.textContent=a;b.onclick=()=>chooseAnswer(i,g,b);holder.appendChild(b)});document.getElementById('question').classList.remove('hidden')}
 function chooseAnswer(i,g,button){const q=questions[g.index],fb=document.getElementById('feedback');[...document.querySelectorAll('#choices button')].forEach(b=>b.disabled=true);if(i===g.correctDisplayIndex){sound('correct');score+=10;answered++;g.done=true;fb.textContent='ممتاز! تم فتح البوابة ⭐ '+q.e;fb.style.color='#9dffbd';document.getElementById('score').textContent=score;document.getElementById('progress').textContent=answered;document.getElementById('bar').style.width=(answered/25*100)+'%';document.getElementById('continue').classList.remove('hidden');}else{sound('wrong');fb.textContent='محاولة أخرى! راجع ترتيب العمليات.';fb.style.color='#ffd1a8';[...document.querySelectorAll('#choices button')].forEach((b,j)=>{if(j!==i)b.disabled=false});button.disabled=false;}}
 function closeQuestion(){document.getElementById('question').classList.add('hidden');const completedWorld=Math.floor(currentGate/5),completedInWorld=(currentGate%5)+1;asking=false;paused=true;if(completedInWorld===5){document.getElementById('levelTitle').textContent='🏆 اكتمل عالم '+names[completedWorld]+'!';document.getElementById('levelMessage').textContent='تم إنجاز الأسئلة الخمسة لهذا العالم. '+(answered===25?'اكتملت المغامرة كلها!':'المستوى التالي بانتظارك.');document.querySelector('#levelComplete button').textContent=answered===25?'عرض النتيجة النهائية 🏆':'دخول '+names[completedWorld+1]+' 🚪';document.getElementById('levelComplete').classList.remove('hidden');sound('level');}else{paused=false;}}
-function nextLevel(){document.getElementById('levelComplete').classList.add('hidden');paused=false;asking=false;if(answered===25){document.getElementById('world').textContent='كنز النهاية 🏆';player.position.set(0,.15,-241);checkpoint={x:0,y:.15,z:-241};velocityY=0;camera.position.set(0,6,-224);camera.lookAt(0,1,-241);sound('level');return;}const nextWorld=Math.floor(answered/5),nextBase=-nextWorld*48;player.position.set(-2.4,.2,nextBase-3);checkpoint={x:-2.4,y:.2,z:nextBase-3};velocityY=0;onGround=true;document.getElementById('world').textContent=names[nextWorld];camera.position.set(-2.4,6,nextBase+14);camera.lookAt(-2.4,1,nextBase-3);sound('gate');const entranceGate=gateMeshes.find(g=>g.index===nextWorld*5);if(entranceGate&&!entranceGate.done){openQuestion(entranceGate);}}
+function nextLevel(){document.getElementById('levelComplete').classList.add('hidden');paused=false;asking=false;if(answered===25){document.getElementById('world').textContent='كنز النهاية 🏆';player.position.set(0,.15,-241);checkpoint={x:0,y:.15,z:-241};velocityY=0;camera.position.set(0,6,-224);camera.lookAt(0,1,-241);sound('level');return;}const nextWorld=Math.floor(answered/5);player.position.set(0,.1,8);checkpoint={x:0,y:.1,z:8};velocityY=0;onGround=true;document.getElementById('world').textContent='المركز الرئيسي – بوابات العوالم';camera.position.set(0,7,22);camera.lookAt(0,1,8);sound('level');const hint=document.getElementById('portalHint');if(hint)hint.textContent='✨ تم فتح '+['عالم الطبيعة','عالم الفضاء','عالم المغامرات','عالم المستقبل','عالم الجزر'][nextWorld]+'! اقتربي من بوابته واضغطي E';}
 function finishGame(){finished=true;document.getElementById('hud').classList.add('hidden');document.getElementById('finish').classList.remove('hidden');document.getElementById('finalScore').textContent=score+' من 250 نقطة';document.getElementById('finalInfo').textContent='الاسم: '+playerName+' | التحديات المنجزة: '+answered+'/25 | 🪙 الكوينز: '+coinsCollected+' من 25 | 🏆 وصلت إلى كنز النهاية!';localStorage.setItem('obbyLastResult',JSON.stringify({name:playerName,score,answered,date:new Date().toLocaleString('ar-JO')}))}
 function downloadResult(){const data=localStorage.getItem('obbyLastResult')||'{}';const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data],{type:'application/json'}));a.download='math-obby-result.json';a.click()}
 function updateTimer(dt){remaining-=dt;if(remaining<=0){remaining=0;finishGame()}const m=Math.floor(remaining/60),s=Math.floor(remaining%60);clockEl.textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0')}
-function animate(now=performance.now()){if(!started||finished)return;requestAnimationFrame(animate);const dt=Math.min((now-last)/1000,.04);last=now;if(!paused&&!asking){updateTimer(dt);const visualWorld=Math.min(4,Math.floor(Math.max(0,-player.position.z)/48));scene.background.setHex(skyColors[visualWorld]);scene.fog.color.setHex(fogColors[visualWorld]);let dx=0,dz=0;if(keys.a||keys.arrowleft)dx-=1;if(keys.d||keys.arrowright)dx+=1;if(keys.w||keys.arrowup)dz-=1;if(keys.s||keys.arrowdown)dz+=1;const len=Math.hypot(dx,dz)||1;player.position.x+=dx/len*8*dt;player.position.z+=dz/len*8*dt;player.position.x=THREE.MathUtils.clamp(player.position.x,-6.5,6.5);
+function animate(now=performance.now()){if(!started||finished)return;requestAnimationFrame(animate);const dt=Math.min((now-last)/1000,.04);last=now;if(!paused&&!asking){updateTimer(dt);const visualWorld=Math.min(4,Math.floor(Math.max(0,-player.position.z)/48));scene.background.setHex(skyColors[visualWorld]);scene.fog.color.setHex(fogColors[visualWorld]);let dx=0,dz=0;if(keys.a||keys.arrowleft)dx-=1;if(keys.d||keys.arrowright)dx+=1;if(keys.w||keys.arrowup)dz-=1;if(keys.s||keys.arrowdown)dz+=1;const len=Math.hypot(dx,dz)||1;player.position.x+=dx/len*8*dt;player.position.z+=dz/len*8*dt;player.position.x=THREE.MathUtils.clamp(player.position.x,-16,16);
  const previousY=player.position.y;velocityY-=24*dt;player.position.y+=velocityY*dt;onGround=false;
  // التقاط الهبوط على المنصات مع هامش أمان أوسع، وحفظ آخر منصة وصل إليها اللاعب
  let landed=false;
@@ -240,7 +273,7 @@ function animate(now=performance.now()){if(!started||finished)return;requestAnim
  // اجمع الكوينز بالقفز والاقتراب منها
  for(const coin of coinMeshes){if(coin.visible){coin.rotation.y+=dt*3.8;coin.position.y=coin.userData.baseY+Math.sin(now*.003+coin.position.z)*.22;if(Math.abs(coin.position.z-player.position.z)<2.7&&Math.abs(coin.position.x-player.position.x)<2.0&&Math.abs((player.position.y+1.5)-coin.position.y)<2.0){coin.visible=false;coinsCollected++;sound('coin');document.getElementById('coinCount').textContent=coinsCollected;}}}
  if(answered===25&&player.position.z<-238&&Math.abs(player.position.x)<5&&player.position.y<3){finishGame();return;}
- const g=gateMeshes.find(x=>!x.done&&Math.abs(x.z-player.position.z)<2.5&&Math.abs(player.position.x-x.x)<2.8&&Math.abs(player.position.y)<2);if(g)openQuestion(g);
+ const nearPortal=hubPortals.find(p=>Math.abs(player.position.x-p.x)<3.2&&Math.abs(player.position.z-p.z)<4);const ph=document.getElementById('portalHint');if(ph){ph.style.display=nearPortal?'block':'none';if(nearPortal){const unlocked=Math.min(4,Math.floor(answered/5));ph.textContent=nearPortal.index<=unlocked?'🌀 '+nearPortal.title+' – اضغطي E للدخول':'🔒 '+nearPortal.title+' – أكملي العالم السابق';}}const g=gateMeshes.find(x=>!x.done&&Math.abs(x.z-player.position.z)<2.5&&Math.abs(player.position.x-x.x)<2.8&&Math.abs(player.position.y)<2);if(g)openQuestion(g);
  player.rotation.y=Math.atan2(dx,-dz||.0001);const moving=Math.abs(dx)+Math.abs(dz)>0;player.userData.legs.forEach((l,i)=>l.rotation.x=moving?Math.sin(now*.014+i*Math.PI)*.5:0);
  }
  camera.position.x+=(player.position.x*.45-camera.position.x)*.08;camera.position.y+=(player.position.y+5.3-camera.position.y)*.08;camera.position.z+=(player.position.z+10-camera.position.z)*.08;camera.lookAt(player.position.x,player.position.y+1.2,player.position.z-5);
