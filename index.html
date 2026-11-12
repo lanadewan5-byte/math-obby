@@ -34,8 +34,13 @@
  <div id="pause" class="overlay hidden"><div class="card"><h1>استراحة قصيرة</h1><p>المغامرة متوقفة مؤقتًا.</p><button onclick="togglePause()">متابعة اللعب</button></div></div>
 <div id="finish" class="overlay hidden"><div class="card"><div style="font-size:55px">🏆</div><h1>أنهيتِ المغامرة!</h1><h2 id="finalScore"></h2><p id="finalInfo"></p><button onclick="location.reload()">العب من جديد</button><button class="dark" onclick="downloadResult()">تنزيل النتيجة</button></div></div>
 <div id="admin"><div class="adminbox"><h2>لوحة المعلمة – بنك الأسئلة</h2><p>عدّلي الأسئلة بصيغة JSON ثم احفظيها على هذا الجهاز. احتفظي بنسخة من النص قبل التعديل.</p><textarea id="bankEditor"></textarea><button onclick="saveBank()">حفظ الأسئلة</button><button class="dark" onclick="closeAdmin()">إغلاق</button><div id="adminMsg"></div></div></div>
+<script>
+window.addEventListener('error',function(e){const h=document.getElementById('startHelp');if(h&&(!window.startGame||!window.THREE))h.textContent='تعذّر تحميل ملفات اللعبة: '+(e.message||'خطأ في الاتصال').slice(0,140)+' — تأكدي من الإنترنت ثم حدّثي الصفحة.';});
+window.addEventListener('unhandledrejection',function(e){const h=document.getElementById('startHelp');if(h)h.textContent='تعذّر تحميل اللعبة: '+String(e.reason||'خطأ غير معروف').slice(0,140);});
+setTimeout(function(){if(typeof window.startGame!=='function'){const h=document.getElementById('startHelp');if(h)h.textContent='ملف اللعبة لم يكتمل تحميله. تأكدي من اتصال الإنترنت، ثم افتحي الرابط في Chrome وحدّثي الصفحة.';}},7000);
+</script>
 <script type="module">
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
 const defaultQuestions=[
 {w:0,q:"(12 + 8) × 3",a:["36","60","20"],c:1,e:"الأقواس: 12 + 8 = 20، ثم 20 × 3 = 60."},
 {w:0,q:"6 × (9 − 4) + 2",a:["32","30","26"],c:0,e:"القوس: 9 − 4 = 5، ثم 6 × 5 = 30، ثم 30 + 2 = 32."},
