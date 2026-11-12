@@ -62,7 +62,7 @@ const defaultQuestions=[
 {w:4,q:"100 ÷ (5 × 4) + 25",a:["30","20","45"],c:0,e:"القوس أولًا: 5 × 4 = 20، ثم 100 ÷ 20 = 5، ثم 5 + 25 = 30."},
 {w:4,q:"(40 + 20) ÷ 5 × 2",a:["24","12","30"],c:0,e:"القوس أولًا: 40 + 20 = 60، ثم من اليسار: 60 ÷ 5 = 12، ثم 12 × 2 = 24."}
 ];
-let questions=JSON.parse(localStorage.getItem('obbyBankV3')||'null')||defaultQuestions;
+let questions=JSON.parse(localStorage.getItem('obbyBankV4')||'null')||defaultQuestions;
 const names=['جزيرة الأقواس','مدينة الضرب والقسمة','جسر اليسار واليمين','وادي العمليات المختلطة','قلعة التحدي النهائي'];
 const colors=[0x44c77a,0xf2a63b,0x3d9be8,0x9b70d6,0xf06d91];
 let scene,camera,renderer,player,velocityY=0,onGround=false,keys={},started=false,paused=false,asking=false,finished=false;
@@ -165,7 +165,7 @@ function animate(now=performance.now()){if(!started||finished)return;requestAnim
 window.addEventListener('resize',()=>{if(!renderer)return;camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
 window.openAdmin=()=>{document.getElementById('bankEditor').value=JSON.stringify(questions,null,2);document.getElementById('admin').style.display='flex'};
 window.closeAdmin=()=>document.getElementById('admin').style.display='none';
-window.saveBank=()=>{try{const x=JSON.parse(document.getElementById('bankEditor').value);if(!Array.isArray(x)||x.length!==25||x.some(q=>!q.q||!Array.isArray(q.a)||q.a.length!==3||q.c<0||q.c>2))throw Error('يجب إدخال 25 سؤالًا، ولكل سؤال 3 خيارات وإجابة صحيحة من 0 إلى 2.');questions=x;localStorage.setItem('obbyBankV3',JSON.stringify(x));document.getElementById('adminMsg').textContent='تم حفظ بنك الأسئلة على هذا الجهاز.'}catch(e){document.getElementById('adminMsg').textContent='خطأ: '+e.message}};
+window.saveBank=()=>{try{const x=JSON.parse(document.getElementById('bankEditor').value);if(!Array.isArray(x)||x.length!==25||x.some(q=>!q.q||!Array.isArray(q.a)||q.a.length!==3||q.c<0||q.c>2))throw Error('يجب إدخال 25 سؤالًا، ولكل سؤال 3 خيارات وإجابة صحيحة من 0 إلى 2.');questions=x;localStorage.setItem('obbyBankV4',JSON.stringify(x));document.getElementById('adminMsg').textContent='تم حفظ بنك الأسئلة على هذا الجهاز.'}catch(e){document.getElementById('adminMsg').textContent='خطأ: '+e.message}};
 window.startGame=startGame;window.jump=jump;window.togglePause=togglePause;window.closeQuestion=closeQuestion;window.downloadResult=downloadResult;
 </script>
 </body></html>
