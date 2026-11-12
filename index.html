@@ -2,104 +2,146 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Math Obby | مغامرة أولويات العمليات</title>
+<title>Math Obby 3D | مغامرة أولويات العمليات</title>
 <style>
-:root{--bg:#10162b;--panel:#1c2544;--cyan:#55e6e0;--gold:#ffd166;--pink:#ff70a6;--white:#f7f8ff}
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 20% 10%,#293d70,#10162b 55%);color:var(--white);font-family:Tahoma,Arial,sans-serif;min-height:100vh}
-button,input,textarea{font:inherit}button{cursor:pointer;border:0;border-radius:13px;padding:12px 18px;font-weight:bold;background:var(--cyan);color:#102038}button.secondary{background:#344366;color:white}button.gold{background:var(--gold)}button:disabled{opacity:.45;cursor:not-allowed}
-header{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 4%;background:#0b1024cc;border-bottom:1px solid #ffffff22;position:sticky;top:0;z-index:5}
-h1{font-size:clamp(20px,3vw,30px);margin:0}header small{color:#b8c6ed}.wrap{max-width:1150px;margin:auto;padding:22px}
-.panel{background:#1b2545eF;border:1px solid #ffffff20;border-radius:22px;padding:22px;box-shadow:0 18px 55px #0005}
-.screen{display:none}.screen.active{display:block}.hero{text-align:center;padding:35px 15px}.hero h2{font-size:clamp(26px,5vw,48px);margin:8px}.hero p{color:#c5d0f2;line-height:1.9}.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}.center{justify-content:center}.field{display:grid;gap:8px;max-width:360px;margin:18px auto;text-align:right}.field input{padding:14px;border-radius:12px;border:2px solid #63739c;background:#101a35;color:white}
-.worlds{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:12px;margin:22px 0}.world{padding:16px;border-radius:17px;background:#28365e;border:1px solid #ffffff25}.world b{display:block;margin-bottom:7px}.world span{color:#c4d0f4;font-size:13px}
-.hud{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:14px}.pill{background:#28365e;border-radius:30px;padding:9px 14px}.bar{height:12px;background:#344366;border-radius:20px;overflow:hidden;margin:12px 0}.bar>div{height:100%;background:linear-gradient(90deg,var(--cyan),#9bffb0);width:0;transition:.3s}
-.question{font-size:clamp(25px,4vw,42px);font-weight:bold;text-align:center;direction:ltr;margin:24px 0;color:var(--gold)}.answers{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.answers button{font-size:22px;background:#344366;color:white;border:2px solid #63739c}.answers button:hover{border-color:var(--cyan);background:#405580}
-.feedback{min-height:58px;text-align:center;font-size:17px;line-height:1.7;margin:15px 0}.good{color:#8dffb0}.bad{color:#ff9cae}
-.game-layout{display:grid;grid-template-columns:1.1fr .9fr;gap:16px}.scene{min-height:300px;border-radius:20px;background:linear-gradient(#83c7ed 0 55%,#5cbd91 55% 100%);position:relative;overflow:hidden;border:3px solid #ffffff30}
-.scene:before{content:"";position:absolute;width:140px;height:140px;border-radius:50%;background:#ffe78a;top:24px;left:12%;box-shadow:0 0 55px #ffe78a99}
-.platform{position:absolute;bottom:55px;left:12%;width:76%;height:30px;background:#9c70d6;border:5px solid #7049ac;border-radius:9px;box-shadow:0 13px 0 #503b84}
-.avatar{position:absolute;bottom:90px;left:46%;width:42px;height:58px;transition:left .25s;filter:drop-shadow(0 5px 2px #0004)}
-.avatar .head{width:30px;height:28px;background:#ffd4a6;border-radius:8px;margin:auto;border:3px solid #28365e}.avatar .body{height:29px;width:38px;margin:auto;background:#ff70a6;border-radius:7px}
-.scene-label{position:absolute;top:18px;right:18px;background:#152444bb;padding:8px 12px;border-radius:12px;font-weight:bold}
-.teacher textarea{width:100%;min-height:220px;background:#101a35;color:#eaf0ff;border:1px solid #63739c;border-radius:12px;padding:12px;direction:ltr;text-align:left}
-.note{color:#c5d0f2;font-size:13px;line-height:1.8}.hide{display:none!important}
-@media(max-width:760px){.game-layout{grid-template-columns:1fr}.answers{grid-template-columns:1fr}.scene{min-height:240px}}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#77c9f4;color:#fff;font-family:Tahoma,Arial,sans-serif}canvas{display:block}#hud{position:fixed;inset:0;pointer-events:none;z-index:3}.top{display:flex;justify-content:space-between;gap:8px;padding:12px;align-items:flex-start}.pill{background:#101a36dd;border:2px solid #ffffff40;border-radius:16px;padding:9px 13px;font-weight:bold;box-shadow:0 5px 15px #0003}.meter{height:9px;width:150px;background:#ffffff44;border-radius:20px;overflow:hidden;margin-top:6px}.meter i{display:block;height:100%;width:0;background:#ffe066}.bottom{position:absolute;bottom:14px;left:14px;right:14px;display:flex;justify-content:space-between;align-items:end}.hint{background:#101a36cc;padding:10px 14px;border-radius:14px;font-size:13px;max-width:330px}.overlay{position:fixed;inset:0;background:#09132bd9;display:flex;align-items:center;justify-content:center;z-index:8;padding:16px}.card{width:min(600px,96vw);background:linear-gradient(145deg,#263b70,#111c3d);border:2px solid #ffffff38;border-radius:25px;padding:25px;text-align:center;box-shadow:0 25px 80px #0008}.card h1{font-size:clamp(25px,5vw,42px);margin:4px 0 12px}.card p{line-height:1.8;color:#dce8ff}.field{padding:13px;border-radius:12px;border:2px solid #8296c7;background:#fff;color:#15203c;width:min(330px,100%);font-size:17px}button{border:0;border-radius:13px;padding:12px 17px;font: bold 16px Tahoma;cursor:pointer;background:#ffe066;color:#1c2b50;margin:5px}button.alt{background:#56e6d3}button.dark{background:#344c80;color:#fff}.answers{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px}.answers button{min-height:58px;font-size:22px;background:#e8f2ff}.answers button:hover{transform:translateY(-2px)}#feedback{min-height:30px;font-weight:bold;margin-top:12px}.hidden{display:none!important}#admin{position:fixed;inset:0;background:#081127ee;z-index:12;display:none;align-items:center;justify-content:center;padding:16px}.adminbox{background:#1d2c54;padding:20px;border-radius:18px;width:min(700px,95vw)}textarea{width:100%;height:45vh;background:#0d1732;color:#dff;border:1px solid #7185b8;border-radius:10px;padding:12px;direction:ltr;text-align:left}#touch{position:fixed;bottom:95px;left:16px;z-index:4;display:none;gap:8px;pointer-events:auto}#touch button{width:55px;height:55px;border-radius:50%;font-size:22px;background:#13234dcc;color:white;border:1px solid #fff8;margin:0;touch-action:none}#jump{position:fixed;bottom:105px;right:20px;z-index:4;width:74px;height:74px;border-radius:50%;background:#ffb84d;color:#24345c;display:none;pointer-events:auto}#startHelp{font-size:13px;color:#c9d9ff}
+@media(max-width:650px){.answers{grid-template-columns:1fr}.bottom .hint{font-size:11px}.meter{width:95px}#touch,#jump{display:flex}}
 </style>
 </head>
 <body>
-<header><div><h1>🧩 Math Obby</h1><small>مغامرة أولويات العمليات الحسابية</small></div><div class="row"><span class="pill" id="topTimer">⏱ 30:00</span><button class="secondary" onclick="showTeacher()">لوحة المعلمة</button></div></header>
-<main class="wrap">
-<section id="home" class="screen active panel hero">
-<div style="font-size:64px">🏝️ 🏙️ 🌉 🏰</div><h2>هل أنت مستعد لتحدّي العوالم الخمسة؟</h2>
-<p>اقفز بين المنصات، حلّ 30 تحديًا، واجمع مفاتيح القلعة. تذكّر: الأقواس أولًا، ثم الضرب والقسمة من اليسار إلى اليمين، ثم الجمع والطرح من اليسار إلى اليمين.</p>
-<div class="field"><label for="student">اسم اللاعب</label><input id="student" maxlength="35" placeholder="اكتب اسمك هنا"></div>
-<div class="row center"><button class="gold" onclick="startGame()">ابدأ المغامرة 🚀</button><button class="secondary" onclick="showTeacher()">إعدادات المعلمة</button></div>
-<div class="worlds">
-<div class="world"><b>1. جزيرة الأقواس</b><span>6 تحديات · افتح بوابة الجزيرة</span></div><div class="world"><b>2. مدينة الضرب والقسمة</b><span>6 تحديات · أنقذ المدينة</span></div><div class="world"><b>3. جسر اليسار واليمين</b><span>6 تحديات · اعبر الجسر</span></div><div class="world"><b>4. وادي العمليات المختلطة</b><span>6 تحديات · اجتز الوادي</span></div><div class="world"><b>5. قلعة التحدي النهائي</b><span>6 تحديات · افتح الكنز</span></div>
-</div><p class="note">الوقت المقترح: 30 دقيقة. يمكنك إعادة المحاولة قبل الانتقال للتحدي التالي.</p>
-</section>
-<section id="play" class="screen">
-<div class="hud"><span class="pill" id="worldName">العالم 1</span><span class="pill" id="progressText">التحدي 1 من 30</span><span class="pill" id="scoreText">⭐ 0</span><span class="pill" id="timer">⏱ 30:00</span></div>
-<div class="bar"><div id="progressBar"></div></div>
-<div class="game-layout">
-<div class="scene"><div class="scene-label" id="sceneLabel">جزيرة الأقواس</div><div class="avatar" id="avatar"><div class="head"></div><div class="body"></div></div><div class="platform"></div></div>
-<div class="panel"><div class="note" id="story">البوابة مغلقة! حل المسألة لتفتح طريقك.</div><div class="question" id="question"> (6 + 4) × 3 = ؟</div><div class="answers" id="answers"></div><div class="feedback" id="feedback" aria-live="polite"></div><div class="row center"><button id="nextBtn" class="gold" onclick="nextQuestion()" disabled>التحدي التالي ←</button><button class="secondary" onclick="pauseGame()">إيقاف مؤقت</button></div></div>
+<div id="hud" class="hidden">
+ <div class="top">
+  <div class="pill">⭐ <span id="score">0</span> نقطة<br><small id="world">جزيرة الأقواس</small></div>
+  <div class="pill">🏁 <span id="progress">0</span>/30<div class="meter"><i id="bar"></i></div></div>
+  <div class="pill">⏱️ <span id="clock">30:00</span><br><small id="playerLabel"></small></div>
+ </div>
+ <div class="bottom"><div class="hint">تحرّك: WASD أو الأسهم · اقفز: Space<br>اقترب من بوابة التحدي لتفتح المسألة</div><button class="dark" style="pointer-events:auto" onclick="togglePause()">Ⅱ إيقاف</button></div>
 </div>
-</section>
-<section id="result" class="screen panel hero"><div style="font-size:65px">🏆</div><h2>أحسنت! أنهيت المغامرة</h2><p id="resultText"></p><div class="row center"><button class="gold" onclick="downloadResults()">تنزيل نتيجتي</button><button onclick="location.reload()" class="secondary">العب من جديد</button></div></section>
-<section id="teacher" class="screen panel teacher"><h2>🧑‍🏫 لوحة المعلمة</h2><p class="note">يمكنك تعديل الأسئلة من هنا. حافظي على صيغة JSON الصحيحة، ثم اضغطي حفظ. النتائج محفوظة على هذا الجهاز والمتصفح فقط.</p><textarea id="editor" spellcheck="false"></textarea><div class="row" style="margin-top:12px"><button onclick="saveQuestions()">حفظ بنك الأسئلة</button><button class="secondary" onclick="resetQuestions()">استعادة الأسئلة الأصلية</button><button class="secondary" onclick="downloadAll()">تصدير نتائج هذا الجهاز</button><button class="secondary" onclick="showHome()">العودة</button></div><p id="teacherMsg" class="feedback"></p><h3>نتائج اللاعبين على هذا الجهاز</h3><div id="resultsList" class="note"></div></section>
-</main>
-<script>
-const original=[
-{w:0,q:"(6 + 4) × 3",a:30,o:[30,24,18],why:"نحسب ما داخل القوس أولًا: 6 + 4 = 10، ثم 10 × 3 = 30."},
-{w:0,q:"(20 − 8) ÷ 4",a:3,o:[3,5,8],why:"داخل القوس أولًا: 20 − 8 = 12، ثم 12 ÷ 4 = 3."},
-{w:0,q:"5 + (9 − 3) × 2",a:17,o:[17,22,11],why:"القوس أولًا: 9 − 3 = 6، ثم الضرب 6 × 2 = 12، ثم 5 + 12 = 17."},
-{w:0,q:"(18 ÷ 3) + 7",a:13,o:[13,9,15],why:"داخل القوس: 18 ÷ 3 = 6، ثم 6 + 7 = 13."},
-{w:0,q:"4 × (12 − 7) + 6",a:26,o:[26,34,20],why:"القوس 5، ثم 4 × 5 = 20، ثم 20 + 6 = 26."},
-{w:0,q:"(15 + 5) ÷ (2 + 3)",a:4,o:[4,10,5],why:"نحسب القوسين: 20 ÷ 5 = 4."},
-{w:1,q:"8 + 5 × 4",a:28,o:[28,52,32],why:"الضرب قبل الجمع: 5 × 4 = 20، ثم 8 + 20 = 28."},
-{w:1,q:"42 ÷ 6 + 9",a:16,o:[16,7,21],why:"القسمة قبل الجمع: 42 ÷ 6 = 7، ثم 7 + 9 = 16."},
-{w:1,q:"35 − 4 × 6",a:11,o:[11,186,31],why:"نضرب أولًا: 4 × 6 = 24، ثم 35 − 24 = 11."},
-{w:1,q:"7 × 3 + 18 ÷ 6",a:24,o:[24,39,10],why:"الضرب والقسمة أولًا: 21 + 3 = 24."},
-{w:1,q:"64 ÷ 8 + 5 × 3",a:23,o:[23,39,13],why:"القسمة والضرب أولًا: 8 + 15 = 23."},
-{w:1,q:"50 − 24 ÷ 4 × 2",a:38,o:[38,47,13],why:"القسمة والضرب من اليسار لليمين: 24 ÷ 4 = 6 ثم 6 × 2 = 12، وأخيرًا 50 − 12 = 38."},
-{w:2,q:"36 ÷ 6 × 2",a:12,o:[12,3,18],why:"القسمة والضرب لهما الأولوية نفسها؛ نبدأ من اليسار: 36 ÷ 6 = 6 ثم 6 × 2 = 12."},
-{w:2,q:"24 ÷ 3 × 2",a:16,o:[16,4,8],why:"من اليسار إلى اليمين: 24 ÷ 3 = 8 ثم 8 × 2 = 16."},
-{w:2,q:"18 ÷ 3 × 2 + 1",a:13,o:[13,4,7],why:"من اليسار: 18 ÷ 3 = 6 ثم 6 × 2 = 12، ثم +1 = 13."},
-{w:2,q:"40 ÷ 5 ÷ 2",a:4,o:[4,16,20],why:"ننفذ القسمة من اليسار: 40 ÷ 5 = 8 ثم 8 ÷ 2 = 4."},
-{w:2,q:"5 × 4 ÷ 2 + 7",a:17,o:[17,47,14],why:"من اليسار في الضرب والقسمة: 5 × 4 = 20 ثم 20 ÷ 2 = 10 ثم +7 = 17."},
-{w:2,q:"30 − 12 + 4",a:22,o:[22,14,34],why:"الجمع والطرح لهما الأولوية نفسها؛ من اليسار: 30 − 12 = 18 ثم +4 = 22."},
-{w:3,q:"9 + 24 ÷ 3 − 2",a:15,o:[15,9,17],why:"القسمة أولًا: 24 ÷ 3 = 8، ثم من اليسار 9 + 8 − 2 = 15."},
-{w:3,q:"6 × (8 − 5) + 4",a:22,o:[22,58,18],why:"القوس = 3، ثم 6 × 3 = 18، ثم +4 = 22."},
-{w:3,q:"45 ÷ 5 + 2 × 6",a:21,o:[21,66,15],why:"القسمة والضرب أولًا: 9 + 12 = 21."},
-{w:3,q:"28 − (4 + 3) × 2",a:14,o:[14,42,20],why:"القوس = 7، ثم 7 × 2 = 14، ثم 28 − 14 = 14."},
-{w:3,q:"72 ÷ 8 ÷ 3",a:3,o:[3,27,9],why:"من اليسار إلى اليمين: 72 ÷ 8 = 9 ثم 9 ÷ 3 = 3."},
-{w:3,q:"16 + 3 × 4 − 10",a:18,o:[18,66,28],why:"الضرب أولًا: 3 × 4 = 12، ثم 16 + 12 − 10 = 18."},
-{w:4,q:"14 + 6 × 3 − 5",a:27,o:[27,55,25],why:"الضرب أولًا: 6 × 3 = 18، ثم 14 + 18 − 5 = 27."},
-{w:4,q:"(18 + 6) ÷ 4 + 7",a:13,o:[13,10,19],why:"القوس = 24، ثم 24 ÷ 4 = 6، ثم +7 = 13."},
-{w:4,q:"8 × 4 − 36 ÷ 6",a:26,o:[26,20,42],why:"الضرب والقسمة أولًا: 32 − 6 = 26."},
-{w:4,q:"54 ÷ (3 × 3) + 11",a:17,o:[17,29,15],why:"القوس = 9، ثم 54 ÷ 9 = 6، ثم +11 = 17."},
-{w:4,q:"100 − 8 × 9 + 4",a:32,o:[32,832,68],why:"الضرب أولًا: 8 × 9 = 72، ثم من اليسار 100 − 72 + 4 = 32."},
-{w:4,q:"(7 + 5) × 3 − 20 ÷ 2",a:26,o:[26,8,46],why:"القوس = 12، ثم الضرب والقسمة: 36 − 10 = 26."}
+<div id="touch"><div style="display:grid;grid-template-columns:repeat(3,55px);gap:5px"><span></span><button data-key="w">▲</button><span></span><button data-key="a">◀</button><button data-key="s">▼</button><button data-key="d">▶</button></div></div>
+<button id="jump" onclick="jump()">قفز</button>
+<div id="welcome" class="overlay"><div class="card">
+ <div style="font-size:55px">🏝️🧗‍♀️✨</div><h1>Math Obby 3D</h1><h2>مغامرة أولويات العمليات</h2>
+ <p>ادخلي عوالم المنصات، تحرّكي بشخصيتك واقفزي فوق العقبات! عند كل بوابة أجيبي عن سؤال رياضيات ليفتح لك الطريق.</p>
+ <input id="playerName" class="field" placeholder="اكتبي اسم الطالب/ة" maxlength="30">
+ <p id="startHelp">يفضّل استخدام الحاسوب: الأسهم أو WASD للحركة و Space للقفز.</p>
+ <button onclick="startGame()">ابدأ المغامرة 🚀</button> <button class="dark" onclick="openAdmin()">لوحة المعلمة ⚙️</button>
+ </div></div>
+<div id="question" class="overlay hidden"><div class="card">
+ <div id="qWorld" style="color:#ffe066;font-weight:bold">العالم الأول</div><h2 id="qTitle">بوابة التحدي</h2><div id="qText" style="font-size:clamp(25px,5vw,38px);font-weight:bold;margin:18px"></div>
+ <p>اختاري الإجابة الصحيحة لفتح البوابة</p><div class="answers" id="choices"></div><div id="feedback"></div><button id="continue" class="alt hidden" onclick="closeQuestion()">متابعة الطريق ➜</button>
+ </div></div>
+<div id="pause" class="overlay hidden"><div class="card"><h1>استراحة قصيرة</h1><p>المغامرة متوقفة مؤقتًا.</p><button onclick="togglePause()">متابعة اللعب</button></div></div>
+<div id="finish" class="overlay hidden"><div class="card"><div style="font-size:55px">🏆</div><h1>أنهيتِ المغامرة!</h1><h2 id="finalScore"></h2><p id="finalInfo"></p><button onclick="location.reload()">العب من جديد</button><button class="dark" onclick="downloadResult()">تنزيل النتيجة</button></div></div>
+<div id="admin"><div class="adminbox"><h2>لوحة المعلمة – بنك الأسئلة</h2><p>عدّلي الأسئلة بصيغة JSON ثم احفظيها على هذا الجهاز. احتفظي بنسخة من النص قبل التعديل.</p><textarea id="bankEditor"></textarea><button onclick="saveBank()">حفظ الأسئلة</button><button class="dark" onclick="closeAdmin()">إغلاق</button><div id="adminMsg"></div></div></div>
+<script type="module">
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+const defaultQuestions=[
+{w:0,q:"8 + 3 × 4",a:["20","44","32"],c:0,e:"نبدأ بالضرب: 3 × 4 = 12، ثم 8 + 12 = 20."},
+{w:0,q:"(8 + 3) × 4",a:["20","44","35"],c:1,e:"الأقواس أولًا: 8 + 3 = 11، ثم 11 × 4 = 44."},
+{w:0,q:"18 − (6 + 4)",a:["8","16","22"],c:0,e:"نحسب ما داخل القوس: 6 + 4 = 10، ثم 18 − 10 = 8."},
+{w:0,q:"5 × (9 − 5)",a:["20","40","25"],c:0,e:"9 − 5 = 4، ثم 5 × 4 = 20."},
+{w:0,q:"(24 ÷ 6) + 7",a:["11","4","17"],c:0,e:"القوس أولًا: 24 ÷ 6 = 4، ثم 4 + 7 = 11."},
+{w:0,q:"30 − (3 × 6)",a:["12","18","162"],c:0,e:"داخل القوس 3 × 6 = 18، ثم 30 − 18 = 12."},
+{w:1,q:"6 + 24 ÷ 6",a:["5","10","30"],c:1,e:"القسمة أولًا: 24 ÷ 6 = 4، ثم 6 + 4 = 10."},
+{w:1,q:"7 × 5 − 9",a:["26","44","17"],c:0,e:"الضرب أولًا: 7 × 5 = 35، ثم 35 − 9 = 26."},
+{w:1,q:"36 ÷ 4 × 2",a:["4.5","18","9"],c:1,e:"القسمة والضرب من اليسار إلى اليمين: 36 ÷ 4 = 9 ثم 9 × 2 = 18."},
+{w:1,q:"48 ÷ 6 + 3 × 2",a:["11","19","22"],c:1,e:"القسمة والضرب أولًا: 8 + 6 = 14."},
+{w:1,q:"9 × 4 ÷ 6",a:["6","18","3"],c:0,e:"من اليسار إلى اليمين: 9 × 4 = 36 ثم 36 ÷ 6 = 6."},
+{w:1,q:"50 − 32 ÷ 8",a:["2.25","46","18"],c:1,e:"القسمة أولًا: 32 ÷ 8 = 4، ثم 50 − 4 = 46."},
+{w:2,q:"20 − 6 + 3",a:["11","17","23"],c:1,e:"الجمع والطرح من اليسار إلى اليمين: 20 − 6 = 14 ثم 14 + 3 = 17."},
+{w:2,q:"40 ÷ 5 × 3",a:["8","24","2.6"],c:1,e:"من اليسار إلى اليمين: 40 ÷ 5 = 8 ثم 8 × 3 = 24."},
+{w:2,q:"18 + 12 − 7",a:["23","13","37"],c:0,e:"من اليسار إلى اليمين: 18 + 12 = 30 ثم 30 − 7 = 23."},
+{w:2,q:"6 × 4 ÷ 3",a:["8","2","18"],c:0,e:"من اليسار إلى اليمين: 6 × 4 = 24 ثم 24 ÷ 3 = 8."},
+{w:2,q:"35 − 15 + 8",a:["12","28","58"],c:1,e:"35 − 15 = 20 ثم 20 + 8 = 28."},
+{w:2,q:"72 ÷ 8 × 2",a:["4.5","18","9"],c:1,e:"72 ÷ 8 = 9 ثم 9 × 2 = 18."},
+{w:3,q:"5 + 3 × 6 − 4",a:["44","19","14"],c:1,e:"الضرب أولًا: 3 × 6 = 18، ثم 5 + 18 − 4 = 19."},
+{w:3,q:"(12 + 8) ÷ 4 + 6",a:["11","14","8"],c:0,e:"القوس 20، ثم 20 ÷ 4 = 5، ثم 5 + 6 = 11."},
+{w:3,q:"7 × (10 − 6) + 3",a:["31","49","25"],c:0,e:"القوس 4، ثم 7 × 4 = 28، ثم +3 = 31."},
+{w:3,q:"60 ÷ (5 × 3) + 9",a:["13","21","4"],c:0,e:"القوس 15، ثم 60 ÷ 15 = 4، ثم +9 = 13."},
+{w:3,q:"45 − 5 × 7 + 2",a:["282","12","22"],c:1,e:"الضرب 35، ثم 45 − 35 + 2 = 12."},
+{w:3,q:"(16 − 4) × 2 ÷ 3",a:["8","24","6"],c:0,e:"القوس 12، ثم 12 × 2 = 24، ثم ÷3 = 8."},
+{w:4,q:"8 + 36 ÷ (3 × 4)",a:["11","5","20"],c:0,e:"القوس 12، ثم 36 ÷ 12 = 3، ثم 8 + 3 = 11."},
+{w:4,q:"(25 − 5) ÷ 4 × 3",a:["15","5","20"],c:0,e:"القوس 20، ثم 20 ÷ 4 = 5، ثم 5 × 3 = 15."},
+{w:4,q:"90 − (6 × 8) + 7",a:["49","31","103"],c:0,e:"القوس 48، ثم 90 − 48 + 7 = 49."},
+{w:4,q:"4 × (18 ÷ 3) + 5",a:["29","24","17"],c:0,e:"داخل القوس 6، ثم 4 × 6 + 5 = 29."},
+{w:4,q:"100 ÷ (5 × 4) + 16",a:["21","36","5"],c:0,e:"القوس 20، ثم 100 ÷ 20 = 5، ثم +16 = 21."},
+{w:4,q:"(30 + 6) ÷ 6 × 5",a:["30","11","35"],c:0,e:"القوس 36، ثم 36 ÷ 6 = 6، ثم 6 × 5 = 30."}
 ];
-const worldNames=["جزيرة الأقواس","مدينة الضرب والقسمة","جسر اليسار واليمين","وادي العمليات المختلطة","قلعة التحدي النهائي"];
-let bank=JSON.parse(localStorage.getItem("obbyBank")||"null")||original;
-let idx=0,score=0,attempts=0,seconds=1800,clock=null,locked=false,studentName="";
-const $=id=>document.getElementById(id);
-function show(id){document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));$(id).classList.add("active")}
-function showHome(){show("home")}
-function startGame(){studentName=$("student").value.trim();if(!studentName){alert("اكتب اسم اللاعب أولًا");return}idx=0;score=0;attempts=0;seconds=1800;locked=false;show("play");render();clearInterval(clock);clock=setInterval(()=>{seconds--;updateTime();if(seconds<=0){clearInterval(clock);finish(true)}},1000)}
-function updateTime(){let m=Math.floor(seconds/60),s=seconds%60;let t="⏱ "+String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");$("timer").textContent=t;$("topTimer").textContent=t}
-function render(){let item=bank[idx];if(!item){finish(false);return}locked=false;$("nextBtn").disabled=true;$("feedback").textContent="";$("feedback").className="feedback";$("worldName").textContent="العالم "+(item.w+1);$("sceneLabel").textContent=worldNames[item.w]||"تحدي";$("story").textContent=["البوابة لا تفتح إلا إذا بدأت بالأقواس!","ساعد سكان المدينة في ترتيب العمليات.","اعبر الجسر خطوة خطوة من اليسار إلى اليمين.","رتّب العمليات المختلطة لتصل إلى المخرج.","التحدي الأخير! أثبت أنك خبير أولويات العمليات."][item.w]||"حل التحدي لفتح الطريق.";$("progressText").textContent="التحدي "+(idx+1)+" من "+bank.length;$("scoreText").textContent="⭐ "+score;$("progressBar").style.width=(idx/bank.length*100)+"%";$("question").textContent=item.q+" = ؟";$("answers").innerHTML="";let choices=[...item.o].sort(()=>Math.random()-.5);choices.forEach(n=>{let b=document.createElement("button");b.textContent=n;b.onclick=()=>answer(n,b);$("answers").appendChild(b)});$("avatar").style.left=(12+(idx%6)*13)+"%";updateTime()}
-function answer(n,btn){if(locked)return;attempts++;let item=bank[idx];if(Number(n)===Number(item.a)){locked=true;score+=10;$("feedback").innerHTML='<span class="good">✔ إجابة صحيحة! +10 نقاط</span><br>'+item.why;$("nextBtn").disabled=false;[...$("answers").children].forEach(b=>b.disabled=true)}else{$("feedback").innerHTML='<span class="bad">ليست الإجابة الصحيحة، حاول مرة أخرى.</span><br>تذكّر ترتيب العمليات ولا تستعجل.';btn.disabled=true}}
-function nextQuestion(){if(!locked)return;idx++;if(idx>=bank.length){finish(false)}else render()}
-function pauseGame(){clearInterval(clock);let resume=confirm("اللعبة متوقفة مؤقتًا. اضغط موافق للمتابعة.");if(resume)clock=setInterval(()=>{seconds--;updateTime();if(seconds<=0){clearInterval(clock);finish(true)}},1000)}
-function finish(timeUp){clearInterval(clock);show("result");let rec={name:studentName,score,total:bank.length*10,correct:Math.floor(score/10),attempts,timeUsed:1800-seconds,date:new Date().toLocaleString("ar-JO"),timeUp};let all=JSON.parse(localStorage.getItem("obbyResults")||"[]");all.push(rec);localStorage.setItem("obbyResults",JSON.stringify(all));$("resultText").textContent=studentName+"، حصلت على "+score+" من "+(bank.length*10)+" نقطة، وأجبت عن "+rec.correct+" تحديًا صحيحًا. عدد المحاولات: "+attempts+"."+(timeUp?" انتهى الوقت.":"")}
-function showTeacher(){show("teacher");$("editor").value=JSON.stringify(bank,null,2);let all=JSON.parse(localStorage.getItem("obbyResults")||"[]");$("resultsList").innerHTML=all.length?all.map(r=>r.name+" — "+r.score+"/"+r.total+" — "+r.date).join("<br>"):"لا توجد نتائج بعد."}
-function saveQuestions(){try{let v=JSON.parse($("editor").value);if(!Array.isArray(v)||!v.length||v.some(q=>!q.q||!Array.isArray(q.o)||q.o.length!==3||!q.o.includes(q.a)||q.w<0||q.w>4))throw Error("تحققي من السؤال والخيارات والإجابة ورقم العالم (0 إلى 4).");bank=v;localStorage.setItem("obbyBank",JSON.stringify(bank));$("teacherMsg").textContent="تم حفظ بنك الأسئلة بنجاح على هذا الجهاز."}catch(e){$("teacherMsg").textContent="تعذر الحفظ: "+e.message}}
-function resetQuestions(){bank=original;localStorage.setItem("obbyBank",JSON.stringify(bank));$("editor").value=JSON.stringify(bank,null,2);$("teacherMsg").textContent="تمت استعادة الأسئلة الأصلية."}
-function download(name,data){let a=document.createElement("a"),url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:"application/json"}));a.href=url;a.download=name;a.click();URL.revokeObjectURL(url)}
-function downloadResults(){let all=JSON.parse(localStorage.getItem("obbyResults")||"[]");download("math-obby-result.json",all.filter(x=>x.name===studentName).slice(-1))}
-function downloadAll(){download("math-obby-all-results.json",JSON.parse(localStorage.getItem("obbyResults")||"[]"))}
+let questions=JSON.parse(localStorage.getItem('obbyBank')||'null')||defaultQuestions;
+const names=['جزيرة الأقواس','مدينة الضرب والقسمة','جسر اليسار واليمين','وادي العمليات المختلطة','قلعة التحدي النهائي'];
+const colors=[0x44c77a,0xf2a63b,0x3d9be8,0x9b70d6,0xf06d91];
+let scene,camera,renderer,player,velocityY=0,onGround=false,keys={},started=false,paused=false,asking=false,finished=false;
+let score=0,answered=0,playerName='',remaining=1800,last=performance.now(),gateMeshes=[],platforms=[],currentGate=0;
+const clockEl=document.getElementById('clock');
+function mat(color,roughness=.8){return new THREE.MeshStandardMaterial({color,roughness})}
+function block(x,y,z,sx,sy,sz,color){const m=new THREE.Mesh(new THREE.BoxGeometry(sx,sy,sz),mat(color));m.position.set(x,y,z);scene.add(m);return m}
+function makeWorld(){
+ scene=new THREE.Scene();scene.background=new THREE.Color(0x87ceeb);scene.fog=new THREE.Fog(0x87ceeb,38,115);
+ camera=new THREE.PerspectiveCamera(65,innerWidth/innerHeight,.1,250);
+ renderer=new THREE.WebGLRenderer({antialias:true});renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;document.body.appendChild(renderer.domElement);
+ scene.add(new THREE.HemisphereLight(0xeaf7ff,0x486044,2));
+ const sun=new THREE.DirectionalLight(0xffffff,2.3);sun.position.set(-12,25,12);sun.castShadow=true;scene.add(sun);
+ // floating island route, each world has six gates and safe platforms
+ for(let w=0;w<5;w++){
+  const baseZ=-w*48;const col=colors[w];
+  const island=new THREE.Mesh(new THREE.CylinderGeometry(13,16,4,8),mat(col));island.position.set(0,-2,baseZ-23);island.receiveShadow=true;scene.add(island);
+  block(0,.1,baseZ-23,23,.8,23,0x9be5a0);
+  // decorative crystals and trees
+  for(let j=0;j<5;j++){const rock=new THREE.Mesh(new THREE.ConeGeometry(1.1,3,5),mat(j%2?0xffffff:0xffe58a));rock.position.set((j-2)*4,1.8,baseZ-29+(j%2)*10);scene.add(rock)}
+  for(let k=0;k<6;k++){
+   const z=baseZ-k*6.4-3;
+   const p=block(0,-.5,z,7,.7,5,col);p.userData={top:-.15};platforms.push(p);
+   // little side stepping blocks
+   block(k%2?5:-5,-1.1,z-1,2,.5,2,0xf6d66b);
+   const gate=new THREE.Group();gate.position.set(0,1.5,z-1.5);
+   const frame= new THREE.Mesh(new THREE.BoxGeometry(4.8,3.5,.55),mat(0xffe066));gate.add(frame);
+   const inner=new THREE.Mesh(new THREE.BoxGeometry(3.8,2.7,.65),new THREE.MeshStandardMaterial({color:0x162a55,emissive:0x254b9b,emissiveIntensity:.8}));gate.add(inner);
+   scene.add(gate);gateMeshes.push({group:gate,index:w*6+k,world:w,z:z-1.5,done:false});
+   const star=new THREE.Mesh(new THREE.OctahedronGeometry(.65),mat(0xffe066));star.position.set(0,4,z-1.5);scene.add(star);
+  }
+  // world sign
+  const sign=block(0,2,baseZ+5,7,2,.5,0x17264c);
+  // floating clouds
+  for(let c=0;c<4;c++){const cloud=new THREE.Mesh(new THREE.SphereGeometry(2.2,10,8),mat(0xffffff));cloud.position.set((c-1.5)*11,7,baseZ-15-c*6);scene.add(cloud)}
+ }
+ // starting pad
+ block(0,-.4,7,12,1,12,0x4aaf79);
+ // player block avatar
+ player=new THREE.Group();
+ const torso=new THREE.Mesh(new THREE.BoxGeometry(1.15,1.45,.65),mat(0x2878e8));torso.position.y=1.55;player.add(torso);
+ const head=new THREE.Mesh(new THREE.BoxGeometry(.95,.95,.85),mat(0xffd0a1));head.position.y=2.78;player.add(head);
+ const hair=new THREE.Mesh(new THREE.BoxGeometry(1,.25,.9),mat(0x49301f));hair.position.y=3.25;player.add(hair);
+ const legs=[];for(let s of [-1,1]){const leg=new THREE.Mesh(new THREE.BoxGeometry(.42,.95,.48),mat(0x24334e));leg.position.set(s*.3,.48,0);player.add(leg);legs.push(leg)}
+ player.position.set(0,0,8);player.userData.legs=legs;scene.add(player);
+ camera.position.set(0,6,17);camera.lookAt(0,1,4);
+}
+function startGame(){playerName=document.getElementById('playerName').value.trim()||'لاعب';document.getElementById('playerLabel').textContent=playerName;document.getElementById('welcome').classList.add('hidden');document.getElementById('hud').classList.remove('hidden');makeWorld();started=true;last=performance.now();animate()}
+function jump(){if(started&&!paused&&!asking&&onGround){velocityY=10.5;onGround=false}}
+function togglePause(){if(!started||finished)return;paused=!paused;document.getElementById('pause').classList.toggle('hidden',!paused)}
+window.addEventListener('keydown',e=>{keys[e.key.toLowerCase()]=true;if(e.code==='Space'){e.preventDefault();jump()}});
+window.addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);
+document.querySelectorAll('[data-key]').forEach(b=>{const k=b.dataset.key;b.addEventListener('pointerdown',e=>{e.preventDefault();keys[k]=true});['pointerup','pointerleave','pointercancel'].forEach(ev=>b.addEventListener(ev,()=>keys[k]=false))});
+function openQuestion(g){asking=true;paused=true;currentGate=g.index;const q=questions[g.index];document.getElementById('qWorld').textContent=names[q.w]||names[g.world];document.getElementById('qTitle').textContent='بوابة التحدي '+(g.index+1);document.getElementById('qText').textContent=q.q;document.getElementById('feedback').textContent='';document.getElementById('continue').classList.add('hidden');const holder=document.getElementById('choices');holder.innerHTML='';q.a.forEach((a,i)=>{const b=document.createElement('button');b.textContent=a;b.onclick=()=>chooseAnswer(i,g,b);holder.appendChild(b)});document.getElementById('question').classList.remove('hidden')}
+function chooseAnswer(i,g,button){const q=questions[g.index],fb=document.getElementById('feedback');[...document.querySelectorAll('#choices button')].forEach(b=>b.disabled=true);if(i===q.c){score+=10;answered++;g.done=true;g.group?.scale?.set(1,1,1);fb.textContent='ممتاز! فتحتِ البوابة ⭐ '+q.e;fb.style.color='#9dffbd';document.getElementById('score').textContent=score;document.getElementById('progress').textContent=answered;document.getElementById('bar').style.width=(answered/30*100)+'%';document.getElementById('continue').classList.remove('hidden');}else{fb.textContent='حاولي مرة أخرى! تذكري ترتيب العمليات. '+q.e;fb.style.color='#ffd1a8';[...document.querySelectorAll('#choices button')].forEach((b,j)=>{if(j!==i)b.disabled=false});button.disabled=false}}
+function closeQuestion(){document.getElementById('question').classList.add('hidden');asking=false;paused=false;if(answered===30)finishGame()}
+function finishGame(){finished=true;document.getElementById('hud').classList.add('hidden');document.getElementById('finish').classList.remove('hidden');document.getElementById('finalScore').textContent=score+' من 300 نقطة';document.getElementById('finalInfo').textContent='الاسم: '+playerName+' | التحديات المنجزة: '+answered+'/30';localStorage.setItem('obbyLastResult',JSON.stringify({name:playerName,score,answered,date:new Date().toLocaleString('ar-JO')}))}
+function downloadResult(){const data=localStorage.getItem('obbyLastResult')||'{}';const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data],{type:'application/json'}));a.download='math-obby-result.json';a.click()}
+function updateTimer(dt){remaining-=dt;if(remaining<=0){remaining=0;finishGame()}const m=Math.floor(remaining/60),s=Math.floor(remaining%60);clockEl.textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0')}
+function animate(now=performance.now()){if(!started||finished)return;requestAnimationFrame(animate);const dt=Math.min((now-last)/1000,.04);last=now;if(!paused&&!asking){updateTimer(dt);let dx=0,dz=0;if(keys.a||keys.arrowleft)dx-=1;if(keys.d||keys.arrowright)dx+=1;if(keys.w||keys.arrowup)dz-=1;if(keys.s||keys.arrowdown)dz+=1;const len=Math.hypot(dx,dz)||1;player.position.x+=dx/len*8*dt;player.position.z+=dz/len*8*dt;player.position.x=THREE.MathUtils.clamp(player.position.x,-5.2,5.2);
+ velocityY-=24*dt;player.position.y+=velocityY*dt;onGround=false;
+ // snap to the top of the current route platform when crossing it
+ for(const p of platforms){const pos=p.position;if(Math.abs(player.position.z-pos.z)<2.8&&Math.abs(player.position.x-pos.x)<3.7&&player.position.y<=.2&&player.position.y>=-1.5){player.position.y=0;velocityY=0;onGround=true;break}}
+ if(player.position.z>6&&player.position.y<0){player.position.set(0,0,8);velocityY=0}
+ if(player.position.y<-9){player.position.set(0,0,Math.max(-235,player.position.z+5));velocityY=0}
+ const g=gateMeshes.find(x=>!x.done&&Math.abs(x.z-player.position.z)<2.5&&Math.abs(player.position.x)<3.3&&Math.abs(player.position.y)<2);if(g)openQuestion(g);
+ player.rotation.y=Math.atan2(dx,-dz||.0001);const moving=Math.abs(dx)+Math.abs(dz)>0;player.userData.legs.forEach((l,i)=>l.rotation.x=moving?Math.sin(now*.014+i*Math.PI)*.5:0);
+ }
+ camera.position.x+=(player.position.x*.45-camera.position.x)*.08;camera.position.y+=(player.position.y+5.3-camera.position.y)*.08;camera.position.z+=(player.position.z+10-camera.position.z)*.08;camera.lookAt(player.position.x,player.position.y+1.2,player.position.z-5);
+ renderer.render(scene,camera)}
+window.addEventListener('resize',()=>{if(!renderer)return;camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
+window.openAdmin=()=>{document.getElementById('bankEditor').value=JSON.stringify(questions,null,2);document.getElementById('admin').style.display='flex'};
+window.closeAdmin=()=>document.getElementById('admin').style.display='none';
+window.saveBank=()=>{try{const x=JSON.parse(document.getElementById('bankEditor').value);if(!Array.isArray(x)||x.length!==30||x.some(q=>!q.q||!Array.isArray(q.a)||q.a.length!==3||q.c<0||q.c>2))throw Error('يجب إدخال 30 سؤالًا، ولكل سؤال 3 خيارات وإجابة صحيحة من 0 إلى 2.');questions=x;localStorage.setItem('obbyBank',JSON.stringify(x));document.getElementById('adminMsg').textContent='تم حفظ بنك الأسئلة على هذا الجهاز.'}catch(e){document.getElementById('adminMsg').textContent='خطأ: '+e.message}};
+window.startGame=startGame;window.jump=jump;window.togglePause=togglePause;window.closeQuestion=closeQuestion;window.downloadResult=downloadResult;
 </script>
 </body></html>
