@@ -130,7 +130,7 @@ function makeWorld(){
  const head=new THREE.Mesh(new THREE.BoxGeometry(.95,.95,.85),mat(0xffd0a1));head.position.y=2.78;player.add(head);
  const hair=new THREE.Mesh(new THREE.BoxGeometry(1,.25,.9),mat(0x49301f));hair.position.y=3.25;player.add(hair);
  const legs=[];for(let s of [-1,1]){const leg=new THREE.Mesh(new THREE.BoxGeometry(.42,.95,.48),mat(0x24334e));leg.position.set(s*.3,.48,0);player.add(leg);legs.push(leg)}
- player.position.set(0,0,8);player.userData.legs=legs;scene.add(player);
+ player.position.set(0,.12,8);player.userData.legs=legs;scene.add(player);
  camera.position.set(0,6,17);camera.lookAt(0,1,4);
 }
 function startGame(){score=0;answered=0;remaining=1800;audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume();gemsCollected=0;document.getElementById('gemCount').textContent='0';playerName=document.getElementById('playerName').value.trim()||'لاعب';document.getElementById('playerLabel').textContent=playerName;document.getElementById('welcome').classList.add('hidden');document.getElementById('hud').classList.remove('hidden');makeWorld();started=true;last=performance.now();document.activeElement?.blur();document.body.focus();animate()}
@@ -166,8 +166,8 @@ function animate(now=performance.now()){if(!started||finished)return;requestAnim
    }
   }
  }
- if(player.position.z>6&&player.position.y<0){player.position.set(0,0,8);velocityY=0}
- if(player.position.y<-12){player.position.set(0,0,8);velocityY=0;onGround=false}
+ if(player.position.z>6&&player.position.y<0){player.position.set(0,.12,8);velocityY=0;onGround=true}
+ if(player.position.y<-12){player.position.set(0,.12,8);velocityY=0;onGround=true}
  // اجمع الجواهر بالقفز والاقتراب منها
  for(const gem of gemMeshes){if(gem.visible){gem.rotation.y+=dt*2.5;gem.rotation.x+=dt;if(Math.abs(gem.position.z-player.position.z)<1.8&&Math.abs(gem.position.x-player.position.x)<1.5&&Math.abs((player.position.y+1.8)-gem.position.y)<1.45){gem.visible=false;gemsCollected++;sound('gem');document.getElementById('gemCount').textContent=gemsCollected;}}}
  const g=gateMeshes.find(x=>!x.done&&Math.abs(x.z-player.position.z)<2.5&&Math.abs(player.position.x-x.x)<2.8&&Math.abs(player.position.y)<2);if(g)openQuestion(g);
