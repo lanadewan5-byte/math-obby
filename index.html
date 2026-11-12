@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Math Obby | مغامرة أولويات العمليات</title>
+<style>
+:root{--bg:#10162b;--panel:#1c2544;--cyan:#55e6e0;--gold:#ffd166;--pink:#ff70a6;--white:#f7f8ff}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 20% 10%,#293d70,#10162b 55%);color:var(--white);font-family:Tahoma,Arial,sans-serif;min-height:100vh}
+button,input,textarea{font:inherit}button{cursor:pointer;border:0;border-radius:13px;padding:12px 18px;font-weight:bold;background:var(--cyan);color:#102038}button.secondary{background:#344366;color:white}button.gold{background:var(--gold)}button:disabled{opacity:.45;cursor:not-allowed}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 4%;background:#0b1024cc;border-bottom:1px solid #ffffff22;position:sticky;top:0;z-index:5}
+h1{font-size:clamp(20px,3vw,30px);margin:0}header small{color:#b8c6ed}.wrap{max-width:1150px;margin:auto;padding:22px}
+.panel{background:#1b2545eF;border:1px solid #ffffff20;border-radius:22px;padding:22px;box-shadow:0 18px 55px #0005}
+.screen{display:none}.screen.active{display:block}.hero{text-align:center;padding:35px 15px}.hero h2{font-size:clamp(26px,5vw,48px);margin:8px}.hero p{color:#c5d0f2;line-height:1.9}.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}.center{justify-content:center}.field{display:grid;gap:8px;max-width:360px;margin:18px auto;text-align:right}.field input{padding:14px;border-radius:12px;border:2px solid #63739c;background:#101a35;color:white}
+.worlds{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:12px;margin:22px 0}.world{padding:16px;border-radius:17px;background:#28365e;border:1px solid #ffffff25}.world b{display:block;margin-bottom:7px}.world span{color:#c4d0f4;font-size:13px}
+.hud{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:14px}.pill{background:#28365e;border-radius:30px;padding:9px 14px}.bar{height:12px;background:#344366;border-radius:20px;overflow:hidden;margin:12px 0}.bar>div{height:100%;background:linear-gradient(90deg,var(--cyan),#9bffb0);width:0;transition:.3s}
+.question{font-size:clamp(25px,4vw,42px);font-weight:bold;text-align:center;direction:ltr;margin:24px 0;color:var(--gold)}.answers{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.answers button{font-size:22px;background:#344366;color:white;border:2px solid #63739c}.answers button:hover{border-color:var(--cyan);background:#405580}
+.feedback{min-height:58px;text-align:center;font-size:17px;line-height:1.7;margin:15px 0}.good{color:#8dffb0}.bad{color:#ff9cae}
+.game-layout{display:grid;grid-template-columns:1.1fr .9fr;gap:16px}.scene{min-height:300px;border-radius:20px;background:linear-gradient(#83c7ed 0 55%,#5cbd91 55% 100%);position:relative;overflow:hidden;border:3px solid #ffffff30}
+.scene:before{content:"";position:absolute;width:140px;height:140px;border-radius:50%;background:#ffe78a;top:24px;left:12%;box-shadow:0 0 55px #ffe78a99}
+.platform{position:absolute;bottom:55px;left:12%;width:76%;height:30px;background:#9c70d6;border:5px solid #7049ac;border-radius:9px;box-shadow:0 13px 0 #503b84}
+.avatar{position:absolute;bottom:90px;left:46%;width:42px;height:58px;transition:left .25s;filter:drop-shadow(0 5px 2px #0004)}
+.avatar .head{width:30px;height:28px;background:#ffd4a6;border-radius:8px;margin:auto;border:3px solid #28365e}.avatar .body{height:29px;width:38px;margin:auto;background:#ff70a6;border-radius:7px}
+.scene-label{position:absolute;top:18px;right:18px;background:#152444bb;padding:8px 12px;border-radius:12px;font-weight:bold}
+.teacher textarea{width:100%;min-height:220px;background:#101a35;color:#eaf0ff;border:1px solid #63739c;border-radius:12px;padding:12px;direction:ltr;text-align:left}
+.note{color:#c5d0f2;font-size:13px;line-height:1.8}.hide{display:none!important}
+@media(max-width:760px){.game-layout{grid-template-columns:1fr}.answers{grid-template-columns:1fr}.scene{min-height:240px}}
+</style>
+</head>
+<body>
+<header><div><h1>🧩 Math Obby</h1><small>مغامرة أولويات العمليات الحسابية</small></div><div class="row"><span class="pill" id="topTimer">⏱ 30:00</span><button class="secondary" onclick="showTeacher()">لوحة المعلمة</button></div></header>
+<main class="wrap">
+<section id="home" class="screen active panel hero">
+<div style="font-size:64px">🏝️ 🏙️ 🌉 🏰</div><h2>هل أنت مستعد لتحدّي العوالم الخمسة؟</h2>
+<p>اقفز بين المنصات، حلّ 30 تحديًا، واجمع مفاتيح القلعة. تذكّر: الأقواس أولًا، ثم الضرب والقسمة من اليسار إلى اليمين، ثم الجمع والطرح من اليسار إلى اليمين.</p>
+<div class="field"><label for="student">اسم اللاعب</label><input id="student" maxlength="35" placeholder="اكتب اسمك هنا"></div>
+<div class="row center"><button class="gold" onclick="startGame()">ابدأ المغامرة 🚀</button><button class="secondary" onclick="showTeacher()">إعدادات المعلمة</button></div>
+<div class="worlds">
+<div class="world"><b>1. جزيرة الأقواس</b><span>6 تحديات · افتح بوابة الجزيرة</span></div><div class="world"><b>2. مدينة الضرب والقسمة</b><span>6 تحديات · أنقذ المدينة</span></div><div class="world"><b>3. جسر اليسار واليمين</b><span>6 تحديات · اعبر الجسر</span></div><div class="world"><b>4. وادي العمليات المختلطة</b><span>6 تحديات · اجتز الوادي</span></div><div class="world"><b>5. قلعة التحدي النهائي</b><span>6 تحديات · افتح الكنز</span></div>
+</div><p class="note">الوقت المقترح: 30 دقيقة. يمكنك إعادة المحاولة قبل الانتقال للتحدي التالي.</p>
+</section>
+<section id="play" class="screen">
+<div class="hud"><span class="pill" id="worldName">العالم 1</span><span class="pill" id="progressText">التحدي 1 من 30</span><span class="pill" id="scoreText">⭐ 0</span><span class="pill" id="timer">⏱ 30:00</span></div>
+<div class="bar"><div id="progressBar"></div></div>
+<div class="game-layout">
+<div class="scene"><div class="scene-label" id="sceneLabel">جزيرة الأقواس</div><div class="avatar" id="avatar"><div class="head"></div><div class="body"></div></div><div class="platform"></div></div>
+<div class="panel"><div class="note" id="story">البوابة مغلقة! حل المسألة لتفتح طريقك.</div><div class="question" id="question"> (6 + 4) × 3 = ؟</div><div class="answers" id="answers"></div><div class="feedback" id="feedback" aria-live="polite"></div><div class="row center"><button id="nextBtn" class="gold" onclick="nextQuestion()" disabled>التحدي التالي ←</button><button class="secondary" onclick="pauseGame()">إيقاف مؤقت</button></div></div>
+</div>
+</section>
+<section id="result" class="screen panel hero"><div style="font-size:65px">🏆</div><h2>أحسنت! أنهيت المغامرة</h2><p id="resultText"></p><div class="row center"><button class="gold" onclick="downloadResults()">تنزيل نتيجتي</button><button onclick="location.reload()" class="secondary">العب من جديد</button></div></section>
+<section id="teacher" class="screen panel teacher"><h2>🧑‍🏫 لوحة المعلمة</h2><p class="note">يمكنك تعديل الأسئلة من هنا. حافظي على صيغة JSON الصحيحة، ثم اضغطي حفظ. النتائج محفوظة على هذا الجهاز والمتصفح فقط.</p><textarea id="editor" spellcheck="false"></textarea><div class="row" style="margin-top:12px"><button onclick="saveQuestions()">حفظ بنك الأسئلة</button><button class="secondary" onclick="resetQuestions()">استعادة الأسئلة الأصلية</button><button class="secondary" onclick="downloadAll()">تصدير نتائج هذا الجهاز</button><button class="secondary" onclick="showHome()">العودة</button></div><p id="teacherMsg" class="feedback"></p><h3>نتائج اللاعبين على هذا الجهاز</h3><div id="resultsList" class="note"></div></section>
+</main>
+<script>
+const original=[
+{w:0,q:"(6 + 4) × 3",a:30,o:[30,24,18],why:"نحسب ما داخل القوس أولًا: 6 + 4 = 10، ثم 10 × 3 = 30."},
+{w:0,q:"(20 − 8) ÷ 4",a:3,o:[3,5,8],why:"داخل القوس أولًا: 20 − 8 = 12، ثم 12 ÷ 4 = 3."},
+{w:0,q:"5 + (9 − 3) × 2",a:17,o:[17,22,11],why:"القوس أولًا: 9 − 3 = 6، ثم الضرب 6 × 2 = 12، ثم 5 + 12 = 17."},
+{w:0,q:"(18 ÷ 3) + 7",a:13,o:[13,9,15],why:"داخل القوس: 18 ÷ 3 = 6، ثم 6 + 7 = 13."},
+{w:0,q:"4 × (12 − 7) + 6",a:26,o:[26,34,20],why:"القوس 5، ثم 4 × 5 = 20، ثم 20 + 6 = 26."},
+{w:0,q:"(15 + 5) ÷ (2 + 3)",a:4,o:[4,10,5],why:"نحسب القوسين: 20 ÷ 5 = 4."},
+{w:1,q:"8 + 5 × 4",a:28,o:[28,52,32],why:"الضرب قبل الجمع: 5 × 4 = 20، ثم 8 + 20 = 28."},
+{w:1,q:"42 ÷ 6 + 9",a:16,o:[16,7,21],why:"القسمة قبل الجمع: 42 ÷ 6 = 7، ثم 7 + 9 = 16."},
+{w:1,q:"35 − 4 × 6",a:11,o:[11,186,31],why:"نضرب أولًا: 4 × 6 = 24، ثم 35 − 24 = 11."},
+{w:1,q:"7 × 3 + 18 ÷ 6",a:24,o:[24,39,10],why:"الضرب والقسمة أولًا: 21 + 3 = 24."},
+{w:1,q:"64 ÷ 8 + 5 × 3",a:23,o:[23,39,13],why:"القسمة والضرب أولًا: 8 + 15 = 23."},
+{w:1,q:"50 − 24 ÷ 4 × 2",a:38,o:[38,47,13],why:"القسمة والضرب من اليسار لليمين: 24 ÷ 4 = 6 ثم 6 × 2 = 12، وأخيرًا 50 − 12 = 38."},
+{w:2,q:"36 ÷ 6 × 2",a:12,o:[12,3,18],why:"القسمة والضرب لهما الأولوية نفسها؛ نبدأ من اليسار: 36 ÷ 6 = 6 ثم 6 × 2 = 12."},
+{w:2,q:"24 ÷ 3 × 2",a:16,o:[16,4,8],why:"من اليسار إلى اليمين: 24 ÷ 3 = 8 ثم 8 × 2 = 16."},
+{w:2,q:"18 ÷ 3 × 2 + 1",a:13,o:[13,4,7],why:"من اليسار: 18 ÷ 3 = 6 ثم 6 × 2 = 12، ثم +1 = 13."},
+{w:2,q:"40 ÷ 5 ÷ 2",a:4,o:[4,16,20],why:"ننفذ القسمة من اليسار: 40 ÷ 5 = 8 ثم 8 ÷ 2 = 4."},
+{w:2,q:"5 × 4 ÷ 2 + 7",a:17,o:[17,47,14],why:"من اليسار في الضرب والقسمة: 5 × 4 = 20 ثم 20 ÷ 2 = 10 ثم +7 = 17."},
+{w:2,q:"30 − 12 + 4",a:22,o:[22,14,34],why:"الجمع والطرح لهما الأولوية نفسها؛ من اليسار: 30 − 12 = 18 ثم +4 = 22."},
+{w:3,q:"9 + 24 ÷ 3 − 2",a:15,o:[15,9,17],why:"القسمة أولًا: 24 ÷ 3 = 8، ثم من اليسار 9 + 8 − 2 = 15."},
+{w:3,q:"6 × (8 − 5) + 4",a:22,o:[22,58,18],why:"القوس = 3، ثم 6 × 3 = 18، ثم +4 = 22."},
+{w:3,q:"45 ÷ 5 + 2 × 6",a:21,o:[21,66,15],why:"القسمة والضرب أولًا: 9 + 12 = 21."},
+{w:3,q:"28 − (4 + 3) × 2",a:14,o:[14,42,20],why:"القوس = 7، ثم 7 × 2 = 14، ثم 28 − 14 = 14."},
+{w:3,q:"72 ÷ 8 ÷ 3",a:3,o:[3,27,9],why:"من اليسار إلى اليمين: 72 ÷ 8 = 9 ثم 9 ÷ 3 = 3."},
+{w:3,q:"16 + 3 × 4 − 10",a:18,o:[18,66,28],why:"الضرب أولًا: 3 × 4 = 12، ثم 16 + 12 − 10 = 18."},
+{w:4,q:"14 + 6 × 3 − 5",a:27,o:[27,55,25],why:"الضرب أولًا: 6 × 3 = 18، ثم 14 + 18 − 5 = 27."},
+{w:4,q:"(18 + 6) ÷ 4 + 7",a:13,o:[13,10,19],why:"القوس = 24، ثم 24 ÷ 4 = 6، ثم +7 = 13."},
+{w:4,q:"8 × 4 − 36 ÷ 6",a:26,o:[26,20,42],why:"الضرب والقسمة أولًا: 32 − 6 = 26."},
+{w:4,q:"54 ÷ (3 × 3) + 11",a:17,o:[17,29,15],why:"القوس = 9، ثم 54 ÷ 9 = 6، ثم +11 = 17."},
+{w:4,q:"100 − 8 × 9 + 4",a:32,o:[32,832,68],why:"الضرب أولًا: 8 × 9 = 72، ثم من اليسار 100 − 72 + 4 = 32."},
+{w:4,q:"(7 + 5) × 3 − 20 ÷ 2",a:26,o:[26,8,46],why:"القوس = 12، ثم الضرب والقسمة: 36 − 10 = 26."}
+];
+const worldNames=["جزيرة الأقواس","مدينة الضرب والقسمة","جسر اليسار واليمين","وادي العمليات المختلطة","قلعة التحدي النهائي"];
+let bank=JSON.parse(localStorage.getItem("obbyBank")||"null")||original;
+let idx=0,score=0,attempts=0,seconds=1800,clock=null,locked=false,studentName="";
+const $=id=>document.getElementById(id);
+function show(id){document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));$(id).classList.add("active")}
+function showHome(){show("home")}
+function startGame(){studentName=$("student").value.trim();if(!studentName){alert("اكتب اسم اللاعب أولًا");return}idx=0;score=0;attempts=0;seconds=1800;locked=false;show("play");render();clearInterval(clock);clock=setInterval(()=>{seconds--;updateTime();if(seconds<=0){clearInterval(clock);finish(true)}},1000)}
+function updateTime(){let m=Math.floor(seconds/60),s=seconds%60;let t="⏱ "+String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");$("timer").textContent=t;$("topTimer").textContent=t}
+function render(){let item=bank[idx];if(!item){finish(false);return}locked=false;$("nextBtn").disabled=true;$("feedback").textContent="";$("feedback").className="feedback";$("worldName").textContent="العالم "+(item.w+1);$("sceneLabel").textContent=worldNames[item.w]||"تحدي";$("story").textContent=["البوابة لا تفتح إلا إذا بدأت بالأقواس!","ساعد سكان المدينة في ترتيب العمليات.","اعبر الجسر خطوة خطوة من اليسار إلى اليمين.","رتّب العمليات المختلطة لتصل إلى المخرج.","التحدي الأخير! أثبت أنك خبير أولويات العمليات."][item.w]||"حل التحدي لفتح الطريق.";$("progressText").textContent="التحدي "+(idx+1)+" من "+bank.length;$("scoreText").textContent="⭐ "+score;$("progressBar").style.width=(idx/bank.length*100)+"%";$("question").textContent=item.q+" = ؟";$("answers").innerHTML="";let choices=[...item.o].sort(()=>Math.random()-.5);choices.forEach(n=>{let b=document.createElement("button");b.textContent=n;b.onclick=()=>answer(n,b);$("answers").appendChild(b)});$("avatar").style.left=(12+(idx%6)*13)+"%";updateTime()}
+function answer(n,btn){if(locked)return;attempts++;let item=bank[idx];if(Number(n)===Number(item.a)){locked=true;score+=10;$("feedback").innerHTML='<span class="good">✔ إجابة صحيحة! +10 نقاط</span><br>'+item.why;$("nextBtn").disabled=false;[...$("answers").children].forEach(b=>b.disabled=true)}else{$("feedback").innerHTML='<span class="bad">ليست الإجابة الصحيحة، حاول مرة أخرى.</span><br>تذكّر ترتيب العمليات ولا تستعجل.';btn.disabled=true}}
+function nextQuestion(){if(!locked)return;idx++;if(idx>=bank.length){finish(false)}else render()}
+function pauseGame(){clearInterval(clock);let resume=confirm("اللعبة متوقفة مؤقتًا. اضغط موافق للمتابعة.");if(resume)clock=setInterval(()=>{seconds--;updateTime();if(seconds<=0){clearInterval(clock);finish(true)}},1000)}
+function finish(timeUp){clearInterval(clock);show("result");let rec={name:studentName,score,total:bank.length*10,correct:Math.floor(score/10),attempts,timeUsed:1800-seconds,date:new Date().toLocaleString("ar-JO"),timeUp};let all=JSON.parse(localStorage.getItem("obbyResults")||"[]");all.push(rec);localStorage.setItem("obbyResults",JSON.stringify(all));$("resultText").textContent=studentName+"، حصلت على "+score+" من "+(bank.length*10)+" نقطة، وأجبت عن "+rec.correct+" تحديًا صحيحًا. عدد المحاولات: "+attempts+"."+(timeUp?" انتهى الوقت.":"")}
+function showTeacher(){show("teacher");$("editor").value=JSON.stringify(bank,null,2);let all=JSON.parse(localStorage.getItem("obbyResults")||"[]");$("resultsList").innerHTML=all.length?all.map(r=>r.name+" — "+r.score+"/"+r.total+" — "+r.date).join("<br>"):"لا توجد نتائج بعد."}
+function saveQuestions(){try{let v=JSON.parse($("editor").value);if(!Array.isArray(v)||!v.length||v.some(q=>!q.q||!Array.isArray(q.o)||q.o.length!==3||!q.o.includes(q.a)||q.w<0||q.w>4))throw Error("تحققي من السؤال والخيارات والإجابة ورقم العالم (0 إلى 4).");bank=v;localStorage.setItem("obbyBank",JSON.stringify(bank));$("teacherMsg").textContent="تم حفظ بنك الأسئلة بنجاح على هذا الجهاز."}catch(e){$("teacherMsg").textContent="تعذر الحفظ: "+e.message}}
+function resetQuestions(){bank=original;localStorage.setItem("obbyBank",JSON.stringify(bank));$("editor").value=JSON.stringify(bank,null,2);$("teacherMsg").textContent="تمت استعادة الأسئلة الأصلية."}
+function download(name,data){let a=document.createElement("a"),url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:"application/json"}));a.href=url;a.download=name;a.click();URL.revokeObjectURL(url)}
+function downloadResults(){let all=JSON.parse(localStorage.getItem("obbyResults")||"[]");download("math-obby-result.json",all.filter(x=>x.name===studentName).slice(-1))}
+function downloadAll(){download("math-obby-all-results.json",JSON.parse(localStorage.getItem("obbyResults")||"[]"))}
+</script>
+</body></html>
