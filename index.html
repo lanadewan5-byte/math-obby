@@ -45,7 +45,7 @@ const defaultQuestions=[
 {w:1,q:"6 + 24 ÷ 6",a:["5","10","30"],c:1,e:"القسمة أولًا: 24 ÷ 6 = 4، ثم 6 + 4 = 10."},
 {w:1,q:"7 × 5 − 9",a:["26","44","17"],c:0,e:"الضرب أولًا: 7 × 5 = 35، ثم 35 − 9 = 26."},
 {w:1,q:"36 ÷ 4 × 2",a:["4.5","18","9"],c:1,e:"القسمة والضرب من اليسار إلى اليمين: 36 ÷ 4 = 9 ثم 9 × 2 = 18."},
-{w:1,q:"48 ÷ 6 + 3 × 2",a:["11","19","22"],c:1,e:"القسمة والضرب أولًا: 8 + 6 = 14."},
+{w:1,q:"48 ÷ 6 + 3 × 2",a:["14","19","22"],c:0,e:"القسمة والضرب أولًا: 8 + 6 = 14."},
 {w:1,q:"9 × 4 ÷ 6",a:["6","18","3"],c:0,e:"من اليسار إلى اليمين: 9 × 4 = 36 ثم 36 ÷ 6 = 6."},
 {w:1,q:"50 − 32 ÷ 8",a:["2.25","46","18"],c:1,e:"القسمة أولًا: 32 ÷ 8 = 4، ثم 50 − 4 = 46."},
 {w:2,q:"20 − 6 + 3",a:["11","17","23"],c:1,e:"الجمع والطرح من اليسار إلى اليمين: 20 − 6 = 14 ثم 14 + 3 = 17."},
@@ -105,7 +105,7 @@ function makeWorld(){
   for(let c=0;c<4;c++){const cloud=new THREE.Mesh(new THREE.SphereGeometry(2.2,10,8),mat(0xffffff));cloud.position.set((c-1.5)*11,7,baseZ-15-c*6);scene.add(cloud)}
  }
  // starting pad
- block(0,-.4,7,12,1,12,0x4aaf79);
+ const startPad=block(0,-.4,7,12,1,12,0x4aaf79);platforms.push(startPad);
  // player block avatar
  player=new THREE.Group();
  const torso=new THREE.Mesh(new THREE.BoxGeometry(1.15,1.45,.65),mat(0x2878e8));torso.position.y=1.55;player.add(torso);
