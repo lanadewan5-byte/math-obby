@@ -97,6 +97,28 @@ function makeWorld(){
   const baseZ=-w*48,col=colors[w];
   // تبقى السماء موحدة، بينما يتغير لون الإضاءة والمنصات والصخور في كل عالم
   const worldGlow=new THREE.PointLight(accents[w],1.25,42);worldGlow.position.set(0,7,baseZ-22);scene.add(worldGlow);
+  // معلم بصري ضخم وفريد لكل عالم، خارج مسار القفز
+  if(w===0){
+   for(let n=0;n<3;n++){const x=n===0?-10:10,z=baseZ-13-n*10;const trunk=new THREE.Mesh(new THREE.CylinderGeometry(.45,.8,8,7),mat(0x80502c));trunk.position.set(x,3,z);scene.add(trunk);for(let b=0;b<3;b++){const leaf=new THREE.Mesh(new THREE.SphereGeometry(2.5-b*.25,10,8),new THREE.MeshStandardMaterial({color:b===1?0x9aff55:0x16b96a,emissive:0x07552b,emissiveIntensity:.45}));leaf.position.set(x+(b-1)*1.1,7+b*.65,z);leaf.scale.set(1.25,.7,1);scene.add(leaf);}}
+   for(let n=0;n<5;n++){const ring=new THREE.Mesh(new THREE.TorusGeometry(1.2,.12,8,24),new THREE.MeshStandardMaterial({color:0xeaff55,emissive:0x70aa16,emissiveIntensity:.7}));ring.position.set(n%2?9:-9,5+n%3,baseZ-8-n*7);ring.rotation.y=n*.7;scene.add(ring);}
+  }else if(w===1){
+   const volcano=new THREE.Mesh(new THREE.ConeGeometry(7,12,7),mat(0x39212a));volcano.position.set(10,3,baseZ-22);scene.add(volcano);
+   const lavaRim=new THREE.Mesh(new THREE.TorusGeometry(2.35,.48,10,28),new THREE.MeshStandardMaterial({color:0xff4b16,emissive:0xff2600,emissiveIntensity:2}));lavaRim.position.set(10,8.5,baseZ-22);scene.add(lavaRim);
+   for(let n=0;n<5;n++){const shard=new THREE.Mesh(new THREE.DodecahedronGeometry(1.3+n%2*.6,0),new THREE.MeshStandardMaterial({color:n%2?0x6d3540:0x33202a,emissive:0x8c180d,emissiveIntensity:.35}));shard.position.set(-9+(n%2)*2,1+n%3*1.5,baseZ-7-n*8);shard.rotation.set(n*.5,n,0);scene.add(shard);}
+   for(let n=0;n<3;n++){const stream=new THREE.Mesh(new THREE.CylinderGeometry(.13,.28,6,8),new THREE.MeshBasicMaterial({color:0xff4b16}));stream.position.set(4+n*2,1,baseZ-16-n*9);stream.rotation.z=.25;scene.add(stream);}
+  }else if(w===2){
+   const iceMat=new THREE.MeshPhysicalMaterial({color:0xb8f5ff,metalness:.18,roughness:.12,transmission:.22,transparent:true,opacity:.88});
+   for(let n=0;n<9;n++){const crystal=new THREE.Mesh(new THREE.ConeGeometry(.9+(n%3)*.45,4+(n%4)*1.7,5),iceMat);crystal.position.set(n%2?9:-9,1.5+(n%3)*.5,baseZ-5-n*4.5);crystal.rotation.z=(n%2?.18:-.18);scene.add(crystal);}
+   for(let n=0;n<3;n++){const arch=new THREE.Mesh(new THREE.TorusGeometry(2.4+n*.45,.16,8,32),iceMat);arch.position.set(n===1?10:-10,4,baseZ-12-n*14);arch.rotation.y=Math.PI/2;scene.add(arch);}
+  }else if(w===3){
+   for(let n=0;n<7;n++){const crystal=new THREE.Mesh(new THREE.OctahedronGeometry(1.3+(n%3)*.55,0),new THREE.MeshStandardMaterial({color:n%2?0xff70d8:0x9c70ff,emissive:0x772cff,emissiveIntensity:1.15,metalness:.35,roughness:.2}));crystal.position.set(n%2?9:-9,2+(n%3)*1.5,baseZ-6-n*6);crystal.rotation.set(n*.4,n*.7,n*.25);scene.add(crystal);}
+   for(let n=0;n<4;n++){const halo=new THREE.Mesh(new THREE.TorusGeometry(2.2+n*.35,.09,8,36),new THREE.MeshBasicMaterial({color:n%2?0x48f5ff:0xff71e8}));halo.position.set(n%2?9:-9,5,baseZ-10-n*10);halo.rotation.set(.8,n*.5,.35);scene.add(halo);}
+  }else{
+   const planet=new THREE.Mesh(new THREE.SphereGeometry(5.2,24,18),new THREE.MeshStandardMaterial({color:0x273b9a,emissive:0x171c65,emissiveIntensity:.8,metalness:.35,roughness:.55}));planet.position.set(10,4,baseZ-24);scene.add(planet);
+   const orbit=new THREE.Mesh(new THREE.TorusGeometry(7,.18,10,64),new THREE.MeshStandardMaterial({color:0x39f4ff,emissive:0x00aaff,emissiveIntensity:1.5,metalness:.7}));orbit.position.copy(planet.position);orbit.rotation.set(.55,.2,.3);scene.add(orbit);
+   for(let n=0;n<12;n++){const rock=new THREE.Mesh(new THREE.IcosahedronGeometry(.55+(n%3)*.3,0),new THREE.MeshStandardMaterial({color:n%2?0x6b65a9:0x353b70,emissive:0x2924a0,emissiveIntensity:.5}));rock.position.set(-11+(n%4)*1.4,1+(n%3)*2,baseZ-4-n*3.3);rock.rotation.set(n,n*.4,n*.2);scene.add(rock);}
+   for(let n=0;n<5;n++){const star=new THREE.Mesh(new THREE.OctahedronGeometry(.45,0),new THREE.MeshBasicMaterial({color:0x5df7ff}));star.position.set(n%2?9:-9,7+n%3,baseZ-7-n*8);scene.add(star);}
+  }
   // صخور صغيرة عائمة أسفل الطريق لتعطي إحساس الجزر المعلقة
   for(let j=0;j<5;j++){
    const rock=new THREE.Mesh(new THREE.ConeGeometry(1.25,3.4,5),mat(w===1?0x642c36:w===2?0x75c9e8:w===3?0x572b86:w===4?0x29245e:0x168b58));
@@ -193,7 +215,7 @@ function nextLevel(){document.getElementById('levelComplete').classList.add('hid
 function finishGame(){finished=true;document.getElementById('hud').classList.add('hidden');document.getElementById('finish').classList.remove('hidden');document.getElementById('finalScore').textContent=score+' من 250 نقطة';document.getElementById('finalInfo').textContent='الاسم: '+playerName+' | التحديات المنجزة: '+answered+'/25 | 🪙 الكوينز: '+coinsCollected+' من 25 | 🏆 وصلت إلى كنز النهاية!';localStorage.setItem('obbyLastResult',JSON.stringify({name:playerName,score,answered,date:new Date().toLocaleString('ar-JO')}))}
 function downloadResult(){const data=localStorage.getItem('obbyLastResult')||'{}';const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data],{type:'application/json'}));a.download='math-obby-result.json';a.click()}
 function updateTimer(dt){remaining-=dt;if(remaining<=0){remaining=0;finishGame()}const m=Math.floor(remaining/60),s=Math.floor(remaining%60);clockEl.textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0')}
-function animate(now=performance.now()){if(!started||finished)return;requestAnimationFrame(animate);const dt=Math.min((now-last)/1000,.04);last=now;if(!paused&&!asking){updateTimer(dt);let dx=0,dz=0;if(keys.a||keys.arrowleft)dx-=1;if(keys.d||keys.arrowright)dx+=1;if(keys.w||keys.arrowup)dz-=1;if(keys.s||keys.arrowdown)dz+=1;const len=Math.hypot(dx,dz)||1;player.position.x+=dx/len*8*dt;player.position.z+=dz/len*8*dt;player.position.x=THREE.MathUtils.clamp(player.position.x,-6.5,6.5);
+function animate(now=performance.now()){if(!started||finished)return;requestAnimationFrame(animate);const dt=Math.min((now-last)/1000,.04);last=now;if(!paused&&!asking){updateTimer(dt);const visualWorld=Math.min(4,Math.floor(Math.max(0,-player.position.z)/48));scene.background.setHex(skyColors[visualWorld]);scene.fog.color.setHex(fogColors[visualWorld]);let dx=0,dz=0;if(keys.a||keys.arrowleft)dx-=1;if(keys.d||keys.arrowright)dx+=1;if(keys.w||keys.arrowup)dz-=1;if(keys.s||keys.arrowdown)dz+=1;const len=Math.hypot(dx,dz)||1;player.position.x+=dx/len*8*dt;player.position.z+=dz/len*8*dt;player.position.x=THREE.MathUtils.clamp(player.position.x,-6.5,6.5);
  const previousY=player.position.y;velocityY-=24*dt;player.position.y+=velocityY*dt;onGround=false;
  // التقاط الهبوط على المنصات مع هامش أمان أوسع، وحفظ آخر منصة وصل إليها اللاعب
  let landed=false;
