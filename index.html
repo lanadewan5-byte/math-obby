@@ -88,10 +88,10 @@ function makeWorld(){
   for(let k=0;k<5;k++){
    const z=baseZ-k*8-3;
    const laneX=[-2.4,1.8,3.0,-1.6,2.4][k];
-   const p=block(laneX,-.5,z,6.2,.7,6.2,col);platforms.push(p);
+   const p=block(laneX,-.5,z,6.2,.7,6.2,col);p.userData={halfX:3.1,halfZ:3.1,top:-.15};platforms.push(p);
    // منصات قفز صغيرة على جوانب الطريق
    const stepX=laneX+(k%2===0?3.8:-3.8);
-   const step=block(stepX,-.85,z-3.6,2.3,.55,2.3,0xf6d66b);platforms.push(step);
+   const step=block(stepX,-.85,z-3.6,2.3,.55,2.3,0xf6d66b);step.userData={halfX:1.15,halfZ:1.15,top:-.575};platforms.push(step);
    // عوارض قفز منخفضة مرئية على منصات مختارة
    if(k===1||k===3){
     const hurdle=block(laneX,-.02,z-1.8,3.1,.5,.45,0xff5d73);
@@ -109,7 +109,7 @@ function makeWorld(){
    gateMeshes.push({group:gate,index:w*5+k,world:w,z:z-1.5,x:laneX,done:false});
   }
   // جسر انتقال واضح بين العوالم
-  const connector=block(0,-.5,baseZ-43,5.5,.7,5.5,0xffe066);platforms.push(connector);
+  const connector=block(0,-.5,baseZ-43,5.5,.7,5.5,0xffe066);connector.userData={halfX:2.75,halfZ:2.75,top:-.15};platforms.push(connector);
   const sign=block(0,2,baseZ+5,7,2,.5,0x17264c);
   for(let cloudIndex=0;cloudIndex<4;cloudIndex++){
    const cloud=new THREE.Mesh(new THREE.SphereGeometry(2.2,10,8),mat(0xffffff));
@@ -117,10 +117,10 @@ function makeWorld(){
   }
  }
  // starting pad
- const startPad=block(0,-.4,7,12,1,12,0x4aaf79);platforms.push(startPad);
+ const startPad=block(0,-.4,7,12,1,12,0x4aaf79);startPad.userData={halfX:6,halfZ:6,top:.1};platforms.push(startPad);
  // وصل منصة البداية بأول منصة حتى لا تسقط الشخصية قبل أول قفزة
- const bridge1=block(0,-.5,2,7,.7,5,0x4aaf79);platforms.push(bridge1);
- const bridge2=block(0,-.5,-2,7,.7,5,0x4aaf79);platforms.push(bridge2);
+ const bridge1=block(0,-.5,2,7,.7,5,0x4aaf79);bridge1.userData={halfX:3.5,halfZ:2.5,top:-.15};platforms.push(bridge1);
+ const bridge2=block(0,-.5,-2,7,.7,5,0x4aaf79);bridge2.userData={halfX:3.5,halfZ:2.5,top:-.15};platforms.push(bridge2);
  // player block avatar
  player=new THREE.Group();
  const torso=new THREE.Mesh(new THREE.BoxGeometry(1.15,1.45,.65),mat(0x2878e8));torso.position.y=1.55;player.add(torso);
@@ -133,7 +133,7 @@ function makeWorld(){
 function startGame(){gemsCollected=0;document.getElementById('gemCount').textContent='0';playerName=document.getElementById('playerName').value.trim()||'لاعب';document.getElementById('playerLabel').textContent=playerName;document.getElementById('welcome').classList.add('hidden');document.getElementById('hud').classList.remove('hidden');makeWorld();started=true;last=performance.now();document.activeElement?.blur();document.body.focus();animate()}
 function jump(){
  if(!started||paused||asking||finished||!player)return;
- if(onGround||player.position.y<=0.25){
+ if(onGround){
   velocityY=12.5;
   player.position.y=Math.max(player.position.y,0.05);
   onGround=false;
@@ -150,11 +150,20 @@ function finishGame(){finished=true;document.getElementById('hud').classList.add
 function downloadResult(){const data=localStorage.getItem('obbyLastResult')||'{}';const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data],{type:'application/json'}));a.download='math-obby-result.json';a.click()}
 function updateTimer(dt){remaining-=dt;if(remaining<=0){remaining=0;finishGame()}const m=Math.floor(remaining/60),s=Math.floor(remaining%60);clockEl.textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0')}
 function animate(now=performance.now()){if(!started||finished)return;requestAnimationFrame(animate);const dt=Math.min((now-last)/1000,.04);last=now;if(!paused&&!asking){updateTimer(dt);let dx=0,dz=0;if(keys.a||keys.arrowleft)dx-=1;if(keys.d||keys.arrowright)dx+=1;if(keys.w||keys.arrowup)dz-=1;if(keys.s||keys.arrowdown)dz+=1;const len=Math.hypot(dx,dz)||1;player.position.x+=dx/len*8*dt;player.position.z+=dz/len*8*dt;player.position.x=THREE.MathUtils.clamp(player.position.x,-6.5,6.5);
- velocityY-=24*dt;player.position.y+=velocityY*dt;onGround=false;
- // snap to the top of the current route platform when crossing it
- for(const p of platforms){const pos=p.position;if(Math.abs(player.position.z-pos.z)<2.8&&Math.abs(player.position.x-pos.x)<3.25&&player.position.y<=.2&&player.position.y>=-1.5){player.position.y=0;velocityY=0;onGround=true;break}}
+ const previousY=player.position.y;velocityY-=24*dt;player.position.y+=velocityY*dt;onGround=false;
+ // هبوط دقيق على سطح المنصة عند عبوره أثناء النزول
+ if(velocityY<=0){
+  for(const p of platforms){
+   const pos=p.position,halfX=p.userData.halfX??3,halfZ=p.userData.halfZ??2.5,top=p.userData.top??-.15;
+   const overlapsX=Math.abs(player.position.x-pos.x)<=halfX+.45;
+   const overlapsZ=Math.abs(player.position.z-pos.z)<=halfZ+.35;
+   if(overlapsX&&overlapsZ&&previousY>=top-.03&&player.position.y<=top){
+    player.position.y=top;velocityY=0;onGround=true;break;
+   }
+  }
+ }
  if(player.position.z>6&&player.position.y<0){player.position.set(0,0,8);velocityY=0}
- if(player.position.y<-9){player.position.set(0,0,Math.max(-235,player.position.z+5));velocityY=0}
+ if(player.position.y<-12){player.position.set(0,0,8);velocityY=0;onGround=false}
  // اجمع الجواهر بالقفز والاقتراب منها
  for(const gem of gemMeshes){if(gem.visible){gem.rotation.y+=dt*2.5;gem.rotation.x+=dt;if(Math.abs(gem.position.z-player.position.z)<1.8&&Math.abs(gem.position.x-player.position.x)<1.5&&Math.abs((player.position.y+1.8)-gem.position.y)<1.45){gem.visible=false;gemsCollected++;document.getElementById('gemCount').textContent=gemsCollected;}}}
  const g=gateMeshes.find(x=>!x.done&&Math.abs(x.z-player.position.z)<2.5&&Math.abs(player.position.x-x.x)<2.8&&Math.abs(player.position.y)<2);if(g)openQuestion(g);
