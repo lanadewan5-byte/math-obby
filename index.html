@@ -118,7 +118,7 @@ function makeWorld(){
  player.position.set(0,0,8);player.userData.legs=legs;scene.add(player);
  camera.position.set(0,6,17);camera.lookAt(0,1,4);
 }
-function startGame(){playerName=document.getElementById('playerName').value.trim()||'لاعب';document.getElementById('playerLabel').textContent=playerName;document.getElementById('welcome').classList.add('hidden');document.getElementById('hud').classList.remove('hidden');makeWorld();started=true;last=performance.now();animate()}
+function startGame(){playerName=document.getElementById('playerName').value.trim()||'لاعب';document.getElementById('playerLabel').textContent=playerName;document.getElementById('welcome').classList.add('hidden');document.getElementById('hud').classList.remove('hidden');makeWorld();started=true;last=performance.now();document.activeElement?.blur();document.body.focus();animate()}
 function jump(){
  if(!started||paused||asking||finished||!player)return;
  if(onGround||player.position.y<=0.25){
@@ -128,7 +128,7 @@ function jump(){
  }
 }
 function togglePause(){if(!started||finished)return;paused=!paused;document.getElementById('pause').classList.toggle('hidden',!paused)}
-window.addEventListener('keydown',e=>{keys[e.key.toLowerCase()]=true;if(e.code==='Space'){e.preventDefault();jump()}});
+window.addEventListener('keydown',e=>{keys[e.key.toLowerCase()]=true;if(e.code==='Space'||e.key===' '){e.preventDefault();if(!e.repeat)jump()}},true);
 window.addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);
 document.querySelectorAll('[data-key]').forEach(b=>{const k=b.dataset.key;b.addEventListener('pointerdown',e=>{e.preventDefault();keys[k]=true});['pointerup','pointerleave','pointercancel'].forEach(ev=>b.addEventListener(ev,()=>keys[k]=false))});
 function openQuestion(g){asking=true;paused=true;currentGate=g.index;const q=questions[g.index];document.getElementById('qWorld').textContent=names[q.w]||names[g.world];document.getElementById('qTitle').textContent='بوابة التحدي '+(g.index+1);document.getElementById('qText').textContent=q.q;document.getElementById('feedback').textContent='';document.getElementById('continue').classList.add('hidden');const holder=document.getElementById('choices');holder.innerHTML='';q.a.forEach((a,i)=>{const b=document.createElement('button');b.textContent=a;b.onclick=()=>chooseAnswer(i,g,b);holder.appendChild(b)});document.getElementById('question').classList.remove('hidden')}
