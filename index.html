@@ -95,7 +95,7 @@ function makeWorld(){
  // كل عالم له سماء وإضاءة مختلفة، والمسار عبارة عن منصات قفز معلقة بلا أرضية كبيرة
  for(let w=0;w<5;w++){
   const baseZ=-w*48,col=colors[w];
-  scene.background=new THREE.Color(skyColors[w]);scene.fog.color.setHex(fogColors[w]);
+  // تبقى السماء موحدة، بينما يتغير لون الإضاءة والمنصات والصخور في كل عالم
   const worldGlow=new THREE.PointLight(accents[w],1.25,42);worldGlow.position.set(0,7,baseZ-22);scene.add(worldGlow);
   // صخور صغيرة عائمة أسفل الطريق لتعطي إحساس الجزر المعلقة
   for(let j=0;j<5;j++){
