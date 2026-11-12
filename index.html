@@ -63,7 +63,7 @@ const defaultQuestions=[
 {w:4,q:"100 ÷ (5 × 4) + 25",a:["30","20","45"],c:0,e:"القوس: 5 × 4 = 20، ثم 100 ÷ 20 = 5، ثم 5 + 25 = 30."},
 {w:4,q:"(40 + 20) ÷ 5 × 2 − 3",a:["21","24","9"],c:0,e:"القوس: 40 + 20 = 60، ثم 60 ÷ 5 = 12، ثم 12 × 2 = 24، ثم 24 − 3 = 21."}
 ];
-let questions=JSON.parse(localStorage.getItem('obbyBankV5')||'null')||defaultQuestions;localStorage.removeItem('obbyBankV4');
+let questions=defaultQuestions;try{const saved=JSON.parse(localStorage.getItem('obbyBankV5')||'null');if(Array.isArray(saved)&&saved.length===25&&saved.every(q=>q&&typeof q.q==='string'&&Array.isArray(q.a)&&q.a.length===3&&Number.isInteger(q.c)&&q.c>=0&&q.c<3))questions=saved;}catch(e){localStorage.removeItem('obbyBankV5');}localStorage.removeItem('obbyBankV4');
 const names=['جزيرة الأقواس','مدينة الضرب والقسمة','جسر اليسار واليمين','وادي العمليات المختلطة','قلعة التحدي النهائي'];
 const colors=[0x44c77a,0xf2a63b,0x3d9be8,0x9b70d6,0xf06d91];
 let scene,camera,renderer,player,velocityY=0,onGround=false,keys={},started=false,paused=false,asking=false,finished=false;
@@ -148,7 +148,7 @@ function makeWorld(){
  player.position.set(0,.1,8);checkpoint={x:0,y:.1,z:8};player.userData.legs=legs;scene.add(player);velocityY=0;onGround=true;
  camera.position.set(0,6,17);camera.lookAt(0,1,4);
 }
-function startGame(){started=false;paused=false;asking=false;finished=false;score=0;answered=0;remaining=1800;audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume();coinsCollected=0;document.getElementById('coinCount').textContent='0';playerName=document.getElementById('playerName').value.trim()||'لاعب';document.getElementById('playerLabel').textContent=playerName;document.getElementById('welcome').classList.add('hidden');document.getElementById('hud').classList.remove('hidden');makeWorld();started=true;last=performance.now();document.activeElement?.blur();document.body.focus();animate()}
+function startGame(){try{started=false;paused=false;asking=false;finished=false;score=0;answered=0;remaining=1800;coinsCollected=0;document.getElementById('coinCount').textContent='0';playerName=document.getElementById('playerName').value.trim()||'لاعب';document.getElementById('playerLabel').textContent=playerName;if(renderer){renderer.dispose();renderer.domElement.remove();renderer=null;}makeWorld();document.getElementById('welcome').classList.add('hidden');document.getElementById('hud').classList.remove('hidden');started=true;last=performance.now();document.activeElement?.blur();document.body.focus();animate();sound('level');}catch(err){started=false;document.getElementById('welcome').classList.remove('hidden');document.getElementById('startHelp').textContent='تعذّر تشغيل اللعبة: '+(err&&err.message?err.message:'تأكدي من تفعيل WebGL والإنترنت')+' — حدّثي الصفحة وجربي مرة أخرى.';console.error('Math Obby start error:',err);}}
 function jump(){
  if(!started||paused||asking||finished||!player)return;
  const onStartPad=Math.abs(player.position.x)<5.8&&player.position.z>1&&player.position.z<13&&player.position.y<=.35;
