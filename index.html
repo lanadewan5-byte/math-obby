@@ -11,7 +11,7 @@
 <body>
 <div id="hud" class="hidden">
  <div class="top">
-  <div class="pill">⭐ <span id="score">0</span> نقطة<br><small id="world">جزيرة الأقواس</small><br><small>💎 الجواهر: <span id="gemCount">0</span></small></div>
+  <div class="pill">⭐ <span id="score">0</span> نقطة<br><small id="world">جزيرة الأقواس</small><br><small>🪙 الكوينز: <span id="coinCount">0</span></small></div>
   <div class="pill">🏁 <span id="progress">0</span>/25<div class="meter"><i id="bar"></i></div></div>
   <div class="pill">⏱️ <span id="clock">30:00</span><br><small id="playerLabel"></small></div>
  </div>
@@ -67,10 +67,10 @@ let questions=JSON.parse(localStorage.getItem('obbyBankV5')||'null')||defaultQue
 const names=['جزيرة الأقواس','مدينة الضرب والقسمة','جسر اليسار واليمين','وادي العمليات المختلطة','قلعة التحدي النهائي'];
 const colors=[0x44c77a,0xf2a63b,0x3d9be8,0x9b70d6,0xf06d91];
 let scene,camera,renderer,player,velocityY=0,onGround=false,keys={},started=false,paused=false,asking=false,finished=false;
-let score=0,answered=0,playerName='',remaining=1800,last=performance.now(),gateMeshes=[],platforms=[],gemMeshes=[],gemsCollected=0,currentGate=0,checkpoint={x:0,y:.1,z:8};
+let score=0,answered=0,playerName='',remaining=1800,last=performance.now(),gateMeshes=[],platforms=[],coinMeshes=[],coinsCollected=0,currentGate=0,checkpoint={x:0,y:.1,z:8};
 const clockEl=document.getElementById('clock');
 let audioCtx=null,soundEnabled=true;
-function sound(type){if(!soundEnabled)return;try{audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume();const now=audioCtx.currentTime,osc=audioCtx.createOscillator(),gain=audioCtx.createGain(),p={jump:[420,620,.11],gem:[760,1120,.16],correct:[620,880,.22],wrong:[210,150,.2],level:[520,780,.42],gate:[440,660,.3]}[type]||[500,700,.18];osc.type=type==='wrong'?'triangle':'sine';osc.frequency.setValueAtTime(p[0],now);osc.frequency.exponentialRampToValueAtTime(p[1],now+p[2]);gain.gain.setValueAtTime(.0001,now);gain.gain.exponentialRampToValueAtTime(.12,now+.015);gain.gain.exponentialRampToValueAtTime(.0001,now+p[2]);osc.connect(gain);gain.connect(audioCtx.destination);osc.start(now);osc.stop(now+p[2]+.02);}catch(e){}}
+function sound(type){if(!soundEnabled)return;try{audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume();const now=audioCtx.currentTime,osc=audioCtx.createOscillator(),gain=audioCtx.createGain(),p={jump:[420,620,.11],gem:[760,1120,.16],coin:[900,1320,.18],correct:[620,880,.22],wrong:[210,150,.2],level:[520,780,.42],gate:[440,660,.3]}[type]||[500,700,.18];osc.type=type==='wrong'?'triangle':'sine';osc.frequency.setValueAtTime(p[0],now);osc.frequency.exponentialRampToValueAtTime(p[1],now+p[2]);gain.gain.setValueAtTime(.0001,now);gain.gain.exponentialRampToValueAtTime(.12,now+.015);gain.gain.exponentialRampToValueAtTime(.0001,now+p[2]);osc.connect(gain);gain.connect(audioCtx.destination);osc.start(now);osc.stop(now+p[2]+.02);}catch(e){}}
 function toggleSound(){soundEnabled=!soundEnabled;document.getElementById('soundToggle').textContent=soundEnabled?'🔊 الصوت: يعمل':'🔇 الصوت: متوقف';if(soundEnabled)sound('correct');}
 function mat(color,roughness=.8){return new THREE.MeshStandardMaterial({color,roughness})}
 function block(x,y,z,sx,sy,sz,color){const m=new THREE.Mesh(new THREE.BoxGeometry(sx,sy,sz),mat(color));m.position.set(x,y,z);scene.add(m);return m}
@@ -101,13 +101,13 @@ function makeWorld(){
     const hurdle=block(laneX,-.02,z-1.8,3.1,.5,.45,0xff5d73);
     hurdle.rotation.z=.08;
    }
-   // جوهرة كبيرة وواضحة في منتصف مسار القفز
-   const gem=new THREE.Group();
-   const gemCore=new THREE.Mesh(new THREE.OctahedronGeometry(.82),new THREE.MeshStandardMaterial({color:0x52f7ff,emissive:0x00bfe8,emissiveIntensity:2.4,metalness:.25,roughness:.2}));
-   gemCore.rotation.y=Math.PI/4;gem.add(gemCore);
-   const gemHalo=new THREE.Mesh(new THREE.TorusGeometry(1.12,.09,10,28),new THREE.MeshBasicMaterial({color:0xffe66d}));
-   gemHalo.rotation.x=Math.PI/2;gem.add(gemHalo);
-   gem.position.set(laneX,1.65,z-3.0);scene.add(gem);gemMeshes.push(gem);
+   // كوين ذهبي كبير يدور ويلمع في مسار اللاعب
+   const coin=new THREE.Group();
+   const coinBody=new THREE.Mesh(new THREE.CylinderGeometry(.78,.78,.18,32),new THREE.MeshStandardMaterial({color:0xffc928,metalness:.8,roughness:.2,emissive:0x9b6200,emissiveIntensity:.45}));
+   coinBody.rotation.x=Math.PI/2;coin.add(coinBody);
+   const coinRing=new THREE.Mesh(new THREE.TorusGeometry(.68,.09,10,32),new THREE.MeshStandardMaterial({color:0xffef8a,metalness:.75,emissive:0xffb300,emissiveIntensity:.8}));
+   coin.add(coinRing);
+   coin.position.set(laneX,1.7,z-3.0);scene.add(coin);coinMeshes.push(coin);
    const gate=new THREE.Group();gate.position.set(laneX,1.25,z-1.5);
    const glow=new THREE.MeshStandardMaterial({color:0x62f5ff,emissive:0x168ba8,emissiveIntensity:1.5});
    const left=new THREE.Mesh(new THREE.BoxGeometry(.42,3.1,.5),glow);left.position.x=-1.55;gate.add(left);
@@ -119,6 +119,16 @@ function makeWorld(){
   }
   // جسر انتقال واضح بين العوالم
   const connector=block(0,-.5,baseZ-43,5.5,.7,5.5,0xffe066);connector.userData={halfX:2.75,halfZ:2.75,top:-.15};platforms.push(connector);
+  if(w===4){
+   const treasureBase=block(0,-.45,baseZ-49,13,.9,13,0xf6d66b);treasureBase.userData={halfX:6.5,halfZ:6.5,top:0};platforms.push(treasureBase);
+   const chest=new THREE.Group();
+   const chestBody=new THREE.Mesh(new THREE.BoxGeometry(3.4,2.1,2.2),new THREE.MeshStandardMaterial({color:0x8b4513,metalness:.25,roughness:.55}));chestBody.position.y=1.15;chest.add(chestBody);
+   const chestLid=new THREE.Mesh(new THREE.BoxGeometry(3.55,.65,2.35),new THREE.MeshStandardMaterial({color:0xc17a22,metalness:.35,roughness:.35}));chestLid.position.y=2.5;chest.add(chestLid);
+   const band=new THREE.Mesh(new THREE.BoxGeometry(.42,2.25,2.42),new THREE.MeshStandardMaterial({color:0xffd43b,metalness:.8,roughness:.2}));band.position.set(0,1.35,0);chest.add(band);
+   const lock=new THREE.Mesh(new THREE.BoxGeometry(.55,.7,.2),new THREE.MeshStandardMaterial({color:0xffe98a,metalness:.8}));lock.position.set(0,1.45,1.22);chest.add(lock);
+   chest.position.set(0,0,baseZ-49);scene.add(chest);
+   const treasureGlow=new THREE.PointLight(0xffc928,2.5,18);treasureGlow.position.set(0,4,baseZ-49);scene.add(treasureGlow);
+  }
   for(let cloudIndex=0;cloudIndex<4;cloudIndex++){
    const cloud=new THREE.Mesh(new THREE.SphereGeometry(2.2,10,8),mat(0xffffff));
    cloud.position.set((cloudIndex-1.5)*11,8,baseZ-15-cloudIndex*6);scene.add(cloud);
@@ -138,7 +148,7 @@ function makeWorld(){
  player.position.set(0,.1,8);checkpoint={x:0,y:.1,z:8};player.userData.legs=legs;scene.add(player);velocityY=0;onGround=true;
  camera.position.set(0,6,17);camera.lookAt(0,1,4);
 }
-function startGame(){started=false;paused=false;asking=false;finished=false;score=0;answered=0;remaining=1800;audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume();gemsCollected=0;document.getElementById('gemCount').textContent='0';playerName=document.getElementById('playerName').value.trim()||'لاعب';document.getElementById('playerLabel').textContent=playerName;document.getElementById('welcome').classList.add('hidden');document.getElementById('hud').classList.remove('hidden');makeWorld();started=true;last=performance.now();document.activeElement?.blur();document.body.focus();animate()}
+function startGame(){started=false;paused=false;asking=false;finished=false;score=0;answered=0;remaining=1800;audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume();gemsCollected=0;document.getElementById('coinCount').textContent='0';playerName=document.getElementById('playerName').value.trim()||'لاعب';document.getElementById('playerLabel').textContent=playerName;document.getElementById('welcome').classList.add('hidden');document.getElementById('hud').classList.remove('hidden');makeWorld();started=true;last=performance.now();document.activeElement?.blur();document.body.focus();animate()}
 function jump(){
  if(!started||paused||asking||finished||!player)return;
  const onStartPad=Math.abs(player.position.x)<5.8&&player.position.z>1&&player.position.z<13&&player.position.y<=.35;
@@ -179,7 +189,7 @@ function animate(now=performance.now()){if(!started||finished)return;requestAnim
   velocityY=0;onGround=true;
  }
  // اجمع الجواهر بالقفز والاقتراب منها
- for(const gem of gemMeshes){if(gem.visible){gem.rotation.y+=dt*2.5;gem.position.y=1.65+Math.sin(now*.003+gem.position.z)*.18;if(Math.abs(gem.position.z-player.position.z)<2.35&&Math.abs(gem.position.x-player.position.x)<1.8&&Math.abs((player.position.y+1.5)-gem.position.y)<1.8){gem.visible=false;gemsCollected++;sound('gem');document.getElementById('gemCount').textContent=gemsCollected;}}}
+ for(const coin of coinMeshes){if(coin.visible){coin.rotation.y+=dt*3.8;coin.position.y=1.7+Math.sin(now*.003+coin.position.z)*.22;if(Math.abs(coin.position.z-player.position.z)<2.7&&Math.abs(coin.position.x-player.position.x)<2.0&&Math.abs((player.position.y+1.5)-coin.position.y)<2.0){coin.visible=false;coinsCollected++;sound('coin');document.getElementById('coinCount').textContent=coinsCollected;}}}
  const g=gateMeshes.find(x=>!x.done&&Math.abs(x.z-player.position.z)<2.5&&Math.abs(player.position.x-x.x)<2.8&&Math.abs(player.position.y)<2);if(g)openQuestion(g);
  player.rotation.y=Math.atan2(dx,-dz||.0001);const moving=Math.abs(dx)+Math.abs(dz)>0;player.userData.legs.forEach((l,i)=>l.rotation.x=moving?Math.sin(now*.014+i*Math.PI)*.5:0);
  }
