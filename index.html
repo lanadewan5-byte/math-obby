@@ -67,7 +67,7 @@ let questions=JSON.parse(localStorage.getItem('obbyBankV5')||'null')||defaultQue
 const names=['جزيرة الأقواس','مدينة الضرب والقسمة','جسر اليسار واليمين','وادي العمليات المختلطة','قلعة التحدي النهائي'];
 const colors=[0x44c77a,0xf2a63b,0x3d9be8,0x9b70d6,0xf06d91];
 let scene,camera,renderer,player,velocityY=0,onGround=false,keys={},started=false,paused=false,asking=false,finished=false;
-let score=0,answered=0,playerName='',remaining=1800,last=performance.now(),gateMeshes=[],platforms=[],gemMeshes=[],gemsCollected=0,currentGate=0;
+let score=0,answered=0,playerName='',remaining=1800,last=performance.now(),gateMeshes=[],platforms=[],gemMeshes=[],gemsCollected=0,currentGate=0,checkpoint={x:0,y:.1,z:8};
 const clockEl=document.getElementById('clock');
 let audioCtx=null,soundEnabled=true;
 function sound(type){if(!soundEnabled)return;try{audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume();const now=audioCtx.currentTime,osc=audioCtx.createOscillator(),gain=audioCtx.createGain(),p={jump:[420,620,.11],gem:[760,1120,.16],correct:[620,880,.22],wrong:[210,150,.2],level:[520,780,.42],gate:[440,660,.3]}[type]||[500,700,.18];osc.type=type==='wrong'?'triangle':'sine';osc.frequency.setValueAtTime(p[0],now);osc.frequency.exponentialRampToValueAtTime(p[1],now+p[2]);gain.gain.setValueAtTime(.0001,now);gain.gain.exponentialRampToValueAtTime(.12,now+.015);gain.gain.exponentialRampToValueAtTime(.0001,now+p[2]);osc.connect(gain);gain.connect(audioCtx.destination);osc.start(now);osc.stop(now+p[2]+.02);}catch(e){}}
@@ -130,7 +130,7 @@ function makeWorld(){
  const head=new THREE.Mesh(new THREE.BoxGeometry(.95,.95,.85),mat(0xffd0a1));head.position.y=2.78;player.add(head);
  const hair=new THREE.Mesh(new THREE.BoxGeometry(1,.25,.9),mat(0x49301f));hair.position.y=3.25;player.add(hair);
  const legs=[];for(let s of [-1,1]){const leg=new THREE.Mesh(new THREE.BoxGeometry(.42,.95,.48),mat(0x24334e));leg.position.set(s*.3,.48,0);player.add(leg);legs.push(leg)}
- player.position.set(0,.1,8);player.userData.legs=legs;scene.add(player);velocityY=0;onGround=true;
+ player.position.set(0,.1,8);checkpoint={x:0,y:.1,z:8};player.userData.legs=legs;scene.add(player);velocityY=0;onGround=true;
  camera.position.set(0,6,17);camera.lookAt(0,1,4);
 }
 function startGame(){started=false;paused=false;asking=false;finished=false;score=0;answered=0;remaining=1800;audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume();gemsCollected=0;document.getElementById('gemCount').textContent='0';playerName=document.getElementById('playerName').value.trim()||'لاعب';document.getElementById('playerLabel').textContent=playerName;document.getElementById('welcome').classList.add('hidden');document.getElementById('hud').classList.remove('hidden');makeWorld();started=true;last=performance.now();document.activeElement?.blur();document.body.focus();animate()}
@@ -153,20 +153,26 @@ function downloadResult(){const data=localStorage.getItem('obbyLastResult')||'{}
 function updateTimer(dt){remaining-=dt;if(remaining<=0){remaining=0;finishGame()}const m=Math.floor(remaining/60),s=Math.floor(remaining%60);clockEl.textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0')}
 function animate(now=performance.now()){if(!started||finished)return;requestAnimationFrame(animate);const dt=Math.min((now-last)/1000,.04);last=now;if(!paused&&!asking){updateTimer(dt);let dx=0,dz=0;if(keys.a||keys.arrowleft)dx-=1;if(keys.d||keys.arrowright)dx+=1;if(keys.w||keys.arrowup)dz-=1;if(keys.s||keys.arrowdown)dz+=1;const len=Math.hypot(dx,dz)||1;player.position.x+=dx/len*8*dt;player.position.z+=dz/len*8*dt;player.position.x=THREE.MathUtils.clamp(player.position.x,-6.5,6.5);
  const previousY=player.position.y;velocityY-=24*dt;player.position.y+=velocityY*dt;onGround=false;
- // هبوط دقيق على سطح المنصة عند عبوره أثناء النزول
+ // التقاط الهبوط على المنصات مع هامش أمان أوسع، وحفظ آخر منصة وصل إليها اللاعب
+ let landed=false;
  if(velocityY<=0){
   for(const p of platforms){
    const pos=p.position,halfX=p.userData.halfX??3,halfZ=p.userData.halfZ??2.5,top=p.userData.top??-.15;
-   const overlapsX=Math.abs(player.position.x-pos.x)<=halfX+.45;
-   const overlapsZ=Math.abs(player.position.z-pos.z)<=halfZ+.35;
-   if(overlapsX&&overlapsZ&&previousY>=top-.03&&player.position.y<=top){
-    player.position.y=top;velocityY=0;onGround=true;break;
+   const inside=Math.abs(player.position.x-pos.x)<=halfX+.55&&Math.abs(player.position.z-pos.z)<=halfZ+.55;
+   const crossed=previousY>=top-.25&&player.position.y<=top+.08;
+   const nearSurface=player.position.y<=top+.35&&player.position.y>=top-1.25;
+   if(inside&&(crossed||nearSurface)){
+    player.position.y=top;velocityY=0;onGround=true;landed=true;
+    checkpoint={x:player.position.x,y:top+.08,z:player.position.z};
+    break;
    }
   }
  }
- if(!onGround&&velocityY<=0){for(const p of platforms){const pos=p.position,halfX=p.userData.halfX??3,halfZ=p.userData.halfZ??2.5,top=p.userData.top??-.15;if(Math.abs(player.position.x-pos.x)<=halfX+.45&&Math.abs(player.position.z-pos.z)<=halfZ+.35&&player.position.y<=top+.18&&player.position.y>=top-.35){player.position.y=top;velocityY=0;onGround=true;break}}}
- if(player.position.z>6&&player.position.y<0){player.position.set(0,.1,8);velocityY=0;onGround=true}
- if(player.position.y<-12){player.position.set(0,.12,8);velocityY=0;onGround=true}
+ // إذا خرج اللاعب من المسار، أعده إلى آخر منصة آمنة بدل البداية
+ if(player.position.y<-3){
+  player.position.set(checkpoint.x,checkpoint.y,checkpoint.z);
+  velocityY=0;onGround=true;
+ }
  // اجمع الجواهر بالقفز والاقتراب منها
  for(const gem of gemMeshes){if(gem.visible){gem.rotation.y+=dt*2.5;gem.rotation.x+=dt;if(Math.abs(gem.position.z-player.position.z)<1.8&&Math.abs(gem.position.x-player.position.x)<1.5&&Math.abs((player.position.y+1.8)-gem.position.y)<1.45){gem.visible=false;gemsCollected++;sound('gem');document.getElementById('gemCount').textContent=gemsCollected;}}}
  const g=gateMeshes.find(x=>!x.done&&Math.abs(x.z-player.position.z)<2.5&&Math.abs(player.position.x-x.x)<2.8&&Math.abs(player.position.y)<2);if(g)openQuestion(g);
