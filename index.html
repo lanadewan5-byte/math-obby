@@ -97,13 +97,16 @@ function makeWorld(){
   for(let k=0;k<5;k++){
    const z=baseZ-k*8-3;
    const laneX=[-2.4,1.8,3.0,-1.6,2.4][k];
-   const p=block(laneX,-.5,z,6.2,.7,6.2,col);p.userData={halfX:3.1,halfZ:3.1,top:-.15};platforms.push(p);
+   // منصات متعاقبة الارتفاع لتكوين طلعات ونزلات واضحة
+   const top=[.15,1.15,.25,1.35,.35][k];
+   const p=block(laneX,top-.35,z,6.2,.7,6.2,col);p.userData={halfX:3.1,halfZ:3.1,top};platforms.push(p);
    // منصات قفز صغيرة على جوانب الطريق
    const stepX=laneX+(k%2===0?3.8:-3.8);
-   const step=block(stepX,-.85,z-3.6,2.3,.55,2.3,0xf6d66b);step.userData={halfX:1.15,halfZ:1.15,top:-.575};platforms.push(step);
+   const stepTop=Math.max(-.05,top-.48);
+   const step=block(stepX,stepTop-.275,z-3.6,2.3,.55,2.3,0xf6d66b);step.userData={halfX:1.15,halfZ:1.15,top:stepTop};platforms.push(step);
    // عوارض قفز منخفضة مرئية على منصات مختارة
    if(k===1||k===3){
-    const hurdle=block(laneX,-.02,z-1.8,3.1,.5,.45,0xff5d73);
+    const hurdle=block(laneX,top+.13,z-1.8,3.1,.5,.45,0xff5d73);
     hurdle.rotation.z=.08;
    }
    // كوين ذهبي كبير يدور ويلمع في مسار اللاعب
@@ -112,8 +115,8 @@ function makeWorld(){
    coinBody.rotation.x=Math.PI/2;coin.add(coinBody);
    const coinRing=new THREE.Mesh(new THREE.TorusGeometry(.68,.09,10,32),new THREE.MeshStandardMaterial({color:0xffef8a,metalness:.75,emissive:0xffb300,emissiveIntensity:.8}));
    coin.add(coinRing);
-   coin.position.set(laneX,1.7,z-3.0);scene.add(coin);coinMeshes.push(coin);
-   const gate=new THREE.Group();gate.position.set(laneX,1.25,z-1.5);
+   coin.position.set(laneX,top+1.7,z-3.0);coin.userData.baseY=top+1.7;scene.add(coin);coinMeshes.push(coin);
+   const gate=new THREE.Group();gate.position.set(laneX,top+1.25,z-1.5);
    const glow=new THREE.MeshStandardMaterial({color:0x62f5ff,emissive:0x168ba8,emissiveIntensity:1.5});
    const left=new THREE.Mesh(new THREE.BoxGeometry(.42,3.1,.5),glow);left.position.x=-1.55;gate.add(left);
    const right=left.clone();right.position.x=1.55;gate.add(right);
@@ -123,7 +126,7 @@ function makeWorld(){
    gateMeshes.push({group:gate,index:w*5+k,world:w,z:z-1.5,x:laneX,done:false});
   }
   // جسر انتقال واضح بين العوالم
-  const connector=block(0,-.5,baseZ-43,5.5,.7,5.5,0xffe066);connector.userData={halfX:2.75,halfZ:2.75,top:-.15};platforms.push(connector);
+  const connector=block(0,-.25,baseZ-43,5.5,.7,5.5,0xffe066);connector.userData={halfX:2.75,halfZ:2.75,top:.1};platforms.push(connector);
   if(w===4){
    const treasureBase=block(0,-.45,baseZ-49,13,.9,13,0xf6d66b);treasureBase.userData={halfX:6.5,halfZ:6.5,top:0};platforms.push(treasureBase);
    const chest=new THREE.Group();
@@ -194,7 +197,7 @@ function animate(now=performance.now()){if(!started||finished)return;requestAnim
   velocityY=0;onGround=true;
  }
  // اجمع الكوينز بالقفز والاقتراب منها
- for(const coin of coinMeshes){if(coin.visible){coin.rotation.y+=dt*3.8;coin.position.y=1.7+Math.sin(now*.003+coin.position.z)*.22;if(Math.abs(coin.position.z-player.position.z)<2.7&&Math.abs(coin.position.x-player.position.x)<2.0&&Math.abs((player.position.y+1.5)-coin.position.y)<2.0){coin.visible=false;coinsCollected++;sound('coin');document.getElementById('coinCount').textContent=coinsCollected;}}}
+ for(const coin of coinMeshes){if(coin.visible){coin.rotation.y+=dt*3.8;coin.position.y=coin.userData.baseY+Math.sin(now*.003+coin.position.z)*.22;if(Math.abs(coin.position.z-player.position.z)<2.7&&Math.abs(coin.position.x-player.position.x)<2.0&&Math.abs((player.position.y+1.5)-coin.position.y)<2.0){coin.visible=false;coinsCollected++;sound('coin');document.getElementById('coinCount').textContent=coinsCollected;}}}
  if(answered===25&&player.position.z<-238&&Math.abs(player.position.x)<5&&player.position.y<3){finishGame();return;}
  const g=gateMeshes.find(x=>!x.done&&Math.abs(x.z-player.position.z)<2.5&&Math.abs(player.position.x-x.x)<2.8&&Math.abs(player.position.y)<2);if(g)openQuestion(g);
  player.rotation.y=Math.atan2(dx,-dz||.0001);const moving=Math.abs(dx)+Math.abs(dz)>0;player.userData.legs.forEach((l,i)=>l.rotation.x=moving?Math.sin(now*.014+i*Math.PI)*.5:0);
