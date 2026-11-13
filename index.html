@@ -6,6 +6,30 @@
 <style>
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#77c9f4;color:#fff;font-family:Tahoma,Arial,sans-serif}canvas{display:block}#hud{position:fixed;inset:0;pointer-events:none;z-index:3}.top{display:flex;justify-content:space-between;gap:8px;padding:12px;align-items:flex-start}.pill{background:#101a36dd;border:2px solid #ffffff40;border-radius:16px;padding:9px 13px;font-weight:bold;box-shadow:0 5px 15px #0003}.meter{height:9px;width:150px;background:#ffffff44;border-radius:20px;overflow:hidden;margin-top:6px}.meter i{display:block;height:100%;width:0;background:#ffe066}.bottom{position:absolute;bottom:14px;left:14px;right:14px;display:flex;justify-content:space-between;align-items:end}.hint{background:#101a36cc;padding:10px 14px;border-radius:14px;font-size:13px;max-width:330px}.overlay{position:fixed;inset:0;background:#09132bd9;display:flex;align-items:center;justify-content:center;z-index:8;padding:16px}.card{width:min(600px,96vw);background:linear-gradient(145deg,#263b70,#111c3d);border:2px solid #ffffff38;border-radius:25px;padding:25px;text-align:center;box-shadow:0 25px 80px #0008}.card h1{font-size:clamp(25px,5vw,42px);margin:4px 0 12px}.station-card{border-color:#ffe28a;background:radial-gradient(circle at 50% 0%,#425b91,#111c3d 72%)}.station-tag{display:inline-block;background:#ffe066;color:#1c2b50;padding:7px 14px;border-radius:30px;font-weight:bold;margin-bottom:10px}.station-answers{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px}.station-answers button{min-height:58px;font-size:22px;background:#e8f2ff;direction:ltr;unicode-bidi:isolate;font-variant-numeric:tabular-nums}.station-answers button:hover{transform:translateY(-2px)}#stationExpression{font-size:clamp(30px,6vw,48px);font-weight:bold;direction:ltr;unicode-bidi:isolate;background:#0b1530;border:1px solid #ffffff38;border-radius:16px;padding:18px;margin:15px 0;font-variant-numeric:tabular-nums}#stationFeedback{min-height:30px;font-weight:bold;margin-top:12px;color:#ffe28a}.card p{line-height:1.8;color:#dce8ff}.field{padding:13px;border-radius:12px;border:2px solid #8296c7;background:#fff;color:#15203c;width:min(330px,100%);font-size:17px}button{border:0;border-radius:13px;padding:12px 17px;font: bold 16px Tahoma;cursor:pointer;background:#ffe066;color:#1c2b50;margin:5px}button.alt{background:#56e6d3}button.dark{background:#344c80;color:#fff}#qText{direction:ltr;unicode-bidi:isolate;text-align:center;font-variant-numeric:tabular-nums}.hidden{display:none!important}#admin{position:fixed;inset:0;background:#081127ee;z-index:12;display:none;align-items:center;justify-content:center;padding:16px}.adminbox{background:#1d2c54;padding:20px;border-radius:18px;width:min(700px,95vw)}textarea{width:100%;height:45vh;background:#0d1732;color:#dff;border:1px solid #7185b8;border-radius:10px;padding:12px;direction:ltr;text-align:left}#touch{position:fixed;bottom:95px;left:16px;z-index:4;display:flex;gap:8px;pointer-events:auto}#touch button{width:55px;height:55px;border-radius:50%;font-size:22px;background:#13234dcc;color:white;border:1px solid #fff8;margin:0;touch-action:none}#jump{position:fixed;bottom:105px;right:20px;z-index:4;width:74px;height:74px;border-radius:50%;background:#ffb84d;color:#24345c;display:block;pointer-events:auto;box-shadow:0 4px 14px #0005}#startHelp{font-size:13px;color:#c9d9ff}#worldToast{position:fixed;top:22%;left:50%;transform:translate(-50%,-50%);z-index:7;background:#101a36ef;border:2px solid #ffffff66;border-radius:22px;padding:18px 30px;text-align:center;font-size:clamp(22px,4vw,38px);font-weight:bold;box-shadow:0 12px 50px #0008;opacity:0;pointer-events:none;transition:opacity .4s}#worldToast.show{opacity:1}
 @media(max-width:650px){.answers{grid-template-columns:1fr}.bottom .hint{font-size:11px}.meter{width:95px}#touch,#jump{display:flex}}
+
+/* Crane learning gateway */
+#craneIntro{width:min(920px,96vw);max-height:94vh;overflow:auto;text-align:center;background:linear-gradient(145deg,#102d4b,#1c5270 58%,#247a83);border:2px solid #7ce5ed;border-radius:24px;padding:20px;box-shadow:0 24px 80px #001a2dcc}
+#craneIntro h1{margin:4px 0;color:#ffe38a;font-size:clamp(24px,4vw,38px)}
+#craneIntro p{line-height:1.8;margin:8px auto;max-width:720px}
+.craneScene{height:190px;position:relative;margin:12px auto 18px;max-width:680px;overflow:hidden;border-radius:18px;background:linear-gradient(#79c8ed 0 68%,#b8d9a1 68%);border:2px solid #ffffff55}
+.craneTower{position:absolute;left:16%;bottom:0;width:18px;height:150px;background:repeating-linear-gradient(135deg,#f5b942 0 9px,#263b50 9px 17px);border:2px solid #24374a}
+.craneBoom{position:absolute;left:16%;top:25px;width:62%;height:13px;background:#f5b942;border:2px solid #24374a;transform-origin:left center}
+.craneCable{position:absolute;left:67%;top:38px;height:65px;width:4px;background:#263b50;animation:lowerHook 2s ease-in-out infinite alternate}
+.craneHook{position:absolute;left:calc(67% - 8px);top:98px;font-size:25px;animation:lowerHook 2s ease-in-out infinite alternate}
+.craneLoad{position:absolute;left:60%;bottom:14px;width:58px;height:42px;border:3px solid #fff;border-radius:7px;background:#ffca55;color:#24374a;font-size:22px;font-weight:900;display:grid;place-items:center;box-shadow:0 5px 0 #b97927;transition:transform .7s,bottom .7s}
+.craneLoad.lifted{bottom:90px;transform:translateX(25px) rotate(-5deg)}
+.craneBase{position:absolute;left:9%;bottom:0;width:32%;height:15px;background:#334b59;border-radius:8px}
+.craneStep{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin:12px 0}
+.craneStep button{background:#f5f8ff;color:#17334c;border:2px solid #9bc7dc;min-width:115px}
+.craneStep button:disabled{opacity:.45;cursor:not-allowed}
+#craneProgress{font-weight:900;color:#ffe38a}
+#craneFeedback{min-height:28px;font-weight:800;color:#fff2b0}
+#craneLaunch{display:none;margin-top:14px}
+#craneLaunch.show{display:block}
+#craneName{max-width:320px}
+@keyframes lowerHook{from{height:40px;top:38px}to{height:92px;top:38px}}
+@media(max-width:600px){#craneIntro{padding:12px}.craneScene{height:150px}.craneTower{height:115px}.craneLoad{width:48px;height:36px}}
+
 </style>
 </head>
 <body>
@@ -20,18 +44,73 @@
 <div id="portalHint" style="position:fixed;top:88px;left:50%;transform:translateX(-50%);z-index:5;background:#101a36dd;border:1px solid #ffffff55;border-radius:14px;padding:9px 16px;font-weight:bold;pointer-events:none;display:none;white-space:nowrap">اقتربي من بوابة واضغطي E</div>
 <div id="touch"><div style="display:grid;grid-template-columns:repeat(3,55px);gap:5px"><span></span><button data-key="w">▲</button><span></span><button data-key="a">◀</button><button data-key="s">▼</button><button data-key="d">▶</button></div></div>
 <button id="jump" onclick="jump()">قفز</button>
-<div id="welcome" class="overlay"><div class="card">
- <div style="font-size:55px">🌳🚀🏰🤖🏝️</div><h1>رحلة بين العوالم</h1><h2>Worlds Adventure 3D</h2>
- <p>خمسة عوالم مختلفة، مسارات مليئة بالمفاجآت وكوينز ذهبية. استكشف واقفز بحرية، وحل 10 ألغاز رياضية فقط عند محطات سرية لفتح الطريق إلى الكنز!</p>
- <input id="playerName" class="field" placeholder="اكتبي اسم الطالب/ة" maxlength="30">
- <p id="startHelp">استخدم WASD أو الأسهم للحركة و Space للقفز. اجمع الكوينز الخمسة والعشرين وافتح الكنز!</p>
- <button onclick="startGame()">ابدأ المغامرة 🚀</button>
+<div id="welcome" class="overlay"><div id="craneIntro">
+ <div style="font-size:42px">🏗️ 🚧 🧱</div><h1>مهمة بناء برج العمليات</h1>
+ <p>قبل دخول العوالم الخمسة، ساعد الرافعة على ترتيب العمليات الحسابية. اختر العملية التي يجب تنفيذها أولاً، ثم التالية، حتى يكتمل البرج!</p>
+ <div class="craneScene"><div class="craneBase"></div><div class="craneTower"></div><div class="craneBoom"></div><div class="craneCable"></div><div class="craneHook">🪝</div><div class="craneLoad" id="craneLoad">؟</div></div>
+ <div id="craneProgress">التحدي 1 من 3 · الخطوة 1 من 3</div>
+ <h2 id="craneExpression" style="font-size:clamp(25px,5vw,38px);color:#fff">8 + 3 × (6 − 2)</h2>
+ <p id="cranePrompt">أي عملية ننفذ أولاً؟</p><div class="craneStep" id="craneChoices"></div>
+ <div id="craneFeedback" aria-live="polite">تذكّر: الأقواس أولاً، ثم الضرب والقسمة، ثم الجمع والطرح.</div>
+ <div id="craneLaunch"><p style="color:#c8f8e5;font-weight:900">🎉 أحسنت! اكتمل برج العمليات وفتحت بوابة العوالم الخمسة.</p>
+ <input id="playerName" class="field craneName" placeholder="اسم الطالب/ة" maxlength="30">
+ <button onclick="startGame()">ادخل المغامرة 🌍</button></div>
  </div></div>
 <div id="worldToast">🌍 العالم الجديد</div>
 <div id="pause" class="overlay hidden"><div class="card"><h1>استراحة قصيرة</h1><p>المغامرة متوقفة مؤقتًا.</p><button onclick="togglePause()">متابعة اللعب</button></div></div>
 <div id="stationModal" class="overlay hidden"><div class="card station-card"><div class="station-tag" id="stationTag">🔐 محطة سرية</div><h1 id="stationTitle">لغز المغامرة</h1><p id="stationStory">افتح الطريق بحل اللغز الرياضي!</p><div id="stationExpression">8 + 3 × 4</div><div class="station-answers" id="stationAnswers"></div><div id="stationFeedback">اختر الإجابة الصحيحة لتفعيل البوابة.</div></div></div>
 <div id="treasureModal" class="overlay hidden"><div class="card"><div style="font-size:58px">🗝️✨</div><h1>وصلت إلى الكنز النهائي!</h1><p>لقد اجتزت العوالم الخمسة. هل أنت مستعد لفتح الصندوق؟</p><button onclick="openFinalTreasure()">افتح الكنز 🏆</button></div></div>
 <div id="finish" class="overlay hidden"><div class="card"><div style="font-size:55px">🏆</div><h1>اكتملت المغامرة!</h1><h2 id="finalScore"></h2><p id="finalInfo"></p><button onclick="location.reload()">العب من جديد</button><button class="dark" onclick="downloadResult()">تنزيل النتيجة</button></div></div>
+
+<script>
+(function(){
+const tasks=[
+ {e:'8 + 3 × (6 − 2)',steps:['(6 − 2)','3 × 4','8 + 12'],choices:[['الجمع +','الجمع'],['الضرب ×','الضرب'],['الأقواس ( )','الأقواس']],correct:['الأقواس','الضرب','الجمع']},
+ {e:'18 − 2 × 5 + 4',steps:['2 × 5','18 − 10','8 + 4'],choices:[['الطرح −','الطرح'],['الضرب ×','الضرب'],['الجمع +','الجمع']],correct:['الضرب','الطرح','الجمع']},
+ {e:'24 ÷ (2 × 3) + 7',steps:['2 × 3','24 ÷ 6','4 + 7'],choices:[['القسمة ÷','القسمة'],['الجمع +','الجمع'],['الأقواس ( )','الأقواس']],correct:['الأقواس','القسمة','الجمع']}
+];
+let task=0,step=0;
+function render(){
+ const t=tasks[task];
+ document.getElementById('craneExpression').textContent=t.e;
+ document.getElementById('craneProgress').textContent='التحدي '+(task+1)+' من 3 · الخطوة '+(step+1)+' من 3';
+ document.getElementById('cranePrompt').textContent='أي عملية ننفذ '+(step===0?'أولاً':step===1?'ثانياً':'أخيراً')+'؟';
+ const box=document.getElementById('craneChoices');box.innerHTML='';
+ t.choices.forEach(([label,key])=>{
+  const b=document.createElement('button');b.textContent=label;b.onclick=()=>choose(key,b);box.appendChild(b);
+ });
+}
+function choose(key,button){
+ const t=tasks[task],feedback=document.getElementById('craneFeedback');
+ if(key!==t.correct[step]){
+  feedback.textContent='ليس بعد! فكّر بقاعدة ترتيب العمليات وحاول مرة أخرى.';
+  button.animate([{transform:'translateX(-5px)'},{transform:'translateX(5px)'},{transform:'translateX(0)'}],{duration:220});
+  return;
+ }
+ feedback.textContent='ممتاز! الرافعة ترفع القطعة: '+t.steps[step]+' ✓';
+ document.getElementById('craneLoad').textContent=['①','②','③'][step];
+ document.getElementById('craneLoad').classList.add('lifted');
+ [...document.getElementById('craneChoices').children].forEach(b=>b.disabled=true);
+ step++;
+ if(step===3){
+  task++;step=0;
+  if(task===tasks.length){
+   document.getElementById('craneProgress').textContent='اكتملت مهمة البناء!';
+   document.getElementById('craneExpression').textContent='🏗️ البرج اكتمل!';
+   document.getElementById('cranePrompt').textContent='أصبحت جاهزاً لاستكشاف العوالم الخمسة.';
+   document.getElementById('craneChoices').innerHTML='';
+   document.getElementById('craneFeedback').textContent='جمعت 9 خطوات صحيحة في ترتيب العمليات.';
+   document.getElementById('craneLaunch').classList.add('show');
+   return;
+  }
+  setTimeout(()=>{document.getElementById('craneLoad').classList.remove('lifted');document.getElementById('craneLoad').textContent='؟';render();},900);
+ }else{
+  setTimeout(()=>{document.getElementById('craneLoad').classList.remove('lifted');render();},650);
+ }
+}
+render();
+})();
+</script>
 <script>
 window.addEventListener('error',function(e){const h=document.getElementById('startHelp');if(h&&(!window.startGame||!window.THREE))h.textContent='تعذّر تحميل ملفات اللعبة: '+(e.message||'خطأ في الاتصال').slice(0,140)+' — تحقق من الاتصال بالإنترنت ثم حدّثي الصفحة.';});
 window.addEventListener('unhandledrejection',function(e){const h=document.getElementById('startHelp');if(h)h.textContent='تعذّر تحميل اللعبة: '+String(e.reason||'خطأ غير معروف').slice(0,140);});
