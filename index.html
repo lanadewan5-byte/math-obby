@@ -46,6 +46,7 @@ const accents=[0xeaff55,0xffd34e,0xd9f7ff,0xffd6fb,0x45f5ff];
 const skyColors=[0x78dfff,0x090d35,0x8fc9ff,0x111b3d,0x25b8d0];
 const fogColors=[0xa9edff,0x202b65,0xb8d9ff,0x243b63,0x8ce8dc];
 let scene,camera,renderer,player,velocityY=0,onGround=false,keys={},started=false,paused=false,asking=false,finished=false,activeWorld=0;
+let worldAnimations=[];
 let treasureChest=null,treasureLid=null,treasureOpen=false,treasurePromptShown=false,treasureProgress=0,victoryDance=false,celebrationTimer=0;
 let score=0,answered=0,playerName='',remaining=0,last=performance.now(),gateMeshes=[],platforms=[],coinMeshes=[],hubPortals=[],coinsCollected=0,currentGate=0,checkpoint={x:-2.4,y:.3,z:-3};
 const clockEl=null;
@@ -55,7 +56,7 @@ function toggleSound(){soundEnabled=!soundEnabled;document.getElementById('sound
 function mat(color,roughness=.8){return new THREE.MeshStandardMaterial({color,roughness})}
 function block(x,y,z,sx,sy,sz,color){const m=new THREE.Mesh(new THREE.BoxGeometry(sx,sy,sz),mat(color));m.position.set(x,y,z);scene.add(m);return m}
 function makeWorld(){
- platforms=[];gateMeshes=[];coinMeshes=[];hubPortals=[];scene=new THREE.Scene();scene.background=new THREE.Color(skyColors[0]);scene.fog=new THREE.Fog(fogColors[0],48,155);
+ platforms=[];gateMeshes=[];coinMeshes=[];hubPortals=[];worldAnimations=[];scene=new THREE.Scene();scene.background=new THREE.Color(skyColors[0]);scene.fog=new THREE.Fog(fogColors[0],48,155);
  camera=new THREE.PerspectiveCamera(65,innerWidth/innerHeight,.1,300);
  renderer=new THREE.WebGLRenderer({antialias:true});renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;document.body.appendChild(renderer.domElement);
  scene.add(new THREE.HemisphereLight(0xeaf7ff,0x486044,2.1));
@@ -74,22 +75,30 @@ function makeWorld(){
    for(let n=0;n<3;n++){const x=n===0?-10:10,z=baseZ-13-n*10;const trunk=new THREE.Mesh(new THREE.CylinderGeometry(.45,.8,8,7),mat(0x80502c));trunk.position.set(x,3,z);scene.add(trunk);for(let b=0;b<3;b++){const leaf=new THREE.Mesh(new THREE.SphereGeometry(2.5-b*.25,10,8),new THREE.MeshStandardMaterial({color:b===1?0x9aff55:0x16b96a,emissive:0x07552b,emissiveIntensity:.45}));leaf.position.set(x+(b-1)*1.1,7+b*.65,z);leaf.scale.set(1.25,.7,1);scene.add(leaf);}}
    for(let n=0;n<5;n++){const ring=new THREE.Mesh(new THREE.TorusGeometry(1.2,.12,8,24),new THREE.MeshStandardMaterial({color:0xeaff55,emissive:0x70aa16,emissiveIntensity:.7}));ring.position.set(n%2?9:-9,5+n%3,baseZ-8-n*7);ring.rotation.y=n*.7;scene.add(ring);}
   }else if(w===1){
-   const volcano=new THREE.Mesh(new THREE.ConeGeometry(7,12,7),mat(0x39212a));volcano.position.set(10,3,baseZ-22);scene.add(volcano);
-   const lavaRim=new THREE.Mesh(new THREE.TorusGeometry(2.35,.48,10,28),new THREE.MeshStandardMaterial({color:0xff4b16,emissive:0xff2600,emissiveIntensity:2}));lavaRim.position.set(10,8.5,baseZ-22);scene.add(lavaRim);
-   for(let n=0;n<5;n++){const shard=new THREE.Mesh(new THREE.DodecahedronGeometry(1.3+n%2*.6,0),new THREE.MeshStandardMaterial({color:n%2?0x6d3540:0x33202a,emissive:0x8c180d,emissiveIntensity:.35}));shard.position.set(-9+(n%2)*2,1+n%3*1.5,baseZ-7-n*8);shard.rotation.set(n*.5,n,0);scene.add(shard);}
-   for(let n=0;n<3;n++){const stream=new THREE.Mesh(new THREE.CylinderGeometry(.13,.28,6,8),new THREE.MeshBasicMaterial({color:0xff4b16}));stream.position.set(4+n*2,1,baseZ-16-n*9);stream.rotation.z=.25;scene.add(stream);}
+   // الفضاء: كواكب ملونة وحلقات مدارية ونجوم بعيدة
+   const orbitGroup=new THREE.Group();orbitGroup.position.set(10,5,baseZ-23);
+   const planet=new THREE.Mesh(new THREE.SphereGeometry(5.2,32,24),new THREE.MeshStandardMaterial({color:0x5267dc,emissive:0x202b8a,emissiveIntensity:.8,metalness:.35,roughness:.35}));orbitGroup.add(planet);
+   const ring=new THREE.Mesh(new THREE.TorusGeometry(7.1,.22,12,64),new THREE.MeshStandardMaterial({color:0x52efff,emissive:0x00bfff,emissiveIntensity:1.5,metalness:.65,roughness:.2}));ring.rotation.set(.65,.2,.3);orbitGroup.add(ring);scene.add(orbitGroup);worldAnimations.push({object:orbitGroup,spin:.28,bob:.25});
+   for(let n=0;n<4;n++){const moon=new THREE.Mesh(new THREE.SphereGeometry(.9+n*.25,16,12),new THREE.MeshStandardMaterial({color:[0xffbd69,0xff78c8,0x9af7ff,0xc5a4ff][n],emissive:0x302060,emissiveIntensity:.4}));moon.position.set(-10+n*5,3+(n%2)*3,baseZ-8-n*8);scene.add(moon);worldAnimations.push({object:moon,spin:.7+n*.12,bob:.35});}
+   for(let n=0;n<18;n++){const star=new THREE.Mesh(new THREE.OctahedronGeometry(.28+(n%3)*.12,0),new THREE.MeshBasicMaterial({color:n%2?0xffffff:0x7df8ff}));star.position.set(-13+(n%7)*4,5+(n%4)*2,baseZ-4-n*4.5);scene.add(star);worldAnimations.push({object:star,spin:.8,bob:.18});}
+   const satellite=new THREE.Group();satellite.position.set(-10,4,baseZ-31);const core=new THREE.Mesh(new THREE.SphereGeometry(.65,16,12),mat(0xf0f4ff));satellite.add(core);for(const side of [-1,1]){const panel=new THREE.Mesh(new THREE.BoxGeometry(1.7,.12,1),mat(0x36c9ff));panel.position.x=side*1.35;satellite.add(panel);}scene.add(satellite);worldAnimations.push({object:satellite,spin:.4,bob:.5});
   }else if(w===2){
-   const iceMat=new THREE.MeshPhysicalMaterial({color:0xb8f5ff,metalness:.18,roughness:.12,transmission:.22,transparent:true,opacity:.88});
-   for(let n=0;n<9;n++){const crystal=new THREE.Mesh(new THREE.ConeGeometry(.9+(n%3)*.45,4+(n%4)*1.7,5),iceMat);crystal.position.set(n%2?9:-9,1.5+(n%3)*.5,baseZ-5-n*4.5);crystal.rotation.z=(n%2?.18:-.18);scene.add(crystal);}
-   for(let n=0;n<3;n++){const arch=new THREE.Mesh(new THREE.TorusGeometry(2.4+n*.45,.16,8,32),iceMat);arch.position.set(n===1?10:-10,4,baseZ-12-n*14);arch.rotation.y=Math.PI/2;scene.add(arch);}
+   // القلاع: أبراج حجرية وأسوار وأعلام وجسر فوق الوادي
+   const stone=mat(0x8c91a8),darkStone=mat(0x4b5575),gold=mat(0xffd66b);
+   for(let n=0;n<4;n++){const x=n%2?11:-11,z=baseZ-8-n*10;const tower=new THREE.Group();const shaft=new THREE.Mesh(new THREE.CylinderGeometry(1.15,1.45,8,8),stone);shaft.position.y=3.8;tower.add(shaft);const roof=new THREE.Mesh(new THREE.ConeGeometry(1.65,2.8,8),mat(0x9b344d));roof.position.y=9.1;tower.add(roof);const slit=new THREE.Mesh(new THREE.BoxGeometry(.28,1.8,.12),mat(0x25314c));slit.position.set(0,4,1.12);tower.add(slit);tower.position.set(x,0,z);scene.add(tower);const flag=new THREE.Mesh(new THREE.BoxGeometry(1.5,.8,.08),gold);flag.position.set(x+1.3,10.2,z);scene.add(flag);}
+   const wall=block(10,1.3,baseZ-27,2.2,5.5,13,0x626d8e);wall.rotation.y=.08;
+   for(let n=0;n<7;n++){const torch=new THREE.PointLight(0xffa94d,1.2,8);torch.position.set(n%2?9:-9,2.8,baseZ-5-n*6);scene.add(torch);const flame=new THREE.Mesh(new THREE.SphereGeometry(.28,10,8),new THREE.MeshBasicMaterial({color:0xffb347}));flame.position.copy(torch.position);scene.add(flame);}
   }else if(w===3){
-   for(let n=0;n<7;n++){const crystal=new THREE.Mesh(new THREE.OctahedronGeometry(1.3+(n%3)*.55,0),new THREE.MeshStandardMaterial({color:n%2?0xff70d8:0x9c70ff,emissive:0x772cff,emissiveIntensity:1.15,metalness:.35,roughness:.2}));crystal.position.set(n%2?9:-9,2+(n%3)*1.5,baseZ-6-n*6);crystal.rotation.set(n*.4,n*.7,n*.25);scene.add(crystal);}
-   for(let n=0;n<4;n++){const halo=new THREE.Mesh(new THREE.TorusGeometry(2.2+n*.35,.09,8,36),new THREE.MeshBasicMaterial({color:n%2?0x48f5ff:0xff71e8}));halo.position.set(n%2?9:-9,5,baseZ-10-n*10);halo.rotation.set(.8,n*.5,.35);scene.add(halo);}
+   // المستقبل: أبراج نيون وروبوتات لطيفة ومنصات طاقة
+   for(let n=0;n<7;n++){const x=n%2?10:-10,z=baseZ-5-n*6.2,h=5+(n%3)*3;const tower=new THREE.Group();const body=new THREE.Mesh(new THREE.BoxGeometry(2.7,h,2.7),new THREE.MeshStandardMaterial({color:n%2?0x263d77:0x344b89,metalness:.65,roughness:.25,emissive:0x102b75,emissiveIntensity:.7}));body.position.y=h/2;tower.add(body);for(let f=0;f<3;f++){const strip=new THREE.Mesh(new THREE.BoxGeometry(2.85,.12,2.85),new THREE.MeshBasicMaterial({color:f%2?0x4dfaff:0xff5bdb}));strip.position.y=1.5+f*(h/3);tower.add(strip);}tower.position.set(x,0,z);scene.add(tower);}
+   const bot=new THREE.Group();const body=new THREE.Mesh(new THREE.BoxGeometry(1.5,1.7,1),mat(0xb9eaff));body.position.y=1.2;bot.add(body);const head=new THREE.Mesh(new THREE.BoxGeometry(1.25,.9,.9),mat(0xe7f7ff));head.position.y=2.55;bot.add(head);for(let e=-1;e<=1;e+=2){const eye=new THREE.Mesh(new THREE.SphereGeometry(.13,12,8),new THREE.MeshBasicMaterial({color:0x00eaff}));eye.position.set(e*.3,2.6,.48);bot.add(eye);}bot.position.set(10,0,baseZ-34);scene.add(bot);worldAnimations.push({object:bot,spin:.18,bob:.3});
+   const energyRing=new THREE.Mesh(new THREE.TorusGeometry(3,.16,10,48),new THREE.MeshBasicMaterial({color:0x42f5ff}));energyRing.position.set(-10,3,baseZ-24);energyRing.rotation.x=Math.PI/2;scene.add(energyRing);worldAnimations.push({object:energyRing,spin:.9,bob:0});
   }else{
-   const planet=new THREE.Mesh(new THREE.SphereGeometry(5.2,24,18),new THREE.MeshStandardMaterial({color:0x273b9a,emissive:0x171c65,emissiveIntensity:.8,metalness:.35,roughness:.55}));planet.position.set(10,4,baseZ-24);scene.add(planet);
-   const orbit=new THREE.Mesh(new THREE.TorusGeometry(7,.18,10,64),new THREE.MeshStandardMaterial({color:0x39f4ff,emissive:0x00aaff,emissiveIntensity:1.5,metalness:.7}));orbit.position.copy(planet.position);orbit.rotation.set(.55,.2,.3);scene.add(orbit);
-   for(let n=0;n<12;n++){const rock=new THREE.Mesh(new THREE.IcosahedronGeometry(.55+(n%3)*.3,0),new THREE.MeshStandardMaterial({color:n%2?0x6b65a9:0x353b70,emissive:0x2924a0,emissiveIntensity:.5}));rock.position.set(-11+(n%4)*1.4,1+(n%3)*2,baseZ-4-n*3.3);rock.rotation.set(n,n*.4,n*.2);scene.add(rock);}
-   for(let n=0;n<5;n++){const star=new THREE.Mesh(new THREE.OctahedronGeometry(.45,0),new THREE.MeshBasicMaterial({color:0x5df7ff}));star.position.set(n%2?9:-9,7+n%3,baseZ-7-n*8);scene.add(star);}
+   // الجزر السحرية: نخيل وشراع وسفينة وشلالات فوق بحر فيروزي
+   const sea=new THREE.Mesh(new THREE.PlaneGeometry(34,52),new THREE.MeshStandardMaterial({color:0x13b9d1,metalness:.25,roughness:.25,transparent:true,opacity:.78}));sea.rotation.x=-Math.PI/2;sea.position.set(0,-5,baseZ-24);scene.add(sea);
+   for(let n=0;n<4;n++){const x=n%2?11:-11,z=baseZ-8-n*10;const trunk=new THREE.Mesh(new THREE.CylinderGeometry(.22,.42,6,8),mat(0x80502c));trunk.position.set(x,2.7,z);trunk.rotation.z=x>0?.12:-.12;scene.add(trunk);for(let f=0;f<5;f++){const leaf=new THREE.Mesh(new THREE.ConeGeometry(.55,4,5),mat(0x27c878));leaf.position.set(x+Math.cos(f*Math.PI*2/5)*1.2,5.6,z+Math.sin(f*Math.PI*2/5)*1.2);leaf.rotation.z=Math.cos(f*Math.PI*2/5)*.8;leaf.rotation.x=Math.sin(f*Math.PI*2/5)*.8;scene.add(leaf);}}
+   const ship=new THREE.Group();const hull=new THREE.Mesh(new THREE.BoxGeometry(5,1.2,2.2),mat(0x75452c));hull.position.y=.4;ship.add(hull);const mast=new THREE.Mesh(new THREE.CylinderGeometry(.12,.16,5,8),mat(0x5b3928));mast.position.y=3;ship.add(mast);const sail=new THREE.Mesh(new THREE.PlaneGeometry(2.6,3.2),new THREE.MeshStandardMaterial({color:0xfff0cb,side:THREE.DoubleSide}));sail.position.set(.1,3.1,0);ship.add(sail);ship.position.set(10,-1,baseZ-27);scene.add(ship);worldAnimations.push({object:ship,spin:.08,bob:.55});
+   for(let n=0;n<3;n++){const fall=new THREE.Mesh(new THREE.CylinderGeometry(.16,.3,5,8),new THREE.MeshBasicMaterial({color:0x8df6ff,transparent:true,opacity:.7}));fall.position.set(n%2?9:-9,1,baseZ-14-n*11);scene.add(fall);worldAnimations.push({object:fall,spin:.15,bob:.3});}
   }
   // صخور صغيرة عائمة أسفل الطريق لتعطي إحساس الجزر المعلقة
   for(let j=0;j<5;j++){
