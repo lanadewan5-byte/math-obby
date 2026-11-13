@@ -90,7 +90,7 @@ function makeWorld(){
    block(k%2?5:-5,-1.1,z-1,2,.5,2,0xf6d66b);
    // جوهرة اختيارية فوق كل منصة: شجّع اللاعب على القفز والاستكشاف
    const gem=new THREE.Mesh(new THREE.OctahedronGeometry(.62),new THREE.MeshStandardMaterial({color:0x62f5ff,emissive:0x168ba8,emissiveIntensity:1.1}));
-   gem.position.set(laneX+(k%2===0?-1.5:1.5),2.2,z-2.2);scene.add(gem);gemMeshes.push(gem);
+   gem.position.set((k%2===0?-1.5:1.5),2.2,z-2.2);scene.add(gem);gemMeshes.push(gem);
    // سؤال عند كل منصتين فقط، حتى يبقى المسار مليئًا بالحركة
    if(k<5){
     const gate=new THREE.Group();gate.position.set(0,1.5,z-1.5);
