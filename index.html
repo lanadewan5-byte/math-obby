@@ -11,7 +11,7 @@
 #craneIntro{width:min(1040px,97vw);max-height:96vh;overflow:auto;text-align:center;background:linear-gradient(145deg,#102d4b,#1c5270 58%,#247a83);border:2px solid #7ce5ed;border-radius:24px;padding:18px;box-shadow:0 24px 80px #001a2dcc}
 #craneIntro h1{margin:4px 0;color:#ffe38a;font-size:clamp(24px,4vw,38px)}
 #craneIntro p{line-height:1.8;margin:8px auto;max-width:780px}
-#crane3d{height:clamp(210px,34vh,340px);position:relative;margin:12px auto 16px;max-width:850px;overflow:hidden;border-radius:18px;border:2px solid #ffffff66;box-shadow:inset 0 0 35px #09233d66;touch-action:pan-y}
+#crane3d{height:clamp(300px,43vh,430px);position:relative;margin:14px auto 18px;max-width:1000px;overflow:hidden;border-radius:22px;border:3px solid #9cecff;box-shadow:0 16px 45px #00152699,inset 0 0 45px #09233d66;touch-action:none;background:linear-gradient(#79d8ff,#d4f5ff 65%,#75bd83)}
 #crane3d canvas{width:100%;height:100%;display:block}
 #craneLoadLabel{position:absolute;top:12px;left:14px;background:#142d4cdd;color:#ffe28a;border:1px solid #ffffff55;padding:8px 13px;border-radius:12px;font-weight:bold;pointer-events:none}
 .dragHint{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);background:#10233bcc;padding:6px 12px;border-radius:12px;font-size:12px;pointer-events:none;white-space:nowrap}
@@ -23,7 +23,7 @@
 #craneLaunch{display:none;margin-top:14px}
 #craneLaunch.show{display:block}
 #playerName{max-width:320px}
-@media(max-width:600px){#craneIntro{padding:10px}#crane3d{height:220px}.craneStep button{min-width:95px;font-size:14px}}
+@media(max-width:600px){#craneIntro{padding:10px}#crane3d{height:290px}.craneStep button{min-width:95px;font-size:14px}}
 </style>
 </head>
 <body>
@@ -60,16 +60,16 @@
 (function(){
 const tasks=[
  {e:'8 + 3 × (6 − 2)',steps:['(6 − 2)','3 × 4','8 + 12'],choices:[['الجمع +','الجمع'],['الضرب ×','الضرب'],['الأقواس ( )','الأقواس']],correct:['الأقواس','الضرب','الجمع'],why:['نبدأ بالأقواس لأنها تغيّر ترتيب الحل.','بعد الأقواس ننفذ الضرب قبل الجمع.','أخيراً نجمع من اليسار إلى اليمين.']},
- {e:'18 − 2 × 5 + 4',steps:['2 × 5','18 − 10','8 + 4'],choices:[['الطرح −','الطرح'],['الضرب ×','الضرب'],['الجمع +','الجمع']],correct:['الضرب','الطرح','الجمع'],why:['الضرب يسبق الجمع والطرح.','بعد الضرب يصبح لدينا طرح وجمع؛ نبدأ بالطرح لأنه يقع يساراً.','نكمل الجمع.']},
+ {e:'18 + 2 × 5 − 4',steps:['2 × 5','18 + 10','28 − 4'],choices:[['الطرح −','الطرح'],['الضرب ×','الضرب'],['الجمع +','الجمع']],correct:['الضرب','الجمع','الطرح'],why:['الضرب يسبق الجمع والطرح.','بعد الضرب يصبح لدينا جمع وطرح؛ نبدأ بالجمع لأنه يقع على اليسار.','ثم ننفذ الطرح المتبقي.']},
  {e:'36 ÷ 6 × 2',steps:['36 ÷ 6','6 × 2','12'],choices:[['الضرب ×','الضرب'],['القسمة ÷','القسمة'],['الجمع +','الجمع']],correct:['القسمة','الضرب'],why:['القسمة والضرب في المرتبة نفسها؛ نبدأ من اليسار.','ثم ننفذ الضرب.']},
  {e:'20 − 8 + 3',steps:['20 − 8','12 + 3','15'],choices:[['الجمع +','الجمع'],['الطرح −','الطرح'],['الضرب ×','الضرب']],correct:['الطرح','الجمع'],why:['الجمع والطرح في المرتبة نفسها؛ نبدأ من اليسار.','ثم ننفذ الجمع.']}
 ];
-let task=0,step=0,craneScene,craneRenderer,craneCamera,crane,hook,load,blocks=[],craneFrame=0,dragging=false,lastX=0;
+let task=0,step=0,craneScene,craneRenderer,craneCamera,crane,hook,load,cable,stack,blocks=[],craneFrame=0,dragging=false,lastX=0,delivering=false,delivery=null,builtBlocks=0;
 const $=id=>document.getElementById(id);
 function buildCrane3D(){
  const host=$('crane3d');if(!host||!window.THREE)return;
  const T=window.THREE;craneScene=new T.Scene();craneScene.background=new T.Color(0x8bd8f4);craneScene.fog=new T.Fog(0x8bd8f4,18,48);
- craneCamera=new T.PerspectiveCamera(42,host.clientWidth/host.clientHeight,.1,100);craneCamera.position.set(10,9,15);craneCamera.lookAt(0,3,0);
+ craneCamera=new T.PerspectiveCamera(42,host.clientWidth/host.clientHeight,.1,100);craneCamera.position.set(13,11,19);craneCamera.lookAt(0,3.1,1);
  craneRenderer=new T.WebGLRenderer({antialias:true,alpha:false});craneRenderer.setPixelRatio(Math.min(devicePixelRatio,2));craneRenderer.setSize(host.clientWidth,host.clientHeight);craneRenderer.shadowMap.enabled=true;craneRenderer.shadowMap.type=T.PCFSoftShadowMap;host.appendChild(craneRenderer.domElement);
  craneScene.add(new T.HemisphereLight(0xe9faff,0x52617b,2));const sun=new T.DirectionalLight(0xffffff,2.5);sun.position.set(8,16,9);sun.castShadow=true;craneScene.add(sun);
  const mat=(c,metal=0)=>new T.MeshStandardMaterial({color:c,metalness:metal,roughness:.42});
@@ -80,18 +80,21 @@ function buildCrane3D(){
  for(let y=.6;y<7.7;y+=.85){const brace=new T.Mesh(new T.BoxGeometry(.85,.12,.12),mat(0xf5bc3f,.35));brace.position.set(0,y,.38);crane.add(brace);}
  const boom=new T.Mesh(new T.BoxGeometry(10,.55,.65),mat(0xf3b832,.35));boom.position.set(4,8,0);boom.castShadow=true;crane.add(boom);
  const counter=new T.Mesh(new T.BoxGeometry(2,.8,.9),mat(0x354b62,.3));counter.position.set(-1,8,0);crane.add(counter);
- const cable=new T.Mesh(new T.CylinderGeometry(.045,.045,3,8),mat(0x26394b));cable.position.set(7,6.1,0);crane.add(cable);hook=new T.Group();hook.position.set(7,4.55,0);crane.add(hook);
+ cable=new T.Mesh(new T.CylinderGeometry(.045,.045,3,10),mat(0x26394b));cable.position.set(7,6.1,0);crane.add(cable);hook=new T.Group();hook.position.set(7,4.55,0);crane.add(hook);
  const hookShape=new T.Mesh(new T.TorusGeometry(.28,.07,8,18,Math.PI*1.6),mat(0xffd04d,.45));hookShape.rotation.z=Math.PI;hook.add(hookShape);
  load=new T.Mesh(new T.BoxGeometry(1.8,1.1,1.5),mat(0xffcf54,.25));load.position.set(7,3.7,0);load.castShadow=true;crane.add(load);
  const towerBase=new T.Mesh(new T.BoxGeometry(2.4,.5,2.4),mat(0x344b62,.2));towerBase.position.y=.1;crane.add(towerBase);
- const stack=new T.Group();stack.position.set(4,0,3);craneScene.add(stack);
- for(let i=0;i<4;i++){const b=new T.Mesh(new T.BoxGeometry(1.9,.85,1.8),mat([0x39b9a6,0x5389df,0xffbd4a,0xe87979][i],.15));b.position.set(0,.45+i*.88,0);b.castShadow=true;b.receiveShadow=true;stack.add(b);blocks.push(b);}
+ stack=new T.Group();stack.position.set(4,0,3);craneScene.add(stack);
+ const buildPad=new T.Mesh(new T.BoxGeometry(3.2,.35,3.2),mat(0x344b62,.2));buildPad.position.set(4,.02,3);buildPad.receiveShadow=true;craneScene.add(buildPad);
+ const blockMats=[0x39b9a6,0x5389df,0xffbd4a,0xe87979,0x9b78ff,0x36c6e8,0xff8d4d,0x65c98a,0xe6c94c,0xd77acb];
+ for(let i=0;i<10;i++){const b=new T.Mesh(new T.BoxGeometry(1.9,.82,1.8),mat(blockMats[i],.18));b.position.set(-9+(i%5)*1.05,.55,5+Math.floor(i/5)*1.15);b.castShadow=true;b.receiveShadow=true;craneScene.add(b);blocks.push(b);}
  const sign=new T.Mesh(new T.BoxGeometry(4,.9,.15),mat(0x193453));sign.position.set(0,6,-4);craneScene.add(sign);
  const treeMat=mat(0x287b54);for(let i=0;i<7;i++){const trunk=new T.Mesh(new T.CylinderGeometry(.15,.2,1.3,7),mat(0x795334));trunk.position.set(-10+i*3,.35,-7);craneScene.add(trunk);const top=new T.Mesh(new T.ConeGeometry(1.1,2.6,8),treeMat);top.position.set(-10+i*3,2,-7);craneScene.add(top);}
  host.addEventListener('pointerdown',e=>{dragging=true;lastX=e.clientX;host.setPointerCapture(e.pointerId)});host.addEventListener('pointermove',e=>{if(!dragging)return;const d=e.clientX-lastX;lastX=e.clientX;craneScene.rotation.y+=d*.008});host.addEventListener('pointerup',()=>dragging=false);host.addEventListener('pointercancel',()=>dragging=false);
- function loop(){if(!craneRenderer)return;craneFrame+=.016;hook.position.y=4.55+Math.sin(craneFrame*1.5)*.15;crane.rotation.y=Math.sin(craneFrame*.22)*.035;craneRenderer.render(craneScene,craneCamera);requestAnimationFrame(loop)}loop();
+ function loop(){if(!craneRenderer)return;craneFrame+=.016;if(delivery){delivery.t=Math.min(1,delivery.t+.018);const p=delivery.t<.22?delivery.t/.22:delivery.t>.78?(1-delivery.t)/.22:1;const x=delivery.from.x+(delivery.to.x-delivery.from.x)*delivery.t,z=delivery.from.z+(delivery.to.z-delivery.from.z)*delivery.t;const y=delivery.from.y+(delivery.to.y-delivery.from.y)*delivery.t+(delivery.t<.22?(1-p)*.25:delivery.t>.78?(1-p)*.25:0);load.position.set(x,y,z);hook.position.set(x,y+.8,z);const cableLen=Math.max(.6,8-(y+.8));cable.scale.y=cableLen/3;cable.position.set(x,8-cableLen/2,z);if(delivery.t>=1){const placed=new T.Mesh(new T.BoxGeometry(1.9,.82,1.8),load.material.clone());placed.position.set(0,.45+builtBlocks*.86,0);placed.castShadow=true;placed.receiveShadow=true;stack.add(placed);builtBlocks++;load.visible=false;delivery=null;delivering=false;}}else{hook.position.set(7,4.55+Math.sin(craneFrame*1.5)*.08,0);cable.scale.y=1;cable.position.set(7,6.1,0);}crane.rotation.y=Math.sin(craneFrame*.22)*.018;craneRenderer.render(craneScene,craneCamera);requestAnimationFrame(loop)}loop();
  window.addEventListener('resize',()=>{if(!craneRenderer)return;const w=host.clientWidth,h=host.clientHeight;craneCamera.aspect=w/h;craneCamera.updateProjectionMatrix();craneRenderer.setSize(w,h)});
 }
+function deliverBlock(){if(delivering||!load||!stack)return;delivering=true;load.visible=true;load.material.color.setHex([0x39b9a6,0x5389df,0xffbd4a,0xe87979,0x9b78ff,0x36c6e8,0xff8d4d,0x65c98a,0xe6c94c,0xd77acb][builtBlocks%10]);delivery={t:0,from:{x:7,y:3.7,z:0},to:{x:7,y:.72+builtBlocks*.86,z:4}};}
 function render(){
  const t=tasks[task];$('craneExpression').textContent=t.e;
  $('craneProgress').textContent='المهمة '+(task+1)+' من '+tasks.length+' · الخطوة '+(step+1)+' من '+t.correct.length;
@@ -103,7 +106,7 @@ function choose(key,button){
  const t=tasks[task],feedback=$('craneFeedback');
  if(key!==t.correct[step]){feedback.textContent='جرّب مرة أخرى. تذكّر: عند تساوي الأولوية نبدأ من اليسار.';button.animate([{transform:'translateX(-5px)'},{transform:'translateX(5px)'},{transform:'translateX(0)'}],{duration:220});return;}
  feedback.textContent='صحيح! '+t.why[step];$('craneLoadLabel').textContent=t.steps[step];
- if(load){load.material.color.setHex([0xffcf54,0x54d7c2,0x77aaff,0xff8eaa][task%4]);load.position.y=5.4;setTimeout(()=>{if(load)load.position.y=3.7},550);}
+ deliverBlock();
  [...$('craneChoices').children].forEach(b=>b.disabled=true);step++;
  if(step===t.correct.length){task++;step=0;if(task===tasks.length){$('craneProgress').textContent='اكتملت مهمّة البرج!';$('craneExpression').textContent='🏗️ تم بناء البرج بنجاح';$('cranePrompt').textContent='أصبحت جاهزاً لاستكشاف العوالم الخمسة.';$('craneChoices').innerHTML='';feedback.textContent='أتقنت ترتيب العمليات، بما فيه الحل من اليسار إلى اليمين.';$('craneLaunch').classList.add('show');return;}setTimeout(render,1000);}else setTimeout(render,650);
 }
