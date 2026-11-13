@@ -17,7 +17,19 @@
 #crane3d{position:fixed;inset:0;width:100vw;height:100dvh;margin:0;max-width:none;overflow:hidden;border:0;border-radius:0;box-shadow:none;touch-action:none;background:linear-gradient(#79d8ff,#d4f5ff 65%,#75bd83);z-index:0}
 #crane3d canvas{width:100%;height:100%;display:block}
 #craneLoadLabel{top:auto;left:16px;bottom:18px}
-#craneIntro>#craneProgress,#craneIntro>#craneExpression,#craneIntro>#cranePrompt,#craneIntro>#craneChoices,#craneIntro>#craneFeedback,#craneIntro>#craneLaunch{position:relative;z-index:2}
+#craneIntro>div:first-child,#craneIntro>h1,#craneIntro>p{position:relative;z-index:2;align-self:flex-start;margin-left:24px}
+#craneIntro>div:first-child{margin-top:14px}
+#craneIntro>h1{margin-left:24px}
+#craneIntro>p{max-width:420px;text-align:right}
+#craneSidePanel{position:absolute;z-index:4;right:22px;top:50%;transform:translateY(-42%);width:min(370px,32vw);max-height:78vh;overflow:auto;padding:18px;background:linear-gradient(145deg,#102d4bf2,#174e65f2);border:2px solid #9cecff;border-radius:22px;box-shadow:0 18px 55px #001526aa;text-align:center}
+#craneSidePanel #craneProgress{margin:0 0 10px;background:#0c2239;padding:8px;border-radius:12px}
+#craneSidePanel #craneExpression{margin:8px 0!important;padding:10px 6px;background:#0c2239;border-radius:14px;font-size:clamp(24px,3vw,36px)!important;overflow-wrap:anywhere}
+#craneSidePanel #cranePrompt,#craneSidePanel #craneFeedback{background:#0c2239;padding:9px 10px;border-radius:12px;margin:7px 0!important}
+#craneSidePanel .craneStep{margin:8px 0;padding:8px;background:#0c2239;border-radius:14px;display:grid;grid-template-columns:1fr;gap:7px}
+#craneSidePanel .craneStep button{width:100%;min-height:44px}
+#craneSidePanel #craneLaunch{margin:8px 0 0;padding:10px;background:#0c2239;border-radius:14px}
+#crane3d canvas{cursor:grab}
+#crane3d canvas:active{cursor:grabbing}
 #craneProgress{margin-top:auto;background:#102d4be8;padding:8px 16px;border-radius:13px;border:1px solid #9cecff}
 #craneExpression{margin:5px 10px!important;padding:5px 18px;border-radius:14px;background:#102d4be8;text-shadow:0 2px 5px #000}
 #cranePrompt,#craneFeedback{background:#102d4be8;padding:7px 14px;border-radius:12px;margin:3px 10px!important}
@@ -36,7 +48,7 @@
 #craneLaunch{display:none;margin-top:14px}
 #craneLaunch.show{display:block}
 #playerName{max-width:320px}
-@media(max-width:600px){#craneIntro>div:first-child{margin-top:8px}#craneIntro>p{font-size:13px;margin:3px 8px;padding:5px 9px}#craneProgress{font-size:13px}#craneExpression{font-size:25px!important}#craneIntro .craneStep{gap:5px;padding:5px;margin-bottom:8px}#craneIntro .craneStep button{min-width:88px;font-size:13px;padding:9px 7px}#craneIntro>#craneFeedback{font-size:12px}#craneLaunch{margin-bottom:8px;padding:6px 10px}#craneIntro .dragHint{font-size:10px;bottom:8px;right:8px}#craneLoadLabel{bottom:8px;left:8px}}
+@media(max-width:700px){#craneIntro>div:first-child{margin:7px auto 0;align-self:center;font-size:25px!important}#craneIntro>h1{align-self:center;margin:0 8px;font-size:22px}#craneIntro>p{display:none}#craneSidePanel{top:auto;bottom:8px;right:8px;left:8px;transform:none;width:auto;max-height:49dvh;padding:9px 11px;border-radius:17px}#craneSidePanel #craneProgress{font-size:12px;padding:5px;margin-bottom:5px}#craneSidePanel #craneExpression{font-size:23px!important;margin:4px 0!important;padding:4px}#craneSidePanel #cranePrompt,#craneSidePanel #craneFeedback{font-size:12px;margin:4px 0!important;padding:5px}#craneSidePanel .craneStep{grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin:4px 0;padding:4px}#craneSidePanel .craneStep button{min-width:0;min-height:38px;font-size:12px;padding:6px 3px}#craneSidePanel #craneLaunch{padding:5px;margin-top:4px}#craneIntro .dragHint{font-size:10px;bottom:51dvh;right:8px}#craneLoadLabel{bottom:51dvh;left:8px}}
 </style>
 </head>
 <body>
@@ -55,13 +67,15 @@
  <div style="font-size:42px">🏗️ 🚧 🧱</div><h1>مهمة بناء برج العمليات</h1>
  <p>قبل دخول العوالم الخمسة، ساعد الرافعة على ترتيب العمليات الحسابية. اختر العملية التي يجب تنفيذها أولاً، ثم التالية، حتى يكتمل البرج!</p>
  <div id="crane3d" aria-label="مشهد رافعة ثلاثية الأبعاد تفاعلي"><div id="craneLoadLabel">🧱</div><div class="dragHint">اسحب المشهد لتدوير الرافعة ↔</div></div>
- <div id="craneProgress">التحدي 1 من 3 · الخطوة 1 من 3</div>
- <h2 id="craneExpression" style="font-size:clamp(25px,5vw,38px);color:#fff">8 + 3 × (6 − 2)</h2>
- <p id="cranePrompt">أي عملية ننفذ أولاً؟</p><div class="craneStep" id="craneChoices"></div>
- <div id="craneFeedback" aria-live="polite">تذكّر: الأقواس أولاً، ثم الضرب والقسمة، ثم الجمع والطرح.</div>
- <div id="craneLaunch"><p style="color:#c8f8e5;font-weight:900">🎉 أحسنت! اكتمل برج العمليات وفتحت بوابة العوالم الخمسة.</p>
- <input id="playerName" class="field craneName" placeholder="اسم الطالب/ة" maxlength="30">
- <button onclick="startGame()">ادخل المغامرة 🌍</button></div>
+ <section id="craneSidePanel" aria-label="لوحة السؤال">
+  <div id="craneProgress">التحدي 1 من 3 · الخطوة 1 من 3</div>
+  <h2 id="craneExpression" style="font-size:clamp(25px,5vw,38px);color:#fff">8 + 3 × (6 − 2)</h2>
+  <p id="cranePrompt">أي عملية ننفذ أولاً؟</p><div class="craneStep" id="craneChoices"></div>
+  <div id="craneFeedback" aria-live="polite">تذكّر: الأقواس أولاً، ثم الضرب والقسمة، ثم الجمع والطرح.</div>
+  <div id="craneLaunch"><p style="color:#c8f8e5;font-weight:900">🎉 أحسنت! اكتمل برج العمليات وفتحت بوابة العوالم الخمسة.</p>
+  <input id="playerName" class="field craneName" placeholder="اسم الطالب/ة" maxlength="30">
+  <button onclick="startGame()">ادخل المغامرة 🌍</button></div>
+ </section>
  </div></div>
 <div id="worldToast">🌍 العالم الجديد</div>
 <div id="pause" class="overlay hidden"><div class="card"><h1>استراحة قصيرة</h1><p>المغامرة متوقفة مؤقتًا.</p><button onclick="togglePause()">متابعة اللعب</button></div></div>
