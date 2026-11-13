@@ -96,7 +96,7 @@ function makeWorld(){
     const gate=new THREE.Group();gate.position.set(0,1.5,z-1.5);
     const frame= new THREE.Mesh(new THREE.BoxGeometry(4.8,3.5,.55),mat(0xffe066));gate.add(frame);
     const inner=new THREE.Mesh(new THREE.BoxGeometry(3.8,2.7,.65),new THREE.MeshStandardMaterial({color:0x162a55,emissive:0x254b9b,emissiveIntensity:.8}));gate.add(inner);
-    scene.add(gate);gateMeshes.push({group:gate,index:w*5+k,world:w,z:z-1.5,done:false});
+    scene.add(gate);gateMeshes.push({group:gate,index:w*5+k,world:w,x:0,z:z-1.5,done:false});
    }
   }
   // world sign
