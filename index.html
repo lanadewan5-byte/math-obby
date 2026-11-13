@@ -8,11 +8,24 @@
 @media(max-width:650px){.answers{grid-template-columns:1fr}.bottom .hint{font-size:11px}.meter{width:95px}#touch,#jump{display:flex}}
 
 /* Interactive 3D crane gateway */
-#craneIntro{width:min(1040px,97vw);max-height:96vh;overflow:auto;text-align:center;background:linear-gradient(145deg,#102d4b,#1c5270 58%,#247a83);border:2px solid #7ce5ed;border-radius:24px;padding:18px;box-shadow:0 24px 80px #001a2dcc}
-#craneIntro h1{margin:4px 0;color:#ffe38a;font-size:clamp(24px,4vw,38px)}
-#craneIntro p{line-height:1.8;margin:8px auto;max-width:780px}
-#crane3d{height:clamp(300px,43vh,430px);position:relative;margin:14px auto 18px;max-width:1000px;overflow:hidden;border-radius:22px;border:3px solid #9cecff;box-shadow:0 16px 45px #00152699,inset 0 0 45px #09233d66;touch-action:none;background:linear-gradient(#79d8ff,#d4f5ff 65%,#75bd83)}
+/* Full-screen 3D crane world: the operator and crane fill the entire game screen */
+#welcome{padding:0;background:transparent;overflow:hidden}
+#craneIntro{position:relative;width:100vw;height:100dvh;max-height:none;overflow:hidden;text-align:center;background:transparent;border:0;border-radius:0;padding:0;box-shadow:none;display:flex;flex-direction:column;align-items:center;justify-content:space-between}
+#craneIntro>div:first-child{position:relative;z-index:2;margin-top:14px;font-size:28px!important;text-shadow:0 3px 8px #10243b}
+#craneIntro h1{position:relative;z-index:2;margin:2px 12px 0;color:#ffe38a;font-size:clamp(23px,3vw,36px);text-shadow:0 3px 9px #10243b}
+#craneIntro>p{position:relative;z-index:2;line-height:1.6;margin:4px 12px;max-width:760px;padding:7px 15px;border-radius:14px;background:#102d4bd9;border:1px solid #9cecff88}
+#crane3d{position:fixed;inset:0;width:100vw;height:100dvh;margin:0;max-width:none;overflow:hidden;border:0;border-radius:0;box-shadow:none;touch-action:none;background:linear-gradient(#79d8ff,#d4f5ff 65%,#75bd83);z-index:0}
 #crane3d canvas{width:100%;height:100%;display:block}
+#craneLoadLabel{top:auto;left:16px;bottom:18px}
+#craneIntro>#craneProgress,#craneIntro>#craneExpression,#craneIntro>#cranePrompt,#craneIntro>#craneChoices,#craneIntro>#craneFeedback,#craneIntro>#craneLaunch{position:relative;z-index:2}
+#craneProgress{margin-top:auto;background:#102d4be8;padding:8px 16px;border-radius:13px;border:1px solid #9cecff}
+#craneExpression{margin:5px 10px!important;padding:5px 18px;border-radius:14px;background:#102d4be8;text-shadow:0 2px 5px #000}
+#cranePrompt,#craneFeedback{background:#102d4be8;padding:7px 14px;border-radius:12px;margin:3px 10px!important}
+#craneIntro .craneStep{margin:4px 8px 12px;padding:8px;background:#102d4be8;border:1px solid #9cecff88;border-radius:16px}
+#craneLaunch{margin:0 10px 14px;padding:10px 18px;background:#102d4bf2;border:1px solid #9cecff;border-radius:16px}
+#craneIntro .dragHint{bottom:18px;left:auto;right:16px;transform:none;background:#102d4be8}
+#crane3d canvas{cursor:grab}
+#crane3d canvas:active{cursor:grabbing}
 #craneLoadLabel{position:absolute;top:12px;left:14px;background:#142d4cdd;color:#ffe28a;border:1px solid #ffffff55;padding:8px 13px;border-radius:12px;font-weight:bold;pointer-events:none}
 .dragHint{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);background:#10233bcc;padding:6px 12px;border-radius:12px;font-size:12px;pointer-events:none;white-space:nowrap}
 .craneStep{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin:12px 0}
@@ -23,7 +36,7 @@
 #craneLaunch{display:none;margin-top:14px}
 #craneLaunch.show{display:block}
 #playerName{max-width:320px}
-@media(max-width:600px){#craneIntro{padding:10px}#crane3d{height:290px}.craneStep button{min-width:95px;font-size:14px}}
+@media(max-width:600px){#craneIntro>div:first-child{margin-top:8px}#craneIntro>p{font-size:13px;margin:3px 8px;padding:5px 9px}#craneProgress{font-size:13px}#craneExpression{font-size:25px!important}#craneIntro .craneStep{gap:5px;padding:5px;margin-bottom:8px}#craneIntro .craneStep button{min-width:88px;font-size:13px;padding:9px 7px}#craneIntro>#craneFeedback{font-size:12px}#craneLaunch{margin-bottom:8px;padding:6px 10px}#craneIntro .dragHint{font-size:10px;bottom:8px;right:8px}#craneLoadLabel{bottom:8px;left:8px}}
 </style>
 </head>
 <body>
