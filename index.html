@@ -69,10 +69,11 @@ const ground=box(scene,110,.5,110,mats.grass,0,-.35,0,false);
 box(scene,110,.12,12,mats.road,0,-.04,-13,false);box(scene,12,.13,90,mats.road,17,-.03,0,false);
 for(let i=-48;i<50;i+=5){box(scene,.22,.03,1.8,mats.yellow,i,-.0,-13.1,false)}
 // City skyline and colorful buildings
-for(let i=0;i<22;i++){const side=i%2?1:-1,x=side*(13+Math.random()*27),z=-25+Math.random()*48,w=4+Math.random()*5,h=5+Math.random()*19,d=4+Math.random()*5;const colors=[0x8a9ee7,0xf4a7a1,0x7ac8bd,0xf0c66d,0x9aafd0];const b=box(scene,w,h,d,mat(colors[i%colors.length]),x,h/2-.1,z);for(let y=2;y<h-1;y+=3)for(let xx=-w/2+.7;xx<w/2-.3;xx+=1.35)box(scene,.65,.9,.06,mats.glass,x+xx,y,z+d/2+.04,false);box(scene,w+.25,.35,d+.25,mats.white,x,h+.1,z)}
+const collisionZones=[];
+for(let i=0;i<22;i++){const side=i%2?1:-1,x=side*(13+Math.random()*27),z=-25+Math.random()*48,w=4+Math.random()*5,h=5+Math.random()*19,d=4+Math.random()*5;const colors=[0x8a9ee7,0xf4a7a1,0x7ac8bd,0xf0c66d,0x9aafd0];const b=box(scene,w,h,d,mat(colors[i%colors.length]),x,h/2-.1,z);for(let y=2;y<h-1;y+=3)for(let xx=-w/2+.7;xx<w/2-.3;xx+=1.35)box(scene,.65,.9,.06,mats.glass,x+xx,y,z+d/2+.04,false);box(scene,w+.25,.35,d+.25,mats.white,x,h+.1,z);collisionZones.push({x,z,rx:w/2+.5,rz:d/2+.5})}
 // road barriers and props
-for(let i=0;i<10;i++){const x=-14+i*3;box(scene,.45,1.1,.45,mats.orange,x,.55,-5);box(scene,.6,.15,.6,mats.white,x,1.15,-5)}
-for(let i=0;i<7;i++){const x=8+i*1.7;box(scene,1.2,.9,1.1,i%2?mats.orange:mats.blue,x,.45,4);box(scene,1.3,.12,1.2,mats.white,x,.95,4)}
+for(let i=0;i<10;i++){const x=-14+i*3;box(scene,.45,1.1,.45,mats.orange,x,.55,-5);box(scene,.6,.15,.6,mats.white,x,1.15,-5);collisionZones.push({x,z:-5,rx:.55,rz:.55})}
+for(let i=0;i<7;i++){const x=8+i*1.7;box(scene,1.2,.9,1.1,i%2?mats.orange:mats.blue,x,.45,4);box(scene,1.3,.12,1.2,mats.white,x,.95,4);collisionZones.push({x,z:4,rx:.9,rz:.8})}
 // Clouds
 const cloudMat=new THREE.MeshStandardMaterial({color:0xffffff,roughness:1});
 const clouds=[];
@@ -81,12 +82,12 @@ function makeSign(text,x,y,z,w=7,h=2){const c=document.createElement('canvas');c
 makeSign('موقع بناء برج العمليات',0,5,-7,9,2.6);
 // construction pad and tower foundation
 box(scene,15,.5,15,mat(0x7e8b99),0,.0,0);box(scene,12,.12,12,mat(0x394e62),0,.31,0);
-box(scene,4,.5,4,mat(0x263b51),0,.62,0);
+box(scene,4,.5,4,mat(0x263b51),0,.62,0);collisionZones.push({x:0,z:0,rx:2.25,rz:2.25});
 const towerGroup=new THREE.Group();scene.add(towerGroup);
 const baseBlock=box(towerGroup,3.2,.75,3.2,mat(0x66869b),0,1.05,0);baseBlock.material=mat(0x66869b);
 // Crane: mast, jib, trolley, cable and hook
 const crane=new THREE.Group();scene.add(crane);crane.position.set(-7,0,-2);
-box(crane,.75,10,.75,mat(0xe9a72d),0,5,0);box(crane,1.05,.65,1.05,mat(0x46566a),0,.35,0);
+box(crane,.75,10,.75,mat(0xe9a72d),0,5,0);box(crane,1.05,.65,1.05,mat(0x46566a),0,.35,0);collisionZones.push({x:-7,z:-2,rx:.8,rz:.8});
 box(crane,12,.55,.65,mat(0xe9a72d),2,10,0);box(crane,3,.3,.6,mat(0x374b63),-5,10,0);
 for(let i=0;i<6;i++){const brace=box(crane,.12,1.1,.12,mat(0x52677c),-3+i*1.8,9.45,0);brace.rotation.z=.8}
 const trolley=new THREE.Group();crane.add(trolley);trolley.position.set(9,9.5,0);box(trolley,1,.45,.8,mat(0x263b51),0,0,0);
@@ -146,8 +147,8 @@ function animate(){requestAnimationFrame(animate);const dt=Math.min(clock.getDel
 clouds.forEach(c=>{c.position.x+=c.userData.speed*dt;if(c.position.x>48)c.position.x=-48});
 workers.forEach((w,i)=>{w.rotation.y=Math.sin(time*.7+i)*.12});
 zoneRing.rotation.z=time*.25;zoneRing.material.emissiveIntensity=.35+Math.sin(time*3)*.2;
-if(gameStarted&&!buildOpen&&!gameWon){let dx=0,dz=0;if(keys.KeyW||keys.ArrowUp)dz-=1;if(keys.KeyS||keys.ArrowDown)dz+=1;if(keys.KeyA||keys.ArrowLeft)dx-=1;if(keys.KeyD||keys.ArrowRight)dx+=1;const moving=dx!==0||dz!==0;if(moving){const len=Math.hypot(dx,dz);dx/=len;dz/=len;player.position.x+=dx*7*dt;player.position.z+=dz*7*dt;player.rotation.y=Math.atan2(dx,dz);const swing=Math.sin(time*12)*.35;legL.rotation.x=swing;legR.rotation.x=-swing;armL.rotation.x=-swing*.7;armR.rotation.x=swing*.7}else{legL.rotation.x=legR.rotation.x=armL.rotation.x=armR.rotation.x=0}
-player.position.x=THREE.MathUtils.clamp(player.position.x,-18,18);player.position.z=THREE.MathUtils.clamp(player.position.z,-20,13);
+if(gameStarted&&!buildOpen&&!gameWon){const previousX=player.position.x,previousZ=player.position.z;let dx=0,dz=0;if(keys.KeyW||keys.ArrowUp)dz-=1;if(keys.KeyS||keys.ArrowDown)dz+=1;if(keys.KeyA||keys.ArrowLeft)dx-=1;if(keys.KeyD||keys.ArrowRight)dx+=1;const moving=dx!==0||dz!==0;if(moving){const len=Math.hypot(dx,dz);dx/=len;dz/=len;player.position.x+=dx*7*dt;player.position.z+=dz*7*dt;player.rotation.y=Math.atan2(dx,dz);const swing=Math.sin(time*12)*.35;legL.rotation.x=swing;legR.rotation.x=-swing;armL.rotation.x=-swing*.7;armR.rotation.x=swing*.7}else{legL.rotation.x=legR.rotation.x=armL.rotation.x=armR.rotation.x=0}
+player.position.x=THREE.MathUtils.clamp(player.position.x,-18,18);player.position.z=THREE.MathUtils.clamp(player.position.z,-20,13);if(collisionZones.some(o=>Math.abs(player.position.x-o.x)<o.rx&&Math.abs(player.position.z-o.z)<o.rz)){player.position.x=previousX;player.position.z=previousZ}
 if(!onGround){velocityY-=20*dt;player.position.y+=velocityY*dt;if(player.position.y<=.05){player.position.y=.05;velocityY=0;onGround=true}}
 nearZone=Math.hypot(player.position.x,player.position.z)<4.3;if(nearZone){$('hint').textContent='✨ حان وقت البناء يا مهندس! اضغط E أو Enter لفتح لوحة التحدي.';if(keys.KeyE||keys.Enter){keys.KeyE=keys.Enter=false;openBuild()}}else{$('hint').textContent='تحرّك نحو منطقة البناء المضيئة في منتصف الموقع. اقترب منها واضغط E.'}
 }
