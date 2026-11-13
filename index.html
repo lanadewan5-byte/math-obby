@@ -82,7 +82,7 @@ function buildCrane3D(){
  const counter=new T.Mesh(new T.BoxGeometry(2,.8,.9),mat(0x354b62,.3));counter.position.set(-1,8,0);crane.add(counter);
  cable=new T.Mesh(new T.CylinderGeometry(.045,.045,3,10),mat(0x26394b));cable.position.set(7,6.1,0);crane.add(cable);hook=new T.Group();hook.position.set(7,4.55,0);crane.add(hook);
  const hookShape=new T.Mesh(new T.TorusGeometry(.28,.07,8,18,Math.PI*1.6),mat(0xffd04d,.45));hookShape.rotation.z=Math.PI;hook.add(hookShape);
- load=new T.Mesh(new T.BoxGeometry(1.8,1.1,1.5),mat(0xffcf54,.25));load.position.set(7,3.7,0);load.castShadow=true;crane.add(load);
+ load=new T.Mesh(new T.BoxGeometry(1.8,1.1,1.5),mat(0xffcf54,.25));load.position.set(7,3.7,0);load.castShadow=true;load.visible=false;crane.add(load);
  const towerBase=new T.Mesh(new T.BoxGeometry(2.4,.5,2.4),mat(0x344b62,.2));towerBase.position.y=.1;crane.add(towerBase);
  stack=new T.Group();stack.position.set(4,0,3);craneScene.add(stack);
  const buildPad=new T.Mesh(new T.BoxGeometry(3.2,.35,3.2),mat(0x344b62,.2));buildPad.position.set(4,.02,3);buildPad.receiveShadow=true;craneScene.add(buildPad);
@@ -108,7 +108,7 @@ function choose(key,button){
  feedback.textContent='صحيح! '+t.why[step];$('craneLoadLabel').textContent=t.steps[step];
  deliverBlock();
  [...$('craneChoices').children].forEach(b=>b.disabled=true);step++;
- if(step===t.correct.length){task++;step=0;if(task===tasks.length){$('craneProgress').textContent='اكتملت مهمّة البرج!';$('craneExpression').textContent='🏗️ تم بناء البرج بنجاح';$('cranePrompt').textContent='أصبحت جاهزاً لاستكشاف العوالم الخمسة.';$('craneChoices').innerHTML='';feedback.textContent='أتقنت ترتيب العمليات، بما فيه الحل من اليسار إلى اليمين.';$('craneLaunch').classList.add('show');return;}setTimeout(render,1000);}else setTimeout(render,650);
+ if(step===t.correct.length){task++;step=0;if(task===tasks.length){$('craneProgress').textContent='اكتملت مهمّة البرج!';$('craneExpression').textContent='🏗️ تم بناء البرج بنجاح';$('cranePrompt').textContent='أصبحت جاهزاً لاستكشاف العوالم الخمسة.';$('craneChoices').innerHTML='';feedback.textContent='أتقنت ترتيب العمليات، بما فيه الحل من اليسار إلى اليمين.';$('craneLaunch').classList.add('show');return;}setTimeout(render,1000);}else setTimeout(render,1100);
 }
 window.addEventListener('three-ready',buildCrane3D,{once:true});if(window.THREE)buildCrane3D();render();
 })();
