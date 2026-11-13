@@ -38,35 +38,9 @@ setTimeout(function(){if(typeof window.startGame!=='function'){const h=document.
 </script>
 <script type="module">
 import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
-const defaultQuestions=[
-{w:0,q:"(12 + 8) × 3",a:["36","60","20"],c:1,e:"الأقواس: 12 + 8 = 20، ثم 20 × 3 = 60."},
-{w:0,q:"6 × (9 − 4) + 2",a:["32","30","26"],c:0,e:"القوس: 9 − 4 = 5، ثم 6 × 5 = 30، ثم 30 + 2 = 32."},
-{w:0,q:"(24 ÷ 6) + 15",a:["19","11","4"],c:0,e:"القوس: 24 ÷ 6 = 4، ثم 4 + 15 = 19."},
-{w:0,q:"40 − (5 × 6) + 4",a:["14","10","34"],c:0,e:"القوس: 5 × 6 = 30، ثم 40 − 30 = 10، ثم 10 + 4 = 14."},
-{w:0,q:"(18 + 12) ÷ 5 + 7",a:["13","6","12"],c:0,e:"القوس: 18 + 12 = 30، ثم 30 ÷ 5 = 6، ثم 6 + 7 = 13."},
-{w:1,q:"7 × 8 − 6",a:["50","56","42"],c:0,e:"الضرب: 7 × 8 = 56، ثم 56 − 6 = 50."},
-{w:1,q:"72 ÷ 8 + 5",a:["14","9","16"],c:0,e:"القسمة: 72 ÷ 8 = 9، ثم 9 + 5 = 14."},
-{w:1,q:"6 + 36 ÷ 6 × 2",a:["18","12","24"],c:0,e:"من اليسار: 36 ÷ 6 = 6، ثم 6 × 2 = 12، ثم 6 + 12 = 18."},
-{w:1,q:"9 × 4 ÷ 6 + 3",a:["9","6","12"],c:0,e:"من اليسار: 9 × 4 = 36، ثم 36 ÷ 6 = 6، ثم 6 + 3 = 9."},
-{w:1,q:"48 ÷ 6 × 2 − 5",a:["11","16","8"],c:0,e:"من اليسار: 48 ÷ 6 = 8، ثم 8 × 2 = 16، ثم 16 − 5 = 11."},
-{w:2,q:"25 − 10 + 6",a:["9","21","31"],c:1,e:"من اليسار: 25 − 10 = 15، ثم 15 + 6 = 21."},
-{w:2,q:"36 ÷ 6 × 3 + 2",a:["20","18","12"],c:0,e:"من اليسار: 36 ÷ 6 = 6، ثم 6 × 3 = 18، ثم 18 + 2 = 20."},
-{w:2,q:"14 + 9 − 5",a:["18","10","28"],c:0,e:"من اليسار: 14 + 9 = 23، ثم 23 − 5 = 18."},
-{w:2,q:"8 × 5 ÷ 4 + 7",a:["17","10","47"],c:0,e:"من اليسار: 8 × 5 = 40، ثم 40 ÷ 4 = 10، ثم 10 + 7 = 17."},
-{w:2,q:"60 − 20 + 15 − 5",a:["50","40","60"],c:0,e:"من اليسار: 60 − 20 = 40، ثم 40 + 15 = 55، ثم 55 − 5 = 50."},
-{w:3,q:"4 + 6 × 5 − 3",a:["31","27","35"],c:0,e:"الضرب: 6 × 5 = 30، ثم 4 + 30 = 34، ثم 34 − 3 = 31."},
-{w:3,q:"(16 + 8) ÷ 4 + 7",a:["13","10","17"],c:0,e:"القوس: 16 + 8 = 24، ثم 24 ÷ 4 = 6، ثم 6 + 7 = 13."},
-{w:3,q:"50 − 4 × 8 + 6",a:["24","18","38"],c:0,e:"الضرب: 4 × 8 = 32، ثم 50 − 32 = 18، ثم 18 + 6 = 24."},
-{w:3,q:"7 × (12 − 8) + 5",a:["33","28","23"],c:0,e:"القوس: 12 − 8 = 4، ثم 7 × 4 = 28، ثم 28 + 5 = 33."},
-{w:3,q:"64 ÷ 8 + 3 × 4 − 2",a:["18","20","22"],c:0,e:"64 ÷ 8 = 8، و3 × 4 = 12، ثم 8 + 12 = 20، ثم 20 − 2 = 18."},
-{w:4,q:"(30 − 6) ÷ 4 × 3 + 2",a:["20","18","24"],c:0,e:"القوس: 30 − 6 = 24، ثم 24 ÷ 4 = 6، ثم 6 × 3 = 18، ثم 18 + 2 = 20."},
-{w:4,q:"90 − (7 × 8) + 12",a:["46","34","58"],c:0,e:"القوس: 7 × 8 = 56، ثم 90 − 56 = 34، ثم 34 + 12 = 46."},
-{w:4,q:"5 × (18 ÷ 3) + 9 − 4",a:["35","39","30"],c:0,e:"القوس: 18 ÷ 3 = 6، ثم 5 × 6 = 30، ثم 30 + 9 = 39، ثم 39 − 4 = 35."},
-{w:4,q:"100 ÷ (5 × 4) + 25",a:["30","20","45"],c:0,e:"القوس: 5 × 4 = 20، ثم 100 ÷ 20 = 5، ثم 5 + 25 = 30."},
-{w:4,q:"(40 + 20) ÷ 5 × 2 − 3",a:["21","24","9"],c:0,e:"القوس: 40 + 20 = 60، ثم 60 ÷ 5 = 12، ثم 12 × 2 = 24، ثم 24 − 3 = 21."}
-];
-let questions=defaultQuestions;try{const saved=JSON.parse(localStorage.getItem('obbyBankV5')||'null');if(Array.isArray(saved)&&saved.length===25&&saved.every(q=>q&&typeof q.q==='string'&&Array.isArray(q.a)&&q.a.length===3&&Number.isInteger(q.c)&&q.c>=0&&q.c<3))questions=saved;}catch(e){localStorage.removeItem('obbyBankV5');}localStorage.removeItem('obbyBankV4');
 const names=['عالم الطبيعة الساحرة','عالم الفضاء المدهش','عالم القلاع والكنوز','مدينة المستقبل','عالم الجزر السحرية'];
+const lanePatterns=[[-2.4,2.5,-3.4,3.5,-1.7],[-2.4,-3.6,2.8,-2.8,3.6],[-2.4,3.4,-3.5,2.7,-2.8],[-2.4,-3.2,3.6,-3.5,2.8],[-2.4,3.7,-3.7,3.5,-2.6]];
+const heightPatterns=[[.15,.75,1.35,.45,1.05],[.15,1.15,.35,1.4,.55],[.15,1.3,.55,1.45,.35],[.15,.85,1.5,.45,1.25],[.15,1.4,.35,1.55,.55]];
 const colors=[0x22e66b,0xff7626,0x42c8ff,0xff4fa3,0x8b5cff];
 const accents=[0xeaff55,0xffd34e,0xd9f7ff,0xffd6fb,0x45f5ff];
 const skyColors=[0x78dfff,0x090d35,0x8fc9ff,0x111b3d,0x25b8d0];
@@ -243,11 +217,11 @@ function openQuestion(g){asking=true;paused=true;currentGate=g.index;const q=que
 function chooseAnswer(i,g,button){const q=questions[g.index],fb=document.getElementById('feedback');[...document.querySelectorAll('#choices button')].forEach(b=>b.disabled=true);if(i===g.correctDisplayIndex){sound('correct');score+=10;answered++;g.done=true;fb.textContent='ممتاز! تم فتح البوابة ⭐ '+q.e;fb.style.color='#9dffbd';document.getElementById('score').textContent=score;document.getElementById('progress').textContent=answered;document.getElementById('bar').style.width=(answered/25*100)+'%';document.getElementById('continue').classList.remove('hidden');}else{sound('wrong');fb.textContent='محاولة أخرى! راجع ترتيب العمليات.';fb.style.color='#ffd1a8';[...document.querySelectorAll('#choices button')].forEach((b,j)=>{if(j!==i)b.disabled=false});button.disabled=false;}}
 function closeQuestion(){document.getElementById('question').classList.add('hidden');const completedWorld=Math.floor(currentGate/5),completedInWorld=(currentGate%5)+1;asking=false;paused=true;if(completedInWorld===5){document.getElementById('levelTitle').textContent='🏆 اكتمل عالم '+names[completedWorld]+'!';document.getElementById('levelMessage').textContent='تم إنجاز الأسئلة الخمسة لهذا العالم. '+(answered===25?'اكتملت المغامرة كلها!':'المستوى التالي بانتظارك.');document.querySelector('#levelComplete button').textContent=answered===25?'عرض النتيجة النهائية 🏆':'دخول '+names[completedWorld+1]+' 🚪';document.getElementById('levelComplete').classList.remove('hidden');sound('level');}else{paused=false;}}
 function nextLevel(){document.getElementById('levelComplete').classList.add('hidden');paused=false;asking=false;const nextWorld=Math.floor(answered/5);if(answered>=25){document.getElementById('world').textContent='قلعة الكنز النهائي 🏆';player.position.set(-2.6,.12,-234);checkpoint={x:-2.6,y:.12,z:-234};velocityY=0;onGround=true;camera.position.set(-2.6,6,-219);camera.lookAt(-2.6,1,-234);const hint=document.getElementById('portalHint');if(hint)hint.textContent='🏆 القلعة أمامك! تقدّم نحو صندوق الكنز الذهبي';sound('level');return;}const baseZ=-nextWorld*48;player.position.set(-2.4,.2,baseZ-3);checkpoint={x:-2.4,y:.2,z:baseZ-3};velocityY=0;onGround=true;document.getElementById('world').textContent=names[nextWorld];camera.position.set(-2.4,6,baseZ+14);camera.lookAt(-2.4,1,baseZ-3);sound('gate');const entranceGate=gateMeshes.find(g=>g.index===nextWorld*5&&!g.done);if(entranceGate)openQuestion(entranceGate);}
-function finishGame(){finished=true;paused=true;victoryDance=true;document.getElementById('treasureModal').classList.add('hidden');document.getElementById('hud').classList.add('hidden');const finishPanel=document.getElementById('finish');finishPanel.classList.add('hidden');document.querySelector('#finish h1').textContent='🎉 أنت بطل المغامرة!';document.querySelector('#finish .card>div').textContent='🎆🏆✨🎊';document.getElementById('finalScore').textContent=score+' من 250 نقطة';document.getElementById('finalInfo').textContent='الاسم: '+playerName+' | المراحل المجتازة: 5 من 5 | التحديات: '+answered+'/25 | ⭐ النجوم: '+answered+' | 🪙 الكوينز: '+coinsCollected+' من 25 | لقد فتحت الكنز النهائي!';localStorage.setItem('obbyLastResult',JSON.stringify({name:playerName,score,answered,coinsCollected,worlds:5,date:new Date().toLocaleString('ar-JO')}));sound('level');setTimeout(()=>{finishPanel.classList.remove('hidden')},5500)}
-function openFinalTreasure(){if(answered<25||treasureOpen)return;treasureOpen=true;paused=false;document.getElementById('treasureModal').classList.add('hidden');celebrationTimer=0; sound('level');}
+function finishGame(){finished=true;paused=true;victoryDance=true;document.getElementById('treasureModal').classList.add('hidden');document.getElementById('hud').classList.add('hidden');const finishPanel=document.getElementById('finish');finishPanel.classList.add('hidden');document.querySelector('#finish h1').textContent='🎉 أنت بطل المغامرة!';document.querySelector('#finish .card>div').textContent='🎆🏆✨🎊';document.getElementById('finalScore').textContent='جمعت '+coinsCollected+' من 25 كوينًا ذهبياً!';document.getElementById('finalInfo').textContent='أحسنت يا '+playerName+'! استكشفت العوالم الخمسة وفتحت الكنز النهائي.';localStorage.setItem('obbyLastResult',JSON.stringify({name:playerName,coinsCollected,worlds:5,date:new Date().toLocaleString('ar-JO')}));sound('level');setTimeout(()=>{finishPanel.classList.remove('hidden')},5500)}
+function openFinalTreasure(){if(treasureOpen)return;treasureOpen=true;paused=false;document.getElementById('treasureModal').classList.add('hidden');celebrationTimer=0; sound('level');}
 function downloadResult(){const data=localStorage.getItem('obbyLastResult')||'{}';const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data],{type:'application/json'}));a.download='math-obby-result.json';a.click()}
 function updateTimer(dt){}
-function animate(now=performance.now()){if(!started)return;requestAnimationFrame(animate);const dt=Math.min((now-last)/1000,.04);last=now;if(!paused&&!asking){updateTimer(dt);const visualWorld=Math.min(4,Math.floor(Math.max(0,-player.position.z)/48));scene.background.setHex(skyColors[visualWorld]);scene.fog.color.setHex(fogColors[visualWorld]);let dx=0,dz=0;if(keys.a||keys.arrowleft)dx-=1;if(keys.d||keys.arrowright)dx+=1;if(keys.w||keys.arrowup)dz-=1;if(keys.s||keys.arrowdown)dz+=1;const len=Math.hypot(dx,dz)||1;player.position.x+=dx/len*8*dt;player.position.z+=dz/len*8*dt;player.position.x=THREE.MathUtils.clamp(player.position.x,-16,16);
+function animate(now=performance.now()){if(!started)return;requestAnimationFrame(animate);const dt=Math.min((now-last)/1000,.04);last=now;if(!paused&&!asking){const visualWorld=Math.min(4,Math.floor(Math.max(0,-player.position.z)/48));scene.background.setHex(skyColors[visualWorld]);scene.fog.color.setHex(fogColors[visualWorld]);let dx=0,dz=0;if(keys.a||keys.arrowleft)dx-=1;if(keys.d||keys.arrowright)dx+=1;if(keys.w||keys.arrowup)dz-=1;if(keys.s||keys.arrowdown)dz+=1;const len=Math.hypot(dx,dz)||1;player.position.x+=dx/len*8*dt;player.position.z+=dz/len*8*dt;player.position.x=THREE.MathUtils.clamp(player.position.x,-16,16);
  const previousY=player.position.y;velocityY-=24*dt;player.position.y+=velocityY*dt;onGround=false;
  // التقاط الهبوط على المنصات مع هامش أمان أوسع، وحفظ آخر منصة وصل إليها اللاعب
  let landed=false;
@@ -259,7 +233,7 @@ function animate(now=performance.now()){if(!started)return;requestAnimationFrame
    const nearSurface=player.position.y<=top+.35&&player.position.y>=top-1.25;
    if(inside&&(crossed||nearSurface)){
     player.position.y=top;velocityY=0;onGround=true;landed=true;
-    checkpoint={x:player.position.x,y:top+.08,z:player.position.z};
+    
     break;
    }
   }
@@ -267,13 +241,16 @@ function animate(now=performance.now()){if(!started)return;requestAnimationFrame
  // إذا خرج اللاعب من المسار، أعده إلى آخر منصة آمنة بدل البداية
  if(player.position.y<-3){
   player.position.set(checkpoint.x,checkpoint.y,checkpoint.z);
-  velocityY=0;onGround=true;
+  velocityY=0;onGround=true;sound('gate');
  }
- if(answered>=25&&!treasurePromptShown&&Math.hypot(player.position.x-(treasureChest?.position.x??999),player.position.z-(treasureChest?.position.z??999))<4.8){treasurePromptShown=true;paused=true;document.getElementById('treasureModal').classList.remove('hidden');const hint=document.getElementById('portalHint');if(hint)hint.textContent='✨ وصلت إلى الصندوق! اضغط «افتح الكنز»';}
+ if(activeWorld===4&&!treasurePromptShown&&treasureChest&&Math.hypot(player.position.x-treasureChest.position.x,player.position.z-treasureChest.position.z)<5.5){treasurePromptShown=true;paused=true;document.getElementById('treasureModal').classList.remove('hidden');}
  // اجمع الكوينز بالقفز والاقتراب منها
  for(const coin of coinMeshes){if(coin.visible){coin.rotation.y+=dt*3.8;coin.position.y=coin.userData.baseY+Math.sin(now*.003+coin.position.z)*.22;if(Math.abs(coin.position.z-player.position.z)<2.7&&Math.abs(coin.position.x-player.position.x)<2.0&&Math.abs((player.position.y+1.5)-coin.position.y)<2.0){coin.visible=false;coinsCollected++;sound('coin');document.getElementById('coinCount').textContent=coinsCollected;}}}
- if(answered===25&&player.position.z<-238&&Math.abs(player.position.x)<5&&player.position.y<3){finishGame();return;}
- const nearPortal=hubPortals.find(p=>Math.abs(player.position.x-p.x)<3.2&&Math.abs(player.position.z-p.z)<4);const ph=document.getElementById('portalHint');if(ph){ph.style.display=nearPortal?'block':'none';if(nearPortal){const unlocked=Math.min(4,Math.floor(answered/5));ph.textContent=nearPortal.index<=unlocked?'🌀 '+nearPortal.title+' – اضغطي E للدخول':'🔒 '+nearPortal.title+' – أكملي العالم السابق';}}const g=gateMeshes.find(x=>!x.done&&Math.abs(x.z-player.position.z)<2.5&&Math.abs(player.position.x-x.x)<2.8&&Math.abs(player.position.y)<2);if(g)openQuestion(g);
+ 
+ const ph=document.getElementById('portalHint');if(ph)ph.style.display='none';
+ // الانتقال التلقائي بين العوالم مع حفظ نقطة بداية العالم الحالي
+ const nextWorld=Math.min(4,Math.max(0,Math.floor((-player.position.z-2)/48)));
+ if(nextWorld>activeWorld){activeWorld=nextWorld;const base=-activeWorld*48;checkpoint={x:lanePatterns[activeWorld][0],y:heightPatterns[activeWorld][0]+.12,z:base-3};document.getElementById('world').textContent=names[activeWorld];document.getElementById('worldProgress').textContent='العالم '+(activeWorld+1)+' من 5';document.getElementById('bar').style.width=(activeWorld/5*100)+'%';showWorldToast(activeWorld);sound('gate');}
  player.rotation.y=Math.atan2(dx,-dz||.0001);const moving=Math.abs(dx)+Math.abs(dz)>0;player.userData.legs.forEach((l,i)=>l.rotation.x=moving?Math.sin(now*.014+i*Math.PI)*.5:0);
  }
  if(treasureLid&&treasureOpen&&treasureProgress<1){treasureProgress=Math.min(1,treasureProgress+dt*0.7);treasureLid.rotation.x=-1.35*treasureProgress;treasureChest.rotation.y=Math.sin(now*.006)*.025;if(treasureProgress>=1){celebrationTimer+=dt;if(celebrationTimer>1.1&&!finished)finishGame();}}if(victoryDance&&player){player.rotation.y+=dt*8;player.position.y=.12+Math.abs(Math.sin(now*.012))*.65;}camera.position.x+=(player.position.x*.45-camera.position.x)*.08;camera.position.y+=(player.position.y+5.3-camera.position.y)*.08;camera.position.z+=(player.position.z+10-camera.position.z)*.08;camera.lookAt(player.position.x,player.position.y+1.2,player.position.z-5);
