@@ -391,7 +391,7 @@ function makeWorld(){
   ring.rotation.x=Math.PI/2;ring.position.set(x,y+.04,z);scene.add(ring);
  }
  // مرحلة ركض بثلاثة مسارات جانبية مستوحاة من Subway Runner
- const runnerTrackZ=-340,runnerTrackLength=54,runnerLanes=[-4,0,4];
+ const runnerTrackZ=-396.5,runnerTrackLength=170,runnerLanes=[-4,0,4];
  for(let lane=0;lane<3;lane++){
   const x=runnerLanes[lane],track=new THREE.Mesh(new THREE.BoxGeometry(3.65,.5,runnerTrackLength),new THREE.MeshStandardMaterial({color:[0x29b6f6,0x7c4dff,0x26c6a5][lane],metalness:.35,roughness:.3,emissive:[0x064d75,0x32105f,0x075d4c][lane],emissiveIntensity:.35}));
   track.position.set(x,-.2,runnerTrackZ);track.receiveShadow=true;scene.add(track);track.userData={halfX:1.82,halfZ:runnerTrackLength/2,top:.05};platforms.push(track);
