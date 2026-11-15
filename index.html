@@ -74,6 +74,7 @@
   <h2 id="craneExpression" style="font-size:clamp(25px,5vw,38px);color:#fff">8 + 3 × (6 − 2)</h2>
   <p id="cranePrompt">أي عملية ننفذ أولاً؟</p><div class="craneStep" id="craneChoices"></div>
   <div id="craneFeedback" aria-live="polite">تذكّر: الأقواس أولاً، ثم الضرب والقسمة، ثم الجمع والطرح.</div>
+  <button id="enableAudioButton" type="button" onclick="enableSoundNow()" style="background:#16d9a5;color:#082b32;font-size:18px;min-width:220px">🔊 اضغط هنا لتفعيل الصوت وتجربته</button>
   <div id="craneLaunch"><p style="color:#c8f8e5;font-weight:900">🎉 أحسنت! اكتمل برج العمليات وفتحت بوابة العوالم الخمسة.</p>
   <input id="playerName" class="field craneName" placeholder="اسم الطالب/ة" maxlength="30">
   <button onclick="startGame()">ادخل المغامرة 🌍</button></div>
@@ -231,6 +232,29 @@ let score=0,answered=0,playerName='',remaining=0,last=performance.now(),gateMesh
 const clockEl=null;
 let audioCtx=null,soundEnabled=true;
 function sound(type){if(!soundEnabled)return;try{audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume().catch(()=>{});const now=audioCtx.currentTime,osc=audioCtx.createOscillator(),gain=audioCtx.createGain(),p={jump:[420,620,.11],gem:[760,1120,.16],coin:[900,1320,.18],correct:[620,880,.22],wrong:[210,150,.2],level:[520,780,.42],gate:[440,660,.3],fall:[260,110,.28]}[type]||[500,700,.18];osc.type=type==='wrong'?'triangle':'sine';osc.frequency.setValueAtTime(p[0],now);osc.frequency.exponentialRampToValueAtTime(p[1],now+p[2]);gain.gain.setValueAtTime(.0001,now);gain.gain.exponentialRampToValueAtTime(.34,now+.015);gain.gain.exponentialRampToValueAtTime(.0001,now+p[2]);osc.connect(gain);gain.connect(audioCtx.destination);osc.start(now);osc.stop(now+p[2]+.02);}catch(e){}}
+function enableSoundNow(){
+ try{
+  soundEnabled=true;
+  const AC=window.AudioContext||window.webkitAudioContext;
+  if(!AC){alert('المتصفح لا يدعم تشغيل الصوت.');return;}
+  audioCtx=audioCtx||new AC();
+  const ctx=audioCtx;
+  const playTest=()=>{
+   const now=ctx.currentTime;
+   [523.25,659.25,783.99,1046.5].forEach((hz,i)=>{
+    const o=ctx.createOscillator(),g=ctx.createGain();
+    o.type='sine';o.frequency.setValueAtTime(hz,now+i*.16);
+    g.gain.setValueAtTime(.0001,now+i*.16);
+    g.gain.exponentialRampToValueAtTime(.42,now+i*.16+.025);
+    g.gain.exponentialRampToValueAtTime(.0001,now+i*.16+.42);
+    o.connect(g);g.connect(ctx.destination);o.start(now+i*.16);o.stop(now+i*.16+.45);
+   });
+   const b=document.getElementById('enableAudioButton');if(b)b.textContent='✅ تم تفعيل الصوت — اسمع النغمة؟';
+  };
+  if(ctx.state==='suspended')ctx.resume().then(playTest).catch(()=>{const b=document.getElementById('enableAudioButton');if(b)b.textContent='⚠️ تعذّر تفعيل الصوت';});
+  else playTest();
+ }catch(e){const b=document.getElementById('enableAudioButton');if(b)b.textContent='⚠️ تعذّر تفعيل الصوت';}
+}
 let musicTimer=null,musicStep=0;function stopWorldMusic(){if(musicTimer){clearInterval(musicTimer);musicTimer=null;}}function startWorldMusic(world){stopWorldMusic();if(!soundEnabled)return;const scales=[[392,440,523,587,659,587,523,440],[330,392,494,587,659,587,494,392],[294,349,440,523,587,523,440,349],[349,440,523,659,698,659,523,440],[392,494,587,659,784,659,587,494]];const melody=scales[world]||scales[0];musicStep=0;musicTimer=setInterval(()=>{if(!soundEnabled||!audioCtx)return;try{const now=audioCtx.currentTime,o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type=world===1?'sine':'triangle';o.frequency.value=melody[musicStep%melody.length];g.gain.setValueAtTime(.0001,now);g.gain.exponentialRampToValueAtTime(.075,now+.04);g.gain.exponentialRampToValueAtTime(.0001,now+.31);o.connect(g);g.connect(audioCtx.destination);o.start(now);o.stop(now+.33);musicStep++;}catch(e){}},360);}
 function toggleSound(){soundEnabled=!soundEnabled;document.getElementById('soundToggle').textContent=soundEnabled?'🔊 الصوت: يعمل':'🔇 الصوت: متوقف';if(soundEnabled){sound('correct');startWorldMusic(activeWorld);}else stopWorldMusic();}
 function mat(color,roughness=.8){return new THREE.MeshStandardMaterial({color,roughness})}
