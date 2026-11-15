@@ -409,16 +409,18 @@ function makeWorld(){
   obstacle.position.set(x,0,row.z);scene.add(obstacle);
   runnerObstacles.push({x,z:row.z,type:'sidestep',hit:false,group:obstacle});
  }
- // بعد أسئلة الركض تظهر مطبات منخفضة على المسارات الثلاثة؛ اقفز فوقها للوصول إلى الكنز
- for(const z of [-356,-359,-362]){
-  for(const x of runnerLanes){
-   const hurdle=new THREE.Group();
-   const bar=new THREE.Mesh(new THREE.BoxGeometry(2.65,.62,.72),new THREE.MeshStandardMaterial({color:0xff4f78,metalness:.25,roughness:.35,emissive:0x8e1239,emissiveIntensity:.65}));
-   bar.position.y=.43;hurdle.add(bar);
-   const glow=new THREE.Mesh(new THREE.BoxGeometry(2.7,.1,.76),new THREE.MeshBasicMaterial({color:0xffe28a}));glow.position.y=.76;hurdle.add(glow);
-   hurdle.position.set(x,0,z);scene.add(hurdle);
-   runnerObstacles.push({x,z,type:'jump',hit:false,group:hurdle});
-  }
+ // مسار قفز طويل مدته قرابة 15 ثانية بسرعة حركة 8 وحدات/ثانية (نحو 120 وحدة)
+ // مطبات متتابعة ومتبادلة بين المسارات حتى يقفز الطالب أو يغيّر مساره
+ for(let i=0;i<12;i++){
+  const z=-360-i*9.5,x=runnerLanes[(i*2+1)%3];
+  const hurdle=new THREE.Group();
+  const bar=new THREE.Mesh(new THREE.BoxGeometry(2.65,.62,.72),new THREE.MeshStandardMaterial({color:0xff4f78,metalness:.25,roughness:.35,emissive:0x8e1239,emissiveIntensity:.65}));
+  bar.position.y=.43;hurdle.add(bar);
+  const glow=new THREE.Mesh(new THREE.BoxGeometry(2.7,.1,.76),new THREE.MeshBasicMaterial({color:0xffe28a}));glow.position.y=.76;hurdle.add(glow);
+  const marker=new THREE.Mesh(new THREE.TorusGeometry(.65,.09,8,20),new THREE.MeshBasicMaterial({color:0x63f5ff}));
+  marker.position.set(0,1.65,0);hurdle.add(marker);
+  hurdle.position.set(x,0,z);scene.add(hurdle);
+  runnerObstacles.push({x,z,type:'jump',hit:false,group:hurdle});
  }
  // بوابات الأسئلة الثلاثة على امتداد مسار الركض
  [-322,-336,-350].forEach((z,i)=>{
@@ -428,7 +430,7 @@ function makeWorld(){
   const beam=new THREE.Mesh(new THREE.BoxGeometry(12.3,.35,.4),glow);beam.position.y=4;arch.add(beam);scene.add(arch);
  });
  // صندوق الكنز في نهاية مسار الركض
- treasureChest=new THREE.Group();treasureChest.position.set(0,.12,-367);
+ treasureChest=new THREE.Group();treasureChest.position.set(0,.12,-480);
  const chestBase=new THREE.Mesh(new THREE.BoxGeometry(2.5,1.25,1.65),new THREE.MeshStandardMaterial({color:0x8b4a20,metalness:.35,roughness:.42}));chestBase.position.y=.68;chestBase.castShadow=true;treasureChest.add(chestBase);
  const bandMat=new THREE.MeshStandardMaterial({color:0xffd34d,metalness:.8,roughness:.2,emissive:0x9b6500,emissiveIntensity:.35});
  for(const x of [-.82,.82]){const band=new THREE.Mesh(new THREE.BoxGeometry(.18,1.28,1.7),bandMat);band.position.set(x,.7,0);treasureChest.add(band);}
@@ -551,7 +553,7 @@ function animate(now=performance.now()){if(!started)return;requestAnimationFrame
  for(const coin of coinMeshes){if(coin.visible){coin.rotation.y+=dt*3.8;coin.position.y=coin.userData.baseY+Math.sin(now*.003+coin.position.z)*.22;if(Math.abs(coin.position.z-player.position.z)<2.7&&Math.abs(coin.position.x-player.position.x)<2.0&&Math.abs((player.position.y+1.5)-coin.position.y)<2.0){coin.visible=false;coinsCollected++;score=coinsCollected;document.getElementById('score').textContent=score;sound('coin');document.getElementById('coinCount').textContent=coinsCollected;}}}
  for(const gem of gemMeshes){if(gem.visible){gem.rotation.y+=dt*2.8;gem.rotation.x+=dt*.7;gem.position.y=gem.userData.baseY+Math.sin(now*.0035+gem.position.z)*.28;if(Math.abs(gem.position.z-player.position.z)<2.8&&Math.abs(gem.position.x-player.position.x)<2.2&&Math.abs((player.position.y+1.5)-gem.position.y)<2.2){gem.visible=false;gemsCollected++;score+=25;document.getElementById('score').textContent=score;document.getElementById('gemCount').textContent='💎 الجواهر: '+gemsCollected+'/5';sound('gem');}}}
  // اصطدامات مرحلة Subway: الحواجز العالية تتطلب تغيير المسار، والمطبات المنخفضة تتطلب القفز
- if(player.position.z<-311&&player.position.z>-365){
+ if(player.position.z<-311&&player.position.z>-482){
   player.position.x=THREE.MathUtils.clamp(player.position.x,-5.8,5.8);
   for(const ob of runnerObstacles){
    if(ob.hit||Math.abs(player.position.z-ob.z)>1.05||Math.abs(player.position.x-ob.x)>1.48)continue;
@@ -569,7 +571,7 @@ function animate(now=performance.now()){if(!started)return;requestAnimationFrame
  }
  const runnerQuestionTriggers=[-322,-336,-350];
  if(activeWorld===5&&gemsCollected===5&&runnerQuestionIndex<3&&player.position.z<runnerQuestionTriggers[runnerQuestionIndex]&&!runnerQuestionActive&&!finished){showRunnerQuestion();}
- if(activeWorld===5&&gemQuestionDone&&player.position.z<-365&&Math.abs(player.position.x)<3.2&&!treasureTriggered&&!finished){treasureTriggered=true;treasureOpen=true;treasureProgress=0;launchFireworks();playVictoryTune();sound('level');}
+ if(activeWorld===5&&gemQuestionDone&&player.position.z<-478&&Math.abs(player.position.x)<3.2&&!treasureTriggered&&!finished){treasureTriggered=true;treasureOpen=true;treasureProgress=0;launchFireworks();playVictoryTune();sound('level');}
 
  
  const ph=document.getElementById('portalHint');if(ph)ph.style.display='none';
