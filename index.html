@@ -51,15 +51,15 @@
 #craneLaunch.show{display:block}
 #playerName{max-width:320px;position:relative;z-index:6;pointer-events:auto;user-select:text;-webkit-user-select:text}#craneSidePanel{pointer-events:auto}#craneSidePanel input,#craneSidePanel button{pointer-events:auto}
 @media(max-width:700px){#craneIntro>div:first-child{margin:7px auto 0;align-self:center;font-size:25px!important}#craneIntro>h1{align-self:center;margin:0 8px;font-size:22px}#craneIntro>p{display:none}#craneSidePanel{top:auto;bottom:8px;right:8px;left:8px;transform:none;width:auto;max-height:49dvh;padding:9px 11px;border-radius:17px}#craneSidePanel #craneProgress{font-size:12px;padding:5px;margin-bottom:5px}#craneSidePanel #craneExpression{font-size:23px!important;margin:4px 0!important;padding:4px}#craneSidePanel #cranePrompt,#craneSidePanel #craneFeedback{font-size:12px;margin:4px 0!important;padding:5px}#craneSidePanel .craneStep{grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin:4px 0;padding:4px}#craneSidePanel .craneStep button{min-width:0;min-height:38px;font-size:12px;padding:6px 3px}#craneSidePanel #craneLaunch{padding:5px;margin-top:4px}#craneIntro .dragHint{font-size:10px;bottom:51dvh;right:8px}#craneLoadLabel{bottom:51dvh;left:8px}}
-#treasureCelebration{position:fixed;inset:0;z-index:9;display:flex;align-items:flex-start;justify-content:center;padding:8vh 16px 16px;pointer-events:none;background:radial-gradient(ellipse at 50% 18%,#ffe66a44,transparent 48%);opacity:0;transform:scale(.88);transition:opacity .45s,transform .55s}
-#treasureCelebration.show{opacity:1;transform:scale(1)}
-#treasureCelebration .celebrateBox{padding:18px 30px;border:2px solid #ffe58a;border-radius:26px;background:linear-gradient(135deg,#17234fee,#5b2d79ee,#142c58ee);box-shadow:0 0 25px #ffd84d99,0 0 70px #ffb52f66;text-align:center;animation:treasurePulse 1.2s ease-in-out infinite alternate}
-#treasureCelebration h2{font-size:clamp(26px,5vw,48px);margin:0 0 6px;color:#ffe66b;text-shadow:0 3px 12px #ff8a00}
-#treasureCelebration p{font-size:clamp(15px,2.5vw,22px);margin:0;color:#fff}
-#treasureCelebration .treasureIcons{font-size:clamp(28px,5vw,48px);letter-spacing:7px;animation:treasureBounce .7s ease-in-out infinite alternate}
+#treasureCelebration{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;padding:18px;pointer-events:none;background:radial-gradient(circle at 50% 45%,#ffe66a66 0%,#ff9e3d33 28%,#10102dcc 78%);opacity:0;visibility:hidden;transform:scale(.82);transition:opacity .5s,transform .6s,visibility .5s}
+#treasureCelebration.show{opacity:1;visibility:visible;transform:scale(1)}
+#treasureCelebration .celebrateBox{width:min(680px,94vw);padding:clamp(22px,5vw,44px);border:3px solid #ffe58a;border-radius:30px;background:linear-gradient(135deg,#17234ff5,#5b2d79f5,#142c58f5);box-shadow:0 0 35px #ffd84dcc,0 0 110px #ffb52faa;text-align:center;animation:treasurePulse 1s ease-in-out infinite alternate}
+#treasureCelebration h2{font-size:clamp(30px,7vw,58px);margin:8px 0 12px;color:#ffe66b;text-shadow:0 3px 18px #ff8a00}
+#treasureCelebration p{font-size:clamp(18px,3vw,27px);margin:0;color:#fff;font-weight:900}
+#treasureCelebration .treasureIcons{font-size:clamp(34px,7vw,64px);letter-spacing:7px;animation:treasureBounce .55s ease-in-out infinite alternate}
 @keyframes treasurePulse{from{box-shadow:0 0 22px #ffd84d88,0 0 55px #ffb52f44}to{box-shadow:0 0 38px #fff18c,0 0 90px #ffb52faa}}
 @keyframes treasureBounce{from{transform:translateY(0) scale(1)}to{transform:translateY(-9px) scale(1.08)}}
-@media(max-width:600px){#treasureCelebration{padding-top:6vh}#treasureCelebration .celebrateBox{padding:14px 16px}}
+@media(max-width:600px){#treasureCelebration{padding:12px}#treasureCelebration .celebrateBox{padding:22px 14px}}
 </style>
 </head>
 <body>
@@ -494,12 +494,11 @@ const runnerQuestions=[
  {q:'45 − (12 + 8) ÷ 4 × 3',a:['30','15','35'],c:0,title:'🚦 تحدي المسار الثاني',story:'أمامك حاجز جديد! انتبه للأقواس ثم القسمة والضرب قبل الطرح.'},
  {q:'6 × (15 − 7) + 48 ÷ 6',a:['54','56','64'],c:1,title:'🏆 التحدي الثالث',story:'اقتربت من الكنز! حل السؤال لتواصل طريقك.'},
  {q:'18 ÷ 3 + 4 × 2',a:['12','14','16'],c:1,title:'⭐ سؤال إضافي سهل',story:'أحسنت! بقي سؤالان بسيطان قبل الكنز. تذكّر: القسمة والضرب أولاً.'},
- {q:'(20 − 8) ÷ 3 + 5',a:['8','9','10'],c:1,title:'💎 السؤال الأخير قبل الكنز',story:'هذا آخر تحدٍّ! حل بهدوء ثم تابع إلى صندوق الكنز.'}
 ];
 function showRunnerQuestion(){
  const q=runnerQuestions[runnerQuestionIndex];if(!q||runnerQuestionActive||asking)return;
  runnerQuestionActive=true;asking=true;paused=true;keys={};
- document.getElementById('stationTag').textContent='🚇 سباق الجواهر · سؤال '+(runnerQuestionIndex+1)+' من 5';
+ document.getElementById('stationTag').textContent='🚇 سباق الجواهر · سؤال '+(runnerQuestionIndex+1)+' من 4';
  document.getElementById('stationTitle').textContent=q.title;document.getElementById('stationStory').textContent=q.story;
  document.getElementById('stationExpression').textContent=q.q;
  document.getElementById('stationFeedback').textContent='اختر الإجابة الصحيحة لتجاوز الحاجز ومواصلة الركض.';
@@ -511,9 +510,9 @@ function answerRunnerQuestion(i){
  if(!runnerQuestionActive)return;const q=runnerQuestions[runnerQuestionIndex];
  if(i!==q.c){document.getElementById('stationFeedback').textContent='إجابة غير صحيحة! جرّب مرة ثانية قبل أن تتابع الركض. 💡';sound('wrong');return;}
  runnerQuestionActive=false;runnerQuestionIndex++;answered++;score+=20;document.getElementById('score').textContent=score;document.getElementById('stationCount').textContent=answered;
- gemQuestionDone=runnerQuestionIndex===5;
+ gemQuestionDone=runnerQuestionIndex===4;
  document.getElementById('stationFeedback').textContent=gemQuestionDone?'ممتاز! اجتزت التحديات الثلاثة، الكنز أمامك! 🏆':'رائع! تجاوزت الحاجز، استعد للسؤال التالي! ⚡';sound('correct');
- const nextZ=[-324,-338,-352,-439,-459][runnerQuestionIndex-1];
+ const nextZ=[-324,-338,-352,-439][runnerQuestionIndex-1];
  setTimeout(()=>{document.getElementById('stationModal').classList.add('hidden');asking=false;paused=false;keys={};checkpoint={x:THREE.MathUtils.clamp(player.position.x,-5.7,5.7),y:.12,z:nextZ-1.5};},750);
 }
 function showStation(g){if(!g||g.done||asking)return;currentStation=g;asking=true;paused=true;keys={};const q=stationQuestions[g.index];document.getElementById('stationTag').textContent=['🌿 محطة الغابة','🪐 محطة الفضاء','🏰 محطة القلعة','🤖 محطة المستقبل','🏝️ محطة الجزيرة'][g.world]+' · تحدي '+(g.index%2+1);document.getElementById('stationTitle').textContent=q.title;document.getElementById('stationStory').textContent=q.story;document.getElementById('stationExpression').textContent=q.q;document.getElementById('stationFeedback').textContent='اختر الإجابة الصحيحة لتفعيل البوابة.';const box=document.getElementById('stationAnswers');box.innerHTML='';q.a.forEach((v,i)=>{const btn=document.createElement('button');btn.textContent=v;btn.onclick=()=>answerStation(i);box.appendChild(btn);});document.getElementById('stationModal').classList.remove('hidden');sound('gate');}
@@ -530,7 +529,7 @@ window.addEventListener('keyup',e=>{if(isTextEntryTarget(e.target)){keys={};retu
 document.getElementById('playerName')?.addEventListener('focus',()=>{keys={};});
 window.addEventListener('blur',()=>{keys={}});
 document.querySelectorAll('[data-key]').forEach(b=>{const k=b.dataset.key;b.addEventListener('pointerdown',e=>{e.preventDefault();keys[k]=true});['pointerup','pointerleave','pointercancel'].forEach(ev=>b.addEventListener(ev,()=>keys[k]=false))});
-function finishGame(){finished=true;paused=true;victoryDance=true;stopWorldMusic();const banner=document.getElementById('upsideWorldBanner');if(banner)banner.remove();document.getElementById('hud').classList.add('hidden');const finishPanel=document.getElementById('finish');finishPanel.classList.add('hidden');document.querySelector('#finish h1').textContent='🎉 فتحت الكنز! أنت بطل المغامرة!';document.querySelector('#finish .card>div').textContent='💎🏆🎆🕺🎊';document.getElementById('finalScore').textContent='حللت '+answered+' محطات وأجبت عن سؤال الكنز وجمعت '+coinsCollected+' كوينًا و'+gemsCollected+' جواهر!';document.getElementById('finalInfo').textContent='أحسنت يا '+playerName+'! اجتزت العوالم الستة وفتحت الكنز بعد حل التحدي الأخير. تستحق رقصة الأبطال!';localStorage.setItem('obbyLastResult',JSON.stringify({name:playerName,coinsCollected,gemsCollected,worlds:6,gemQuestionDone:true,date:new Date().toLocaleString('ar-JO')}));sound('level');setTimeout(()=>{finishPanel.classList.remove('hidden')},1800)}
+function finishGame(){finished=true;paused=true;victoryDance=true;const celebration=document.getElementById('treasureCelebration');if(celebration)celebration.classList.remove('show');stopWorldMusic();const banner=document.getElementById('upsideWorldBanner');if(banner)banner.remove();document.getElementById('hud').classList.add('hidden');const finishPanel=document.getElementById('finish');finishPanel.classList.add('hidden');document.querySelector('#finish h1').textContent='🎉 فتحت الكنز! أنت بطل المغامرة!';document.querySelector('#finish .card>div').textContent='💎🏆🎆🕺🎊';document.getElementById('finalScore').textContent='حللت '+answered+' محطات وأجبت عن سؤال الكنز وجمعت '+coinsCollected+' كوينًا و'+gemsCollected+' جواهر!';document.getElementById('finalInfo').textContent='أحسنت يا '+playerName+'! اجتزت العوالم الستة وفتحت الكنز بعد حل التحدي الأخير. تستحق رقصة الأبطال!';localStorage.setItem('obbyLastResult',JSON.stringify({name:playerName,coinsCollected,gemsCollected,worlds:6,gemQuestionDone:true,date:new Date().toLocaleString('ar-JO')}));sound('level');setTimeout(()=>{finishPanel.classList.remove('hidden')},1800)}
 function launchFireworks(){if(!treasureChest||!scene)return;const palette=[0xffdf65,0x54f5ff,0xff70c8,0x9dff83,0xffffff];for(let burst=0;burst<5;burst++){const origin=treasureChest.position.clone().add(new THREE.Vector3((Math.random()-.5)*5,3+Math.random()*3,(Math.random()-.5)*4));for(let n=0;n<24;n++){const color=palette[(burst+n)%palette.length],spark=new THREE.Mesh(new THREE.SphereGeometry(.12,8,6),new THREE.MeshBasicMaterial({color}));spark.position.copy(origin);scene.add(spark);const angle=Math.random()*Math.PI*2,speed=2+Math.random()*5,up=2+Math.random()*5;fireworkParticles.push({mesh:spark,velocity:new THREE.Vector3(Math.cos(angle)*speed,up,Math.sin(angle)*speed),life:1.3+Math.random()*.8});}}}
 function playVictoryTune(){if(!soundEnabled)return;try{audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();const notes=[523,659,784,1047,784,880,1047,1319];notes.forEach((hz,i)=>setTimeout(()=>{if(!soundEnabled)return;const o=audioCtx.createOscillator(),g=audioCtx.createGain(),t=audioCtx.currentTime;o.type='sine';o.frequency.value=hz;g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.09,t+.025);g.gain.exponentialRampToValueAtTime(.0001,t+.28);o.connect(g);g.connect(audioCtx.destination);o.start(t);o.stop(t+.3);},i*230));}catch(e){}}
 
@@ -580,8 +579,8 @@ function animate(now=performance.now()){if(!started)return;requestAnimationFrame
    }
   }
  }
- const runnerQuestionTriggers=[-322,-336,-350,-440,-460];
- if(activeWorld===5&&gemsCollected===5&&runnerQuestionIndex<3&&player.position.z<runnerQuestionTriggers[runnerQuestionIndex]&&!runnerQuestionActive&&!finished){showRunnerQuestion();}
+ const runnerQuestionTriggers=[-322,-336,-350,-440];
+ if(activeWorld===5&&gemsCollected===5&&runnerQuestionIndex<4&&player.position.z<runnerQuestionTriggers[runnerQuestionIndex]&&!runnerQuestionActive&&!finished){showRunnerQuestion();}
  if(activeWorld===5&&gemQuestionDone&&player.position.z<-478&&Math.abs(player.position.x)<3.2&&!treasureTriggered&&!finished){treasureTriggered=true;treasureOpen=true;treasureProgress=0;celebrationTimer=0;fireworkNext=0;paused=true;keys={};victoryDance=true;const celebration=document.getElementById('treasureCelebration');if(celebration){document.getElementById('treasureWinner').textContent='أحسنت يا '+playerName+'! هذا الكنز من نصيبك!';celebration.classList.add('show');}launchFireworks();playVictoryTune();sound('level');}
 
  
@@ -592,7 +591,7 @@ function animate(now=performance.now()){if(!started)return;requestAnimationFrame
  if(nextWorld>activeWorld){activeWorld=nextWorld;const base=-activeWorld*48;checkpoint={x:lanePatterns[activeWorld][0],y:heightPatterns[activeWorld][0]+.12,z:base-3};document.getElementById('world').textContent=names[activeWorld];document.getElementById('worldProgress').textContent='العالم '+(activeWorld+1)+' من 6';document.getElementById('bar').style.width=(activeWorld/6*100)+'%';showWorldToast(activeWorld);sound('gate');startWorldMusic(activeWorld);}
  player.rotation.y=Math.atan2(dx,-dz||.0001);const moving=Math.abs(dx)+Math.abs(dz)>0;player.userData.legs.forEach((l,i)=>l.rotation.x=moving?Math.sin(now*.014+i*Math.PI)*.5:0);
  }
- if(treasureLid&&treasureOpen){if(treasureProgress<1){treasureProgress=Math.min(1,treasureProgress+dt*.55);treasureLid.rotation.x=-1.45*treasureProgress;}treasureChest.rotation.y=Math.sin(now*.006)*.035;if(treasureProgress>=1){celebrationTimer+=dt;if(celebrationTimer>=fireworkNext){launchFireworks();fireworkNext=celebrationTimer+1.15;}if(celebrationTimer>6.2&&!finished)finishGame();}}for(let i=fireworkParticles.length-1;i>=0;i--){const p=fireworkParticles[i];p.life-=dt;p.velocity.y-=5.5*dt;p.mesh.position.addScaledVector(p.velocity,dt);p.mesh.material.opacity=Math.max(0,p.life/1.5);p.mesh.material.transparent=true;if(p.life<=0){scene.remove(p.mesh);p.mesh.geometry.dispose();p.mesh.material.dispose();fireworkParticles.splice(i,1);}}
+ if(treasureLid&&treasureOpen){if(treasureProgress<1){treasureProgress=Math.min(1,treasureProgress+dt*.55);treasureLid.rotation.x=-1.45*treasureProgress;}treasureChest.rotation.y=Math.sin(now*.006)*.035;if(treasureProgress>=1){celebrationTimer+=dt;if(celebrationTimer>=fireworkNext){launchFireworks();fireworkNext=celebrationTimer+.85;}if(celebrationTimer>8&&!finished)finishGame();}}for(let i=fireworkParticles.length-1;i>=0;i--){const p=fireworkParticles[i];p.life-=dt;p.velocity.y-=5.5*dt;p.mesh.position.addScaledVector(p.velocity,dt);p.mesh.material.opacity=Math.max(0,p.life/1.5);p.mesh.material.transparent=true;if(p.life<=0){scene.remove(p.mesh);p.mesh.geometry.dispose();p.mesh.material.dispose();fireworkParticles.splice(i,1);}}
  if(victoryDance&&player){player.rotation.y+=dt*8;player.position.y=.12+Math.abs(Math.sin(now*.012))*.65;}if(player?.userData.companion){player.userData.companion.position.y=1.55+Math.sin(now*.006)*.16;player.userData.companion.rotation.z=Math.sin(now*.004)*.12;}camera.position.x+=(player.position.x*.45-camera.position.x)*.08;camera.position.y+=(player.position.y+5.3-camera.position.y)*.08;camera.position.z+=(player.position.z+10-camera.position.z)*.08;camera.lookAt(player.position.x,player.position.y+1.2,player.position.z-5);
  renderer.render(scene,camera)}
 window.addEventListener('resize',()=>{if(!renderer)return;camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
