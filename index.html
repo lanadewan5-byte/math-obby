@@ -483,12 +483,14 @@ function enterNearbyPortal(){}
 const runnerQuestions=[
  {q:'72 ÷ 8 + 6 × 3',a:['21','27','33'],c:1,title:'🏃 تحدي المسار الأول',story:'واصل الركض بين المسارات الثلاثة! احسب الناتج لتجاوز الحاجز الأول.'},
  {q:'45 − (12 + 8) ÷ 4 × 3',a:['30','15','35'],c:0,title:'🚦 تحدي المسار الثاني',story:'أمامك حاجز جديد! انتبه للأقواس ثم القسمة والضرب قبل الطرح.'},
- {q:'6 × (15 − 7) + 48 ÷ 6',a:['54','56','64'],c:1,title:'🏆 التحدي الأخير',story:'اقتربت من الكنز! حل السؤال الأخير وافتح طريق النهاية.'}
+ {q:'6 × (15 − 7) + 48 ÷ 6',a:['54','56','64'],c:1,title:'🏆 التحدي الثالث',story:'اقتربت من الكنز! حل السؤال لتواصل طريقك.'},
+ {q:'18 ÷ 3 + 4 × 2',a:['12','14','16'],c:1,title:'⭐ سؤال إضافي سهل',story:'أحسنت! بقي سؤالان بسيطان قبل الكنز. تذكّر: القسمة والضرب أولاً.'},
+ {q:'(20 − 8) ÷ 3 + 5',a:['8','9','10'],c:1,title:'💎 السؤال الأخير قبل الكنز',story:'هذا آخر تحدٍّ! حل بهدوء ثم تابع إلى صندوق الكنز.'}
 ];
 function showRunnerQuestion(){
  const q=runnerQuestions[runnerQuestionIndex];if(!q||runnerQuestionActive||asking)return;
  runnerQuestionActive=true;asking=true;paused=true;keys={};
- document.getElementById('stationTag').textContent='🚇 سباق الجواهر · سؤال '+(runnerQuestionIndex+1)+' من 3';
+ document.getElementById('stationTag').textContent='🚇 سباق الجواهر · سؤال '+(runnerQuestionIndex+1)+' من 5';
  document.getElementById('stationTitle').textContent=q.title;document.getElementById('stationStory').textContent=q.story;
  document.getElementById('stationExpression').textContent=q.q;
  document.getElementById('stationFeedback').textContent='اختر الإجابة الصحيحة لتجاوز الحاجز ومواصلة الركض.';
@@ -500,9 +502,9 @@ function answerRunnerQuestion(i){
  if(!runnerQuestionActive)return;const q=runnerQuestions[runnerQuestionIndex];
  if(i!==q.c){document.getElementById('stationFeedback').textContent='إجابة غير صحيحة! جرّب مرة ثانية قبل أن تتابع الركض. 💡';sound('wrong');return;}
  runnerQuestionActive=false;runnerQuestionIndex++;answered++;score+=20;document.getElementById('score').textContent=score;document.getElementById('stationCount').textContent=answered;
- gemQuestionDone=runnerQuestionIndex===3;
+ gemQuestionDone=runnerQuestionIndex===5;
  document.getElementById('stationFeedback').textContent=gemQuestionDone?'ممتاز! اجتزت التحديات الثلاثة، الكنز أمامك! 🏆':'رائع! تجاوزت الحاجز، استعد للسؤال التالي! ⚡';sound('correct');
- const nextZ=[-324,-338,-352][runnerQuestionIndex-1];
+ const nextZ=[-324,-338,-352,-439,-459][runnerQuestionIndex-1];
  setTimeout(()=>{document.getElementById('stationModal').classList.add('hidden');asking=false;paused=false;keys={};checkpoint={x:THREE.MathUtils.clamp(player.position.x,-5.7,5.7),y:.12,z:nextZ-1.5};},750);
 }
 function showStation(g){if(!g||g.done||asking)return;currentStation=g;asking=true;paused=true;keys={};const q=stationQuestions[g.index];document.getElementById('stationTag').textContent=['🌿 محطة الغابة','🪐 محطة الفضاء','🏰 محطة القلعة','🤖 محطة المستقبل','🏝️ محطة الجزيرة'][g.world]+' · تحدي '+(g.index%2+1);document.getElementById('stationTitle').textContent=q.title;document.getElementById('stationStory').textContent=q.story;document.getElementById('stationExpression').textContent=q.q;document.getElementById('stationFeedback').textContent='اختر الإجابة الصحيحة لتفعيل البوابة.';const box=document.getElementById('stationAnswers');box.innerHTML='';q.a.forEach((v,i)=>{const btn=document.createElement('button');btn.textContent=v;btn.onclick=()=>answerStation(i);box.appendChild(btn);});document.getElementById('stationModal').classList.remove('hidden');sound('gate');}
@@ -569,7 +571,7 @@ function animate(now=performance.now()){if(!started)return;requestAnimationFrame
    }
   }
  }
- const runnerQuestionTriggers=[-322,-336,-350];
+ const runnerQuestionTriggers=[-322,-336,-350,-440,-460];
  if(activeWorld===5&&gemsCollected===5&&runnerQuestionIndex<3&&player.position.z<runnerQuestionTriggers[runnerQuestionIndex]&&!runnerQuestionActive&&!finished){showRunnerQuestion();}
  if(activeWorld===5&&gemQuestionDone&&player.position.z<-478&&Math.abs(player.position.x)<3.2&&!treasureTriggered&&!finished){treasureTriggered=true;treasureOpen=true;treasureProgress=0;launchFireworks();playVictoryTune();sound('level');}
 
