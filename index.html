@@ -534,7 +534,8 @@ function animate(now=performance.now()){if(!started)return;requestAnimationFrame
  for(const a of worldAnimations){a.object.rotation.y+=a.spin*dt;if(a.bob){if(a.baseY===undefined)a.baseY=a.object.position.y;a.object.position.y=a.baseY+Math.sin(now*.0015+a.object.position.z)*a.bob;}}
  for(const coin of coinMeshes){if(coin.visible){coin.rotation.y+=dt*3.8;coin.position.y=coin.userData.baseY+Math.sin(now*.003+coin.position.z)*.22;if(Math.abs(coin.position.z-player.position.z)<2.7&&Math.abs(coin.position.x-player.position.x)<2.0&&Math.abs((player.position.y+1.5)-coin.position.y)<2.0){coin.visible=false;coinsCollected++;score=coinsCollected;document.getElementById('score').textContent=score;sound('coin');document.getElementById('coinCount').textContent=coinsCollected;}}}
  for(const gem of gemMeshes){if(gem.visible){gem.rotation.y+=dt*2.8;gem.rotation.x+=dt*.7;gem.position.y=gem.userData.baseY+Math.sin(now*.0035+gem.position.z)*.28;if(Math.abs(gem.position.z-player.position.z)<2.8&&Math.abs(gem.position.x-player.position.x)<2.2&&Math.abs((player.position.y+1.5)-gem.position.y)<2.2){gem.visible=false;gemsCollected++;score+=25;document.getElementById('score').textContent=score;document.getElementById('gemCount').textContent='💎 الجواهر: '+gemsCollected+'/5';sound('gem');}}}
- if(activeWorld===5&&gemsCollected===5&&player.position.z<-319&&runnerQuestionIndex<3&&!runnerQuestionActive&&!finished){showRunnerQuestion();}
+ const runnerQuestionTriggers=[-322,-336,-350];
+ if(activeWorld===5&&gemsCollected===5&&runnerQuestionIndex<3&&player.position.z<runnerQuestionTriggers[runnerQuestionIndex]&&!runnerQuestionActive&&!finished){showRunnerQuestion();}
  if(activeWorld===5&&gemQuestionDone&&player.position.z<-365&&Math.abs(player.position.x)<3.2&&!treasureTriggered&&!finished){treasureTriggered=true;treasureOpen=true;treasureProgress=0;launchFireworks();playVictoryTune();sound('level');}
 
  
