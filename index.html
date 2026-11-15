@@ -226,7 +226,7 @@ const skyColors=[0x78dfff,0x090d35,0x8fc9ff,0x111b3d,0x25b8d0,0x211039];
 const fogColors=[0xa9edff,0x202b65,0xb8d9ff,0x243b63,0x8ce8dc,0x56336f];
 let scene,camera,renderer,player,velocityY=0,onGround=false,keys={},started=false,paused=false,asking=false,finished=false,activeWorld=0;
 let worldAnimations=[],fireworkParticles=[];
-let treasureChest=null,treasureLid=null,treasureOpen=false,treasurePromptShown=false,treasureProgress=0,victoryDance=false,celebrationTimer=0,gemQuestionShown=false,gemQuestionDone=false,gemQuestionActive=false,treasureTriggered=false;
+let treasureChest=null,treasureLid=null,treasureOpen=false,treasurePromptShown=false,treasureProgress=0,victoryDance=false,celebrationTimer=0,gemQuestionShown=false,gemQuestionDone=false,gemQuestionActive=false,treasureTriggered=false,runnerQuestionIndex=0,runnerQuestionActive=false;
 let score=0,answered=0,playerName='',remaining=0,last=performance.now(),gateMeshes=[],platforms=[],coinMeshes=[],gemMeshes=[],hubPortals=[],coinsCollected=0,gemsCollected=0,currentGate=0,currentStation=null,checkpoint={x:-2.4,y:.3,z:-3};
 const clockEl=null;
 let audioCtx=null,soundEnabled=true;
@@ -390,8 +390,29 @@ function makeWorld(){
   const ring=new THREE.Mesh(new THREE.TorusGeometry(size*.32,.07,8,28),new THREE.MeshBasicMaterial({color:0xf1c7ff}));
   ring.rotation.x=Math.PI/2;ring.position.set(x,y+.04,z);scene.add(ring);
  }
- // صندوق كنز ثلاثي الأبعاد في نهاية المسار
- treasureChest=new THREE.Group();treasureChest.position.set(-2.4,.12,-310);
+ // مرحلة ركض بثلاثة مسارات جانبية مستوحاة من Subway Runner
+ const runnerTrackZ=-340,runnerTrackLength=54,runnerLanes=[-4,0,4];
+ for(let lane=0;lane<3;lane++){
+  const x=runnerLanes[lane],track=new THREE.Mesh(new THREE.BoxGeometry(3.65,.5,runnerTrackLength),new THREE.MeshStandardMaterial({color:[0x29b6f6,0x7c4dff,0x26c6a5][lane],metalness:.35,roughness:.3,emissive:[0x064d75,0x32105f,0x075d4c][lane],emissiveIntensity:.35}));
+  track.position.set(x,-.2,runnerTrackZ);track.receiveShadow=true;scene.add(track);track.userData={halfX:1.82,halfZ:runnerTrackLength/2,top:.05};platforms.push(track);
+  const edgeMat=new THREE.MeshStandardMaterial({color:[0x7cecff,0xd9a5ff,0x8affc8][lane],emissive:[0x168ab8,0x6d25a8,0x168d69][lane],emissiveIntensity:1.2});
+  for(const side of [-1,1]){const rail=new THREE.Mesh(new THREE.BoxGeometry(.12,.35,runnerTrackLength),edgeMat);rail.position.set(x+side*1.78,.2,runnerTrackZ);scene.add(rail);}
+ }
+ // حواجز سباق مرئية موزعة على المسارات
+ for(let n=0;n<9;n++){
+  const z=-318-n*5.2,x=runnerLanes[n%3],obstacle=new THREE.Group();
+  const base=new THREE.Mesh(new THREE.BoxGeometry(2.2,.35,.55),new THREE.MeshStandardMaterial({color:0xffb52e,metalness:.4,emissive:0x8a4200,emissiveIntensity:.45}));base.position.y=.35;obstacle.add(base);
+  const stripe=new THREE.Mesh(new THREE.BoxGeometry(2.2,.12,.58),new THREE.MeshBasicMaterial({color:0xffffff}));stripe.position.y=.48;obstacle.add(stripe);obstacle.position.set(x,0,z);scene.add(obstacle);
+ }
+ // بوابات الأسئلة الثلاثة على امتداد مسار الركض
+ [-322,-336,-350].forEach((z,i)=>{
+  const arch=new THREE.Group();arch.position.set(0,.1,z);
+  const glow=new THREE.MeshStandardMaterial({color:[0x51e6ff,0xffc857,0xe58cff][i],emissive:[0x168db5,0x9c5a08,0x842ca8][i],emissiveIntensity:1.4});
+  for(const x of [-6,6]){const post=new THREE.Mesh(new THREE.BoxGeometry(.35,4,.35),glow);post.position.set(x,2,0);arch.add(post);}
+  const beam=new THREE.Mesh(new THREE.BoxGeometry(12.3,.35,.4),glow);beam.position.y=4;arch.add(beam);scene.add(arch);
+ });
+ // صندوق الكنز في نهاية مسار الركض
+ treasureChest=new THREE.Group();treasureChest.position.set(0,.12,-367);
  const chestBase=new THREE.Mesh(new THREE.BoxGeometry(2.5,1.25,1.65),new THREE.MeshStandardMaterial({color:0x8b4a20,metalness:.35,roughness:.42}));chestBase.position.y=.68;chestBase.castShadow=true;treasureChest.add(chestBase);
  const bandMat=new THREE.MeshStandardMaterial({color:0xffd34d,metalness:.8,roughness:.2,emissive:0x9b6500,emissiveIntensity:.35});
  for(const x of [-.82,.82]){const band=new THREE.Mesh(new THREE.BoxGeometry(.18,1.28,1.7),bandMat);band.position.set(x,.7,0);treasureChest.add(band);}
@@ -436,28 +457,35 @@ function makeWorld(){
  camera.position.set(0,7,22);camera.lookAt(0,1,8);
 }
 function showWorldToast(i){const t=document.getElementById('worldToast');if(!t)return;t.textContent='🌍 '+names[i];t.classList.add('show');clearTimeout(showWorldToast.timer);showWorldToast.timer=setTimeout(()=>t.classList.remove('show'),2300);}
-function startGame(){try{started=false;paused=false;asking=false;finished=false;score=0;answered=0;remaining=0;coinsCollected=0;gemsCollected=0;activeWorld=0;gemQuestionShown=false;gemQuestionDone=false;gemQuestionActive=false;treasureTriggered=false;treasureChest=null;treasureLid=null;treasureOpen=false;treasureProgress=0;celebrationTimer=0;fireworkParticles=[];victoryDance=false;document.getElementById('coinCount').textContent='0';document.getElementById('gemCount').textContent='💎 الجواهر: 0/5';document.getElementById('stationCount').textContent='0';document.getElementById('worldProgress').textContent='العالم 1 من 6';document.getElementById('stationModal').classList.add('hidden');currentStation=null;document.getElementById('bar').style.width='0%';playerName=document.getElementById('playerName').value.trim()||'مغامر';document.getElementById('playerLabel').textContent=playerName;if(renderer){renderer.dispose();renderer.domElement.remove();renderer=null;}makeWorld();player.position.set(-2.4,.3,-3);checkpoint={x:-2.4,y:.3,z:-3};velocityY=0;onGround=true;document.getElementById('welcome').classList.add('hidden');document.getElementById('hud').classList.remove('hidden');started=true;last=performance.now();document.activeElement?.blur();document.body.focus();showWorldToast(0);animate();sound('level');startWorldMusic(0);}catch(err){started=false;document.getElementById('welcome').classList.remove('hidden');const help=document.getElementById('startHelp');const msg='تعذّر تشغيل اللعبة: '+(err&&err.message?err.message:String(err||'خطأ غير معروف'))+' — جرّبي تحديث الصفحة.';if(help)help.textContent=msg;const feedback=document.getElementById('craneFeedback');if(feedback)feedback.textContent=msg;console.error('Worlds Adventure start error:',err);}}
+function startGame(){try{started=false;paused=false;asking=false;finished=false;score=0;answered=0;remaining=0;coinsCollected=0;gemsCollected=0;activeWorld=0;gemQuestionShown=false;gemQuestionDone=false;gemQuestionActive=false;treasureTriggered=false;runnerQuestionIndex=0;runnerQuestionActive=false;treasureChest=null;treasureLid=null;treasureOpen=false;treasureProgress=0;celebrationTimer=0;fireworkParticles=[];victoryDance=false;document.getElementById('coinCount').textContent='0';document.getElementById('gemCount').textContent='💎 الجواهر: 0/5';document.getElementById('stationCount').textContent='0';document.getElementById('worldProgress').textContent='العالم 1 من 6';document.getElementById('stationModal').classList.add('hidden');currentStation=null;document.getElementById('bar').style.width='0%';playerName=document.getElementById('playerName').value.trim()||'مغامر';document.getElementById('playerLabel').textContent=playerName;if(renderer){renderer.dispose();renderer.domElement.remove();renderer=null;}makeWorld();player.position.set(-2.4,.3,-3);checkpoint={x:-2.4,y:.3,z:-3};velocityY=0;onGround=true;document.getElementById('welcome').classList.add('hidden');document.getElementById('hud').classList.remove('hidden');started=true;last=performance.now();document.activeElement?.blur();document.body.focus();showWorldToast(0);animate();sound('level');startWorldMusic(0);}catch(err){started=false;document.getElementById('welcome').classList.remove('hidden');const help=document.getElementById('startHelp');const msg='تعذّر تشغيل اللعبة: '+(err&&err.message?err.message:String(err||'خطأ غير معروف'))+' — جرّبي تحديث الصفحة.';if(help)help.textContent=msg;const feedback=document.getElementById('craneFeedback');if(feedback)feedback.textContent=msg;console.error('Worlds Adventure start error:',err);}}
 // Expose the module-scoped start function for the entry button's inline click handler.
 window.startGame=startGame;
 
 function enterNearbyPortal(){}
-function showGemQuestion(){
- gemQuestionShown=true;gemQuestionActive=true;asking=true;paused=true;keys={};
- document.getElementById('stationTag').textContent='💎 تحدي الجواهر الأخير';
- document.getElementById('stationTitle').textContent='افتح بوابة الكنز!';
- document.getElementById('stationStory').textContent='جمعت الجواهر الخمس! بقي أن تثبت أنك خبير ترتيب العمليات لتحصل على الكنز.';
- document.getElementById('stationExpression').textContent='8 + 3 × 4 = ؟';
- document.getElementById('stationFeedback').textContent='تذكّر: نبدأ بالضرب قبل الجمع.';
+const runnerQuestions=[
+ {q:'72 ÷ 8 + 6 × 3',a:['21','27','33'],c:1,title:'🏃 تحدي المسار الأول',story:'واصل الركض بين المسارات الثلاثة! احسب الناتج لتجاوز الحاجز الأول.'},
+ {q:'45 − (12 + 8) ÷ 4 × 3',a:['30','15','35'],c:0,title:'🚦 تحدي المسار الثاني',story:'أمامك حاجز جديد! انتبه للأقواس ثم القسمة والضرب قبل الطرح.'},
+ {q:'6 × (15 − 7) + 48 ÷ 6',a:['54','56','64'],c:1,title:'🏆 التحدي الأخير',story:'اقتربت من الكنز! حل السؤال الأخير وافتح طريق النهاية.'}
+];
+function showRunnerQuestion(){
+ const q=runnerQuestions[runnerQuestionIndex];if(!q||runnerQuestionActive||asking)return;
+ runnerQuestionActive=true;asking=true;paused=true;keys={};
+ document.getElementById('stationTag').textContent='🚇 سباق الجواهر · سؤال '+(runnerQuestionIndex+1)+' من 3';
+ document.getElementById('stationTitle').textContent=q.title;document.getElementById('stationStory').textContent=q.story;
+ document.getElementById('stationExpression').textContent=q.q+' = ؟';
+ document.getElementById('stationFeedback').textContent='اختر الإجابة الصحيحة لتجاوز الحاجز ومواصلة الركض.';
  const box=document.getElementById('stationAnswers');box.innerHTML='';
- ['44','20','32'].forEach((v,i)=>{const btn=document.createElement('button');btn.textContent=v;btn.onclick=()=>answerGemQuestion(i);box.appendChild(btn);});
+ q.a.forEach((v,i)=>{const btn=document.createElement('button');btn.textContent=v;btn.onclick=()=>answerRunnerQuestion(i);box.appendChild(btn);});
  document.getElementById('stationModal').classList.remove('hidden');sound('gate');
 }
-function answerGemQuestion(i){
- if(!gemQuestionActive)return;
- if(i!==1){document.getElementById('stationFeedback').textContent='ليست الإجابة الصحيحة! نفّذ الضرب أولًا ثم اجمع. 💡';sound('wrong');return;}
- gemQuestionActive=false;gemQuestionDone=true;answered++;score+=20;document.getElementById('score').textContent=score;document.getElementById('stationCount').textContent=answered;
- document.getElementById('stationFeedback').textContent='إجابة صحيحة! ظهرت لك منصة الكنز الأخيرة! 🏆';sound('correct');
- setTimeout(()=>{document.getElementById('stationModal').classList.add('hidden');asking=false;paused=false;keys={};checkpoint={x:-2.4,y:.25,z:-282};},900);
+function answerRunnerQuestion(i){
+ if(!runnerQuestionActive)return;const q=runnerQuestions[runnerQuestionIndex];
+ if(i!==q.c){document.getElementById('stationFeedback').textContent='إجابة غير صحيحة! جرّب مرة ثانية قبل أن تتابع الركض. 💡';sound('wrong');return;}
+ runnerQuestionActive=false;runnerQuestionIndex++;answered++;score+=20;document.getElementById('score').textContent=score;document.getElementById('stationCount').textContent=answered;
+ gemQuestionDone=runnerQuestionIndex===3;
+ document.getElementById('stationFeedback').textContent=gemQuestionDone?'ممتاز! اجتزت التحديات الثلاثة، الكنز أمامك! 🏆':'رائع! تجاوزت الحاجز، استعد للسؤال التالي! ⚡';sound('correct');
+ const nextZ=[-324,-338,-352][runnerQuestionIndex-1];
+ setTimeout(()=>{document.getElementById('stationModal').classList.add('hidden');asking=false;paused=false;keys={};checkpoint={x:THREE.MathUtils.clamp(player.position.x,-5.7,5.7),y:.12,z:nextZ-1.5};},750);
 }
 function showStation(g){if(!g||g.done||asking)return;currentStation=g;asking=true;paused=true;keys={};const q=stationQuestions[g.index];document.getElementById('stationTag').textContent=['🌿 محطة الغابة','🪐 محطة الفضاء','🏰 محطة القلعة','🤖 محطة المستقبل','🏝️ محطة الجزيرة'][g.world]+' · تحدي '+(g.index%2+1);document.getElementById('stationTitle').textContent=q.title;document.getElementById('stationStory').textContent=q.story;document.getElementById('stationExpression').textContent=q.q;document.getElementById('stationFeedback').textContent='اختر الإجابة الصحيحة لتفعيل البوابة.';const box=document.getElementById('stationAnswers');box.innerHTML='';q.a.forEach((v,i)=>{const btn=document.createElement('button');btn.textContent=v;btn.onclick=()=>answerStation(i);box.appendChild(btn);});document.getElementById('stationModal').classList.remove('hidden');sound('gate');}
 function answerStation(i){if(!currentStation)return;const q=stationQuestions[currentStation.index];if(i!==q.c){document.getElementById('stationFeedback').textContent='ليس هذا المفتاح الصحيح! جرّب مرة أخرى 💡';sound('wrong');return;}currentStation.done=true;currentStation.group.visible=false;answered++;score+=10;document.getElementById('score').textContent=score;document.getElementById('stationCount').textContent=answered;document.getElementById('stationFeedback').textContent='أحسنت! فُتحت البوابة، أكمل مغامرتك! ✨';sound('correct');const gate=currentStation;currentStation=null;setTimeout(()=>{document.getElementById('stationModal').classList.add('hidden');asking=false;paused=false;keys={};checkpoint={x:gate.x,y:heightPatterns[gate.world][gate.index%2===0?2:4]+.12,z:gate.z+1.5};},850);}
@@ -506,8 +534,8 @@ function animate(now=performance.now()){if(!started)return;requestAnimationFrame
  for(const a of worldAnimations){a.object.rotation.y+=a.spin*dt;if(a.bob){if(a.baseY===undefined)a.baseY=a.object.position.y;a.object.position.y=a.baseY+Math.sin(now*.0015+a.object.position.z)*a.bob;}}
  for(const coin of coinMeshes){if(coin.visible){coin.rotation.y+=dt*3.8;coin.position.y=coin.userData.baseY+Math.sin(now*.003+coin.position.z)*.22;if(Math.abs(coin.position.z-player.position.z)<2.7&&Math.abs(coin.position.x-player.position.x)<2.0&&Math.abs((player.position.y+1.5)-coin.position.y)<2.0){coin.visible=false;coinsCollected++;score=coinsCollected;document.getElementById('score').textContent=score;sound('coin');document.getElementById('coinCount').textContent=coinsCollected;}}}
  for(const gem of gemMeshes){if(gem.visible){gem.rotation.y+=dt*2.8;gem.rotation.x+=dt*.7;gem.position.y=gem.userData.baseY+Math.sin(now*.0035+gem.position.z)*.28;if(Math.abs(gem.position.z-player.position.z)<2.8&&Math.abs(gem.position.x-player.position.x)<2.2&&Math.abs((player.position.y+1.5)-gem.position.y)<2.2){gem.visible=false;gemsCollected++;score+=25;document.getElementById('score').textContent=score;document.getElementById('gemCount').textContent='💎 الجواهر: '+gemsCollected+'/5';sound('gem');}}}
- if(activeWorld===5&&player.position.z<-281&&gemsCollected===5&&!gemQuestionShown&&!finished&&!asking){showGemQuestion();}
- if(activeWorld===5&&gemQuestionDone&&player.position.z<-308&&Math.abs(player.position.x+2.4)<3.2&&!treasureTriggered&&!finished){treasureTriggered=true;treasureOpen=true;treasureProgress=0;launchFireworks();playVictoryTune();sound('level');}
+ if(activeWorld===5&&gemsCollected===5&&player.position.z<-319&&runnerQuestionIndex<3&&!runnerQuestionActive&&!finished){showRunnerQuestion();}
+ if(activeWorld===5&&gemQuestionDone&&player.position.z<-365&&Math.abs(player.position.x)<3.2&&!treasureTriggered&&!finished){treasureTriggered=true;treasureOpen=true;treasureProgress=0;launchFireworks();playVictoryTune();sound('level');}
 
  
  const ph=document.getElementById('portalHint');if(ph)ph.style.display='none';
