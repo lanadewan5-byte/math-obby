@@ -110,9 +110,18 @@ function craneTone(kind){
   });
  }catch(e){}
 }
-['pointerdown','keydown','touchstart'].forEach(ev=>window.addEventListener(ev,()=>{
- if(craneAudio&&craneAudio.state==='suspended')craneAudio.resume().catch(()=>{});
-},{passive:true}));
+let gameAudioUnlocked=false;
+ function unlockGameAudio(){
+  try{
+   const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
+   audioCtx=audioCtx||new AC();craneAudio=craneAudio||new AC();
+   const pending=[audioCtx,craneAudio].filter(ctx=>ctx.state==='suspended').map(ctx=>ctx.resume().catch(()=>{}));
+   Promise.all(pending).then(()=>{
+    if(!gameAudioUnlocked&&soundEnabled){gameAudioUnlocked=true;sound('level');}
+   });
+  }catch(e){}
+ }
+ ['pointerdown','keydown','touchstart'].forEach(ev=>window.addEventListener(ev,unlockGameAudio,{passive:true}));
 function buildCrane3D(){
  const host=$('crane3d');if(!host||!window.THREE)return;
  const T=window.THREE;craneScene=new T.Scene();craneScene.background=new T.Color(0x8bd8f4);craneScene.fog=new T.Fog(0x8bd8f4,18,48);
@@ -221,7 +230,7 @@ let treasureChest=null,treasureLid=null,treasureOpen=false,treasurePromptShown=f
 let score=0,answered=0,playerName='',remaining=0,last=performance.now(),gateMeshes=[],platforms=[],coinMeshes=[],hubPortals=[],coinsCollected=0,currentGate=0,currentStation=null,checkpoint={x:-2.4,y:.3,z:-3};
 const clockEl=null;
 let audioCtx=null,soundEnabled=true;
-function sound(type){if(!soundEnabled)return;try{audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume();const now=audioCtx.currentTime,osc=audioCtx.createOscillator(),gain=audioCtx.createGain(),p={jump:[420,620,.11],gem:[760,1120,.16],coin:[900,1320,.18],correct:[620,880,.22],wrong:[210,150,.2],level:[520,780,.42],gate:[440,660,.3],fall:[260,110,.28]}[type]||[500,700,.18];osc.type=type==='wrong'?'triangle':'sine';osc.frequency.setValueAtTime(p[0],now);osc.frequency.exponentialRampToValueAtTime(p[1],now+p[2]);gain.gain.setValueAtTime(.0001,now);gain.gain.exponentialRampToValueAtTime(.34,now+.015);gain.gain.exponentialRampToValueAtTime(.0001,now+p[2]);osc.connect(gain);gain.connect(audioCtx.destination);osc.start(now);osc.stop(now+p[2]+.02);}catch(e){}}
+function sound(type){if(!soundEnabled)return;try{audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume().catch(()=>{});const now=audioCtx.currentTime,osc=audioCtx.createOscillator(),gain=audioCtx.createGain(),p={jump:[420,620,.11],gem:[760,1120,.16],coin:[900,1320,.18],correct:[620,880,.22],wrong:[210,150,.2],level:[520,780,.42],gate:[440,660,.3],fall:[260,110,.28]}[type]||[500,700,.18];osc.type=type==='wrong'?'triangle':'sine';osc.frequency.setValueAtTime(p[0],now);osc.frequency.exponentialRampToValueAtTime(p[1],now+p[2]);gain.gain.setValueAtTime(.0001,now);gain.gain.exponentialRampToValueAtTime(.34,now+.015);gain.gain.exponentialRampToValueAtTime(.0001,now+p[2]);osc.connect(gain);gain.connect(audioCtx.destination);osc.start(now);osc.stop(now+p[2]+.02);}catch(e){}}
 let musicTimer=null,musicStep=0;function stopWorldMusic(){if(musicTimer){clearInterval(musicTimer);musicTimer=null;}}function startWorldMusic(world){stopWorldMusic();if(!soundEnabled)return;const scales=[[392,440,523,587,659,587,523,440],[330,392,494,587,659,587,494,392],[294,349,440,523,587,523,440,349],[349,440,523,659,698,659,523,440],[392,494,587,659,784,659,587,494]];const melody=scales[world]||scales[0];musicStep=0;musicTimer=setInterval(()=>{if(!soundEnabled||!audioCtx)return;try{const now=audioCtx.currentTime,o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type=world===1?'sine':'triangle';o.frequency.value=melody[musicStep%melody.length];g.gain.setValueAtTime(.0001,now);g.gain.exponentialRampToValueAtTime(.075,now+.04);g.gain.exponentialRampToValueAtTime(.0001,now+.31);o.connect(g);g.connect(audioCtx.destination);o.start(now);o.stop(now+.33);musicStep++;}catch(e){}},360);}
 function toggleSound(){soundEnabled=!soundEnabled;document.getElementById('soundToggle').textContent=soundEnabled?'🔊 الصوت: يعمل':'🔇 الصوت: متوقف';if(soundEnabled){sound('correct');startWorldMusic(activeWorld);}else stopWorldMusic();}
 function mat(color,roughness=.8){return new THREE.MeshStandardMaterial({color,roughness})}
