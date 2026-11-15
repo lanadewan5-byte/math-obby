@@ -57,7 +57,7 @@
 <div id="hud" class="hidden">
  <div class="top">
   <div class="pill">✨ <span id="score">0</span> إنجاز<br><small id="world">عالم الطبيعة الساحرة</small><br><small>🧩 المحطات: <span id="stationCount">0</span>/10</small></div>
-  <div class="pill">🌍 <span id="worldProgress">العالم 1 من 5</span><div class="meter"><i id="bar"></i></div></div>
+  <div class="pill">🌍 <span id="worldProgress">العالم 1 من 6</span><div class="meter"><i id="bar"></i></div></div>
   <div class="pill">🪙 <span id="coinCount">0</span>/25<br><small id="playerLabel"></small><br><small id="gemCount" style="color:#8ffcff">💎 الجواهر: 0/5</small></div>
  </div>
  <div class="bottom"><div class="hint">تحرّك: WASD أو الأسهم · اقفز: Space<br>اجمع الكوينز واكتشف الأسرار. إذا سقطت ستعود لبداية عالمك.</div><div style="display:flex;gap:6px;pointer-events:auto"><button class="dark" id="soundToggle" onclick="toggleSound()">🔊 الصوت: يعمل</button><button class="dark" onclick="togglePause()">Ⅱ إيقاف</button></div></div>
@@ -299,7 +299,7 @@ function makeWorld(){
    for(let n=0;n<7;n++){const x=n%2?10:-10,z=baseZ-5-n*6.2,h=5+(n%3)*3;const tower=new THREE.Group();const body=new THREE.Mesh(new THREE.BoxGeometry(2.7,h,2.7),new THREE.MeshStandardMaterial({color:n%2?0x263d77:0x344b89,metalness:.65,roughness:.25,emissive:0x102b75,emissiveIntensity:.7}));body.position.y=h/2;tower.add(body);for(let f=0;f<3;f++){const strip=new THREE.Mesh(new THREE.BoxGeometry(2.85,.12,2.85),new THREE.MeshBasicMaterial({color:f%2?0x4dfaff:0xff5bdb}));strip.position.y=1.5+f*(h/3);tower.add(strip);}tower.position.set(x,0,z);scene.add(tower);}
    const bot=new THREE.Group();const body=new THREE.Mesh(new THREE.BoxGeometry(1.5,1.7,1),mat(0xb9eaff));body.position.y=1.2;bot.add(body);const head=new THREE.Mesh(new THREE.BoxGeometry(1.25,.9,.9),mat(0xe7f7ff));head.position.y=2.55;bot.add(head);for(let e=-1;e<=1;e+=2){const eye=new THREE.Mesh(new THREE.SphereGeometry(.13,12,8),new THREE.MeshBasicMaterial({color:0x00eaff}));eye.position.set(e*.3,2.6,.48);bot.add(eye);}bot.position.set(10,0,baseZ-34);scene.add(bot);worldAnimations.push({object:bot,spin:.18,bob:.3});
    const energyRing=new THREE.Mesh(new THREE.TorusGeometry(3,.16,10,48),new THREE.MeshBasicMaterial({color:0x42f5ff}));energyRing.position.set(-10,3,baseZ-24);energyRing.rotation.x=Math.PI/2;scene.add(energyRing);worldAnimations.push({object:energyRing,spin:.9,bob:0});
-  }else{
+  }else if(w<5){
    // الجزر السحرية: نخيل وشراع وسفينة وشلالات فوق بحر فيروزي
    const sea=new THREE.Mesh(new THREE.PlaneGeometry(34,52),new THREE.MeshStandardMaterial({color:0x13b9d1,metalness:.25,roughness:.25,transparent:true,opacity:.78}));sea.rotation.x=-Math.PI/2;sea.position.set(0,-5,baseZ-24);scene.add(sea);
    for(let n=0;n<4;n++){const x=n%2?11:-11,z=baseZ-8-n*10;const trunk=new THREE.Mesh(new THREE.CylinderGeometry(.22,.42,6,8),mat(0x80502c));trunk.position.set(x,2.7,z);trunk.rotation.z=x>0?.12:-.12;scene.add(trunk);for(let f=0;f<5;f++){const leaf=new THREE.Mesh(new THREE.ConeGeometry(.55,4,5),mat(0x27c878));leaf.position.set(x+Math.cos(f*Math.PI*2/5)*1.2,5.6,z+Math.sin(f*Math.PI*2/5)*1.2);leaf.rotation.z=Math.cos(f*Math.PI*2/5)*.8;leaf.rotation.x=Math.sin(f*Math.PI*2/5)*.8;scene.add(leaf);}}
@@ -465,14 +465,14 @@ function animate(now=performance.now()){if(!started)return;requestAnimationFrame
  for(const a of worldAnimations){a.object.rotation.y+=a.spin*dt;if(a.bob){if(a.baseY===undefined)a.baseY=a.object.position.y;a.object.position.y=a.baseY+Math.sin(now*.0015+a.object.position.z)*a.bob;}}
  for(const coin of coinMeshes){if(coin.visible){coin.rotation.y+=dt*3.8;coin.position.y=coin.userData.baseY+Math.sin(now*.003+coin.position.z)*.22;if(Math.abs(coin.position.z-player.position.z)<2.7&&Math.abs(coin.position.x-player.position.x)<2.0&&Math.abs((player.position.y+1.5)-coin.position.y)<2.0){coin.visible=false;coinsCollected++;score=coinsCollected;document.getElementById('score').textContent=score;sound('coin');document.getElementById('coinCount').textContent=coinsCollected;}}}
  for(const gem of gemMeshes){if(gem.visible){gem.rotation.y+=dt*2.8;gem.rotation.x+=dt*.7;gem.position.y=gem.userData.baseY+Math.sin(now*.0035+gem.position.z)*.28;if(Math.abs(gem.position.z-player.position.z)<2.8&&Math.abs(gem.position.x-player.position.x)<2.2&&Math.abs((player.position.y+1.5)-gem.position.y)<2.2){gem.visible=false;gemsCollected++;score+=25;document.getElementById('score').textContent=score;document.getElementById('gemCount').textContent='💎 الجواهر: '+gemsCollected+'/5';sound('gem');}}}
- if(activeWorld===5&&player.position.z<-286&&gemsCollected===5&&!finished){finishGame();}
+ if(activeWorld===5&&player.position.z<-281&&gemsCollected===5&&!finished){finishGame();}
 
  
  const ph=document.getElementById('portalHint');if(ph)ph.style.display='none';
  const nearbyStation=gateMeshes.find(g=>!g.done&&Math.abs(player.position.z-g.z)<2.3&&Math.abs(player.position.x-g.x)<2.8&&Math.abs(player.position.y-(heightPatterns[g.world][g.index%2===0?2:4]+.12))<2.2);if(nearbyStation)showStation(nearbyStation);
  // الانتقال التلقائي بين العوالم مع حفظ نقطة بداية العالم الحالي
  const nextWorld=Math.min(5,Math.max(0,Math.floor((-player.position.z-2)/48)));
- if(nextWorld>activeWorld){activeWorld=nextWorld;const base=-activeWorld*48;checkpoint={x:lanePatterns[activeWorld][0],y:heightPatterns[activeWorld][0]+.12,z:base-3};document.getElementById('world').textContent=names[activeWorld];document.getElementById('worldProgress').textContent='العالم '+(activeWorld+1)+' من 6';document.getElementById('bar').style.width=(activeWorld/5*100)+'%';showWorldToast(activeWorld);sound('gate');startWorldMusic(activeWorld);}
+ if(nextWorld>activeWorld){activeWorld=nextWorld;const base=-activeWorld*48;checkpoint={x:lanePatterns[activeWorld][0],y:heightPatterns[activeWorld][0]+.12,z:base-3};document.getElementById('world').textContent=names[activeWorld];document.getElementById('worldProgress').textContent='العالم '+(activeWorld+1)+' من 6';document.getElementById('bar').style.width=(activeWorld/6*100)+'%';showWorldToast(activeWorld);sound('gate');startWorldMusic(activeWorld);}
  player.rotation.y=Math.atan2(dx,-dz||.0001);const moving=Math.abs(dx)+Math.abs(dz)>0;player.userData.legs.forEach((l,i)=>l.rotation.x=moving?Math.sin(now*.014+i*Math.PI)*.5:0);
  }
  if(treasureLid&&treasureOpen&&treasureProgress<1){treasureProgress=Math.min(1,treasureProgress+dt*0.7);treasureLid.rotation.x=-1.35*treasureProgress;treasureChest.rotation.y=Math.sin(now*.006)*.025;if(treasureProgress>=1){celebrationTimer+=dt;if(celebrationTimer>1.1&&!finished)finishGame();}}for(let i=fireworkParticles.length-1;i>=0;i--){const p=fireworkParticles[i];p.life-=dt;p.velocity.y-=5.5*dt;p.mesh.position.addScaledVector(p.velocity,dt);p.mesh.material.opacity=Math.max(0,p.life/1.5);p.mesh.material.transparent=true;if(p.life<=0){scene.remove(p.mesh);p.mesh.geometry.dispose();p.mesh.material.dispose();fireworkParticles.splice(i,1);}}
