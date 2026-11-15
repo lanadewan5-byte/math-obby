@@ -76,7 +76,7 @@
   <div id="craneFeedback" aria-live="polite">تذكّر: الأقواس أولاً، ثم الضرب والقسمة، ثم الجمع والطرح.</div>
   <div id="craneLaunch"><p style="color:#c8f8e5;font-weight:900">🎉 أحسنت! اكتمل برج العمليات وفتحت بوابة العوالم الخمسة.</p>
   <input id="playerName" class="field craneName" placeholder="اسم الطالب/ة" maxlength="30">
-  <button onclick="startGame()">ادخل المغامرة 🌍</button></div>
+  <button id="enterAdventure" type="button">ادخل المغامرة 🌍</button><div id="startHelp" role="status" aria-live="polite" style="font-size:13px;color:#ffe28a;min-height:22px;margin-top:6px"></div></div>
  </section>
  </div></div>
 <div id="worldToast">🌍 العالم الجديد</div>
@@ -416,7 +416,7 @@ function makeWorld(){
  camera.position.set(0,7,22);camera.lookAt(0,1,8);
 }
 function showWorldToast(i){const t=document.getElementById('worldToast');if(!t)return;t.textContent='🌍 '+names[i];t.classList.add('show');clearTimeout(showWorldToast.timer);showWorldToast.timer=setTimeout(()=>t.classList.remove('show'),2300);}
-function startGame(){try{started=false;paused=false;asking=false;finished=false;score=0;answered=0;remaining=0;coinsCollected=0;gemsCollected=0;activeWorld=0;document.getElementById('coinCount').textContent='0';document.getElementById('gemCount').textContent='💎 الجواهر: 0/5';document.getElementById('stationCount').textContent='0';document.getElementById('worldProgress').textContent='العالم 1 من 6';document.getElementById('stationModal').classList.add('hidden');currentStation=null;document.getElementById('bar').style.width='0%';playerName=document.getElementById('playerName').value.trim()||'مغامر';document.getElementById('playerLabel').textContent=playerName;if(renderer){renderer.dispose();renderer.domElement.remove();renderer=null;}makeWorld();player.position.set(-2.4,.3,-3);checkpoint={x:-2.4,y:.3,z:-3};velocityY=0;onGround=true;document.getElementById('welcome').classList.add('hidden');document.getElementById('hud').classList.remove('hidden');started=true;last=performance.now();document.activeElement?.blur();document.body.focus();showWorldToast(0);animate();sound('level');startWorldMusic(0);}catch(err){started=false;document.getElementById('welcome').classList.remove('hidden');document.getElementById('startHelp').textContent='تعذّر تشغيل اللعبة: '+(err&&err.message?err.message:'تحقق من تفعيل WebGL والاتصال بالإنترنت')+' — حدّثي الصفحة وحاول مرة أخرى.';console.error('Worlds Adventure start error:',err);}}
+function startGame(){try{started=false;paused=false;asking=false;finished=false;score=0;answered=0;remaining=0;coinsCollected=0;gemsCollected=0;activeWorld=0;document.getElementById('coinCount').textContent='0';document.getElementById('gemCount').textContent='💎 الجواهر: 0/5';document.getElementById('stationCount').textContent='0';document.getElementById('worldProgress').textContent='العالم 1 من 6';document.getElementById('stationModal').classList.add('hidden');currentStation=null;document.getElementById('bar').style.width='0%';playerName=document.getElementById('playerName').value.trim()||'مغامر';document.getElementById('playerLabel').textContent=playerName;if(renderer){renderer.dispose();renderer.domElement.remove();renderer=null;}makeWorld();player.position.set(-2.4,.3,-3);checkpoint={x:-2.4,y:.3,z:-3};velocityY=0;onGround=true;document.getElementById('welcome').classList.add('hidden');document.getElementById('hud').classList.remove('hidden');started=true;last=performance.now();document.activeElement?.blur();document.body.focus();showWorldToast(0);animate();sound('level');startWorldMusic(0);}catch(err){started=false;document.getElementById('welcome').classList.remove('hidden');const help=document.getElementById('startHelp');const msg='تعذّر تشغيل اللعبة: '+(err&&err.message?err.message:String(err||'خطأ غير معروف'))+' — جرّبي تحديث الصفحة.';if(help)help.textContent=msg;const feedback=document.getElementById('craneFeedback');if(feedback)feedback.textContent=msg;console.error('Worlds Adventure start error:',err);}}
 // Expose the module-scoped start function for the entry button's inline click handler.
 window.startGame=startGame;
 
@@ -483,5 +483,6 @@ function animate(now=performance.now()){if(!started)return;requestAnimationFrame
  renderer.render(scene,camera)}
 window.addEventListener('resize',()=>{if(!renderer)return;camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
 window.startGame=startGame;window.answerStation=answerStation;window.jump=jump;window.toggleSound=toggleSound;window.togglePause=togglePause;window.downloadResult=downloadResult;
+const enterButton=document.getElementById('enterAdventure');if(enterButton)enterButton.addEventListener('click',()=>{try{startGame();}catch(error){console.error(error);const help=document.getElementById('startHelp');if(help)help.textContent='حدث خطأ عند بدء المغامرة: '+(error?.message||error);}});
 </script>
 </body></html>
