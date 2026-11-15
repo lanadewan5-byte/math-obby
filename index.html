@@ -225,7 +225,7 @@ const accents=[0xb7ff63,0x64e8ff,0xffcc62,0x5cf3ff,0xffdb73,0xd76bff];
 const skyColors=[0x78dfff,0x090d35,0x8fc9ff,0x111b3d,0x25b8d0,0x211039];
 const fogColors=[0xa9edff,0x202b65,0xb8d9ff,0x243b63,0x8ce8dc,0x56336f];
 let scene,camera,renderer,player,velocityY=0,onGround=false,keys={},started=false,paused=false,asking=false,finished=false,activeWorld=0;
-let worldAnimations=[],fireworkParticles=[];
+let worldAnimations=[],fireworkParticles=[],runnerObstacles=[];
 let treasureChest=null,treasureLid=null,treasureOpen=false,treasurePromptShown=false,treasureProgress=0,victoryDance=false,celebrationTimer=0,gemQuestionShown=false,gemQuestionDone=false,gemQuestionActive=false,treasureTriggered=false,runnerQuestionIndex=0,runnerQuestionActive=false;
 let score=0,answered=0,playerName='',remaining=0,last=performance.now(),gateMeshes=[],platforms=[],coinMeshes=[],gemMeshes=[],hubPortals=[],coinsCollected=0,gemsCollected=0,currentGate=0,currentStation=null,checkpoint={x:-2.4,y:.3,z:-3};
 const clockEl=null;
@@ -259,7 +259,7 @@ function toggleSound(){soundEnabled=!soundEnabled;document.getElementById('sound
 function mat(color,roughness=.8){return new THREE.MeshStandardMaterial({color,roughness})}
 function block(x,y,z,sx,sy,sz,color){const m=new THREE.Mesh(new THREE.BoxGeometry(sx,sy,sz),mat(color));m.position.set(x,y,z);scene.add(m);return m}
 function makeWorld(){
- platforms=[];gateMeshes=[];coinMeshes=[];gemMeshes=[];hubPortals=[];worldAnimations=[];scene=new THREE.Scene();scene.background=new THREE.Color(skyColors[0]);scene.fog=new THREE.Fog(fogColors[0],48,155);
+ platforms=[];gateMeshes=[];coinMeshes=[];gemMeshes=[];hubPortals=[];worldAnimations=[];runnerObstacles=[];scene=new THREE.Scene();scene.background=new THREE.Color(skyColors[0]);scene.fog=new THREE.Fog(fogColors[0],48,155);
  camera=new THREE.PerspectiveCamera(65,innerWidth/innerHeight,.1,300);
  renderer=new THREE.WebGLRenderer({antialias:true});renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;document.body.appendChild(renderer.domElement);
  scene.add(new THREE.HemisphereLight(0xeaf7ff,0x486044,2.1));
@@ -398,11 +398,27 @@ function makeWorld(){
   const edgeMat=new THREE.MeshStandardMaterial({color:[0x7cecff,0xd9a5ff,0x8affc8][lane],emissive:[0x168ab8,0x6d25a8,0x168d69][lane],emissiveIntensity:1.2});
   for(const side of [-1,1]){const rail=new THREE.Mesh(new THREE.BoxGeometry(.12,.35,runnerTrackLength),edgeMat);rail.position.set(x+side*1.78,.2,runnerTrackZ);scene.add(rail);}
  }
- // حواجز سباق مرئية موزعة على المسارات
- for(let n=0;n<9;n++){
-  const z=-318-n*5.2,x=runnerLanes[n%3],obstacle=new THREE.Group();
-  const base=new THREE.Mesh(new THREE.BoxGeometry(2.2,.35,.55),new THREE.MeshStandardMaterial({color:0xffb52e,metalness:.4,emissive:0x8a4200,emissiveIntensity:.45}));base.position.y=.35;obstacle.add(base);
-  const stripe=new THREE.Mesh(new THREE.BoxGeometry(2.2,.12,.58),new THREE.MeshBasicMaterial({color:0xffffff}));stripe.position.y=.48;obstacle.add(stripe);obstacle.position.set(x,0,z);scene.add(obstacle);
+ // عوائق تغيير المسار: حواجز عالية تسد مسارًا واحدًا، وعلى اللاعب الانحراف يمينًا أو يسارًا
+ const sideStepRows=[{z:-314,lane:1},{z:-318,lane:0},{z:-328,lane:2},{z:-332,lane:1},{z:-342,lane:0},{z:-346,lane:2}];
+ for(const row of sideStepRows){
+  const obstacle=new THREE.Group(),x=runnerLanes[row.lane];
+  const body=new THREE.Mesh(new THREE.BoxGeometry(2.55,2.55,.7),new THREE.MeshStandardMaterial({color:0xffa52f,metalness:.35,roughness:.3,emissive:0x8a3500,emissiveIntensity:.55}));
+  body.position.y=1.35;obstacle.add(body);
+  const stripe=new THREE.Mesh(new THREE.BoxGeometry(2.58,.22,.74),new THREE.MeshBasicMaterial({color:0xffffff}));stripe.position.y=1.35;obstacle.add(stripe);
+  for(const side of [-1,1]){const lamp=new THREE.Mesh(new THREE.SphereGeometry(.13,10,8),new THREE.MeshBasicMaterial({color:0xfff18a}));lamp.position.set(side*1.12,2.72,0);obstacle.add(lamp);}
+  obstacle.position.set(x,0,row.z);scene.add(obstacle);
+  runnerObstacles.push({x,z:row.z,type:'sidestep',hit:false,group:obstacle});
+ }
+ // بعد أسئلة الركض تظهر مطبات منخفضة على المسارات الثلاثة؛ اقفز فوقها للوصول إلى الكنز
+ for(const z of [-356,-359,-362]){
+  for(const x of runnerLanes){
+   const hurdle=new THREE.Group();
+   const bar=new THREE.Mesh(new THREE.BoxGeometry(2.65,.62,.72),new THREE.MeshStandardMaterial({color:0xff4f78,metalness:.25,roughness:.35,emissive:0x8e1239,emissiveIntensity:.65}));
+   bar.position.y=.43;hurdle.add(bar);
+   const glow=new THREE.Mesh(new THREE.BoxGeometry(2.7,.1,.76),new THREE.MeshBasicMaterial({color:0xffe28a}));glow.position.y=.76;hurdle.add(glow);
+   hurdle.position.set(x,0,z);scene.add(hurdle);
+   runnerObstacles.push({x,z,type:'jump',hit:false,group:hurdle});
+  }
  }
  // بوابات الأسئلة الثلاثة على امتداد مسار الركض
  [-322,-336,-350].forEach((z,i)=>{
@@ -534,6 +550,23 @@ function animate(now=performance.now()){if(!started)return;requestAnimationFrame
  for(const a of worldAnimations){a.object.rotation.y+=a.spin*dt;if(a.bob){if(a.baseY===undefined)a.baseY=a.object.position.y;a.object.position.y=a.baseY+Math.sin(now*.0015+a.object.position.z)*a.bob;}}
  for(const coin of coinMeshes){if(coin.visible){coin.rotation.y+=dt*3.8;coin.position.y=coin.userData.baseY+Math.sin(now*.003+coin.position.z)*.22;if(Math.abs(coin.position.z-player.position.z)<2.7&&Math.abs(coin.position.x-player.position.x)<2.0&&Math.abs((player.position.y+1.5)-coin.position.y)<2.0){coin.visible=false;coinsCollected++;score=coinsCollected;document.getElementById('score').textContent=score;sound('coin');document.getElementById('coinCount').textContent=coinsCollected;}}}
  for(const gem of gemMeshes){if(gem.visible){gem.rotation.y+=dt*2.8;gem.rotation.x+=dt*.7;gem.position.y=gem.userData.baseY+Math.sin(now*.0035+gem.position.z)*.28;if(Math.abs(gem.position.z-player.position.z)<2.8&&Math.abs(gem.position.x-player.position.x)<2.2&&Math.abs((player.position.y+1.5)-gem.position.y)<2.2){gem.visible=false;gemsCollected++;score+=25;document.getElementById('score').textContent=score;document.getElementById('gemCount').textContent='💎 الجواهر: '+gemsCollected+'/5';sound('gem');}}}
+ // اصطدامات مرحلة Subway: الحواجز العالية تتطلب تغيير المسار، والمطبات المنخفضة تتطلب القفز
+ if(player.position.z<-311&&player.position.z>-365){
+  player.position.x=THREE.MathUtils.clamp(player.position.x,-5.8,5.8);
+  for(const ob of runnerObstacles){
+   if(ob.hit||Math.abs(player.position.z-ob.z)>1.05||Math.abs(player.position.x-ob.x)>1.48)continue;
+   const cleared=ob.type==='jump'&&(player.position.y>.72||velocityY>1.8);
+   if(!cleared){
+    ob.hit=true;player.position.z=ob.z+2.1;player.position.x=THREE.MathUtils.clamp(player.position.x,-5.8,5.8);
+    velocityY=0;player.position.y=.12;onGround=true;
+    checkpoint={x:player.position.x,y:.12,z:player.position.z};
+    const toast=document.getElementById('worldToast');
+    if(toast){toast.textContent=ob.type==='jump'?'🚧 اقفز فوق المطب!':'↔ غيّر مسارك لتتجاوز الحاجز!';toast.classList.add('show');clearTimeout(showWorldToast.timer);showWorldToast.timer=setTimeout(()=>toast.classList.remove('show'),1500);}
+    sound('wrong');
+    break;
+   }
+  }
+ }
  const runnerQuestionTriggers=[-322,-336,-350];
  if(activeWorld===5&&gemsCollected===5&&runnerQuestionIndex<3&&player.position.z<runnerQuestionTriggers[runnerQuestionIndex]&&!runnerQuestionActive&&!finished){showRunnerQuestion();}
  if(activeWorld===5&&gemQuestionDone&&player.position.z<-365&&Math.abs(player.position.x)<3.2&&!treasureTriggered&&!finished){treasureTriggered=true;treasureOpen=true;treasureProgress=0;launchFireworks();playVictoryTune();sound('level');}
